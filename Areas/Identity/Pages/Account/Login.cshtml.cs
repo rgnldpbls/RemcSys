@@ -115,8 +115,22 @@ namespace RemcSys.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
+                    var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+                    var roles = await _signInManager.UserManager.GetRolesAsync(user);
+
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    if (roles.Contains("TeamLeader"))
+                    {
+                        return RedirectToAction("TeamLeader", "Home");
+                    }else if (roles.Contains("Evaluator"))
+                    {
+                        return RedirectToAction("Evaluator", "Home");
+                    }
+                    else if (roles.Contains("Chief"))
+                    {
+                        return RedirectToAction("Chief", "Home");
+                    }
+                    /*return LocalRedirect(returnUrl);*/
                 }
                 if (result.RequiresTwoFactor)
                 {

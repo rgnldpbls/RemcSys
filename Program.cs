@@ -7,7 +7,9 @@ var connectionString = builder.Configuration.GetConnectionString("RemcSysDBConte
 
 builder.Services.AddDbContext<RemcSysDBContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<SystemUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<RemcSysDBContext>();
+builder.Services.AddDefaultIdentity<SystemUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<RemcSysDBContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -27,11 +29,45 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+
+using(var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { "TeamLeader", "Evaluator", "Chief" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
+/*using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<SystemUser>>();
+
+    string email = "user123@pup.com";
+    string password = "User@123";
+    if (await userManager.FindByEmailAsync(email) == null)
+    {
+        var user = new SystemUser();
+        user.UserName = email;
+        user.Email = email;
+
+        await userManager.CreateAsync(user, password);
+        await userManager.AddToRoleAsync(user, "TEAMLEADER");
+    }
+}*/
 
 app.Run();

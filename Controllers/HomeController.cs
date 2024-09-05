@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RemcSys.Models;
 using System.Diagnostics;
@@ -27,6 +28,29 @@ namespace RemcSys.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "TeamLeader")]
+        public IActionResult TeamLeader()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Evaluator")]
+        public IActionResult Evaluator()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Chief")]
+        public IActionResult Chief()
+        {
+            return View();
         }
     }
 }
