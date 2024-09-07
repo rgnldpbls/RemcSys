@@ -1,0 +1,47 @@
+﻿@model List<Document>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>List of Documentary Requirements</th>
+            <th>List of Memorandums & Executive Orders</th>
+        </tr>
+    </thead>
+    <tbody>
+       <tr>
+           <td>
+                @if(ViewBag.docu != null)
+                {
+                    <ul>
+                        @foreach(var file in ViewBag.docu)
+                        {
+                            <li>
+                                <a class="btn" style="color:blue" onclick="showDocument('@file.FilePath')">@file.FileName</a>
+                            </li>
+                        }
+                    </ul>
+                }
+            </td>
+            <td>
+                @if(ViewBag.exec != null)
+                {
+                    <ul>
+                        @foreach(var file in ViewBag.exec)
+                        {
+                            <li>
+                                <a class="btn" style="color:red" onclick="showDocument('@file.FilePath')">@file.FileName</a>
+                            </li>
+                        }
+                    </ul>
+                }
+            </td>
+       </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    function showDocument(filePath) {
+        const newTab = window.open("/" + filePath, '_blank');
+        newTab.focus();
+    }
+</script>

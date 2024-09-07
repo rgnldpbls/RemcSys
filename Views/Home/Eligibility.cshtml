@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Eligibility";
+    var type = ViewBag.type as string;
+}
+
+<div class="text-center">
+    <h1 class="display-4">Eligibility</h1>
+    @if(type == "UFR"){
+        <p>Eligibility of University Funded Research</p>
+    }
+    else if(type == "EFR"){
+        <p>Eligibility of Externally Funded Research</p>
+    }
+    else if(type == "UFRL"){
+        <p>Eligibility of Externally Funded Research Load</p>
+    }
+    <a class="btn" style="background-color: goldenrod; color: darkred;" asp-action="Forms" asp-controller="Home">Proceed</a>
+</div>

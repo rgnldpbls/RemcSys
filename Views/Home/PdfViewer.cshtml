@@ -1,0 +1,28 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js" integrity="sha512-Nr6NV16pWOefJbWJiT8SrmZwOomToo/84CNd0MN6DxhP5yk8UAoPUjNuBj9KyRYVpESUb14RTef7FKxLVA4WGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+
+    <div class="viewPDF" style="height:800px"></div>
+
+    <script type="text/javascript">
+        // Embed the PDF if the browser supports it
+        const pdfPath = "@ViewBag.PdfFilePath";
+
+        if (PDFObject.supportsPDFs) {
+            PDFObject.embed(pdfPath, ".viewPDF");
+        } else {
+            alert("This browser does not support PDFObject");
+        }
+    </script>
+
+</body>
+</html>
