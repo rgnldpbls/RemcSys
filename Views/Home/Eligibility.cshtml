@@ -1,18 +1,63 @@
 ﻿@{
     ViewData["Title"] = "Eligibility";
     var type = ViewBag.type as string;
+    Layout = "_NavFaculty";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Eligibility</h1>
-    @if(type == "UFR"){
-        <p>Eligibility of University Funded Research</p>
-    }
-    else if(type == "EFR"){
-        <p>Eligibility of Externally Funded Research</p>
-    }
-    else if(type == "UFRL"){
-        <p>Eligibility of Externally Funded Research Load</p>
-    }
-    <a class="btn" style="background-color: goldenrod; color: darkred;" asp-action="Forms" asp-controller="Home">Proceed</a>
+<div class="eligibility">
+    <div class="card1">
+        <button type="button" class="dismiss">×</button>
+        <span class="title">Notice for Eligibility</span>
+        <div class="card2">
+            @if (type == "University Funded Research")
+            {
+                <ol>
+                    <li>
+                        In the case of UFRW, any of the following can be considered as the Team Leader:<br />
+                        1.1 Regular faculty members of the University with or without administrative designation;<br />
+                        1.2 Permanent administrative employees of the University;
+                    </li>
+                    <li>
+                        Those who are disqualified as team leaders may qualify as Senior Project Support Staff and/or Junior Project Support Staff per approval of the university in the case of UFRW and external funding agency in the case of EFRW, and
+                    </li>
+                    <li>
+                        Junior Project Support Staff who must be administrative employee/s of the university regardless of status.
+                    </li>
+                </ol>
+            }
+            else if (type == "Externally Funded Research")
+            {
+                <ol>
+                    <li>
+                        In the case of EFRW, any permanent employee of the University as pre-selected by the external fund provider/s may be considered as the Team Leader;
+                    </li>
+                    <li>
+                        Those who are disqualified as team leaders may qualify as Senior Project Support Staff and/or Junior Project Support Staff per approval of the university in the case of UFRW and external funding agency in the case of EFRW, and
+                    </li>
+                    <li>
+                        Junior Project Support Staff who must be administrative employee/s of the university regardless of status.
+                    </li>
+                </ol>
+            }
+            else if (type == "University Funded Research Load")
+            {
+                <ul>
+                    <li>
+                        Only regular, temporary status, and part-time appointment
+                        faculty members with at least a master’s degree can avail of this scheme.
+                    </li>
+                    <li>
+                        Only regular, temporary status, and part-time appointment faculty
+                        members who are affiliated with the university in the last three (3) years.
+                    </li>
+                    <li>
+                        Regular administrative employees with at least a master’s degree and
+                        are part-time faculty members of the University can avail of this Research
+                        Load provided that a permit to teach is secured.
+                    </li>
+                </ul>
+            }
+        </div>
+        <a class="btn" style="text-align: center; height: 45px;font-size: 18px;background-color: #FFDB89;color: #850000;font-weight: bold;" asp-action="Forms" asp-controller="Home">Proceed</a>
+    </div>
 </div>

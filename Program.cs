@@ -2,7 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
+using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<RemcDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("RemcDBContext") ?? throw new InvalidOperationException("Connection string 'RemcDBContext' not found.")));
 var connectionString = builder.Configuration.GetConnectionString("RemcSysDBContextConnection") ?? throw new InvalidOperationException("Connection string 'RemcSysDBContextConnection' not found.");
 
 builder.Services.AddDbContext<RemcSysDBContext>(options => options.UseSqlServer(connectionString));
@@ -37,11 +40,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-using(var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new[] { "TeamLeader", "Evaluator", "Chief" };
+    var roles = new[] { "Faculty", "Evaluator", "Chief" };
 
     foreach (var role in roles)
     {

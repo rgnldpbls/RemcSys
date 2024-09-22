@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - REMC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/REMCSys.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+            <div class="header">
+                <div class="logo">
+                    <img src="~/img/research-management-logo.png" alt="RMO" style="height: 60px;">
+                </div>
+                <nav class="nav nav-pills nav-fill">
+                    <a class="nav-link active" href="#">Home</a>
+                    <a class="nav-link active" href="#"> Dashboard</a>
+                    <a class="nav-link active" href="#">Application</a>
+                    <a class="nav-link active" href="#">Evaluators</a>
+                    <a class="nav-link active" href="#">Reports</a>
+                    <a class="nav-link active" href="#">Notify</a>
+                </nav>
+                <div class="profile">
+                    <i class="bi bi-bell-fill" style="font-size: 30px;"></i>
+                    <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        Chief
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-action="TeamLeader">Project Leader</a></li>
+                        <li><a class="dropdown-item" asp-action="Evaluator">Evaluator</a></li>
+                        <li><a class="dropdown-item" asp-action="Chief">Chief</a></li>
+                    </ul>
+                    <i class="bi-person-circle" style="font-size: 35px;"></i>
+                </div>
+            </div>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - RemcSys - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

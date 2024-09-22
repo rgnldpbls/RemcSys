@@ -1,0 +1,32 @@
+﻿html, body {
+    overflow: auto;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.hero-section {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+}
+
+    .hero-section h1 {
+        font-size: 60px;
+        margin: 0;
+        font-weight: bold;
+        color: #FFDB89;
+    }
+
+    .hero-section p {
+        font-size: 20px;
+        margin: 20px 0;
+    }
+
+    .hero-section .btn {
+        font-weight: bold;
+    }

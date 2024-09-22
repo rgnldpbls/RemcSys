@@ -119,16 +119,16 @@ namespace RemcSys.Areas.Identity.Pages.Account
                     var roles = await _signInManager.UserManager.GetRolesAsync(user);
 
                     _logger.LogInformation("User logged in.");
-                    if (roles.Contains("TeamLeader"))
+                    if (roles.Contains("Chief"))
                     {
-                        return RedirectToAction("TeamLeader", "Home");
+                        return RedirectToAction("Chief", "Home");
                     }else if (roles.Contains("Evaluator"))
                     {
                         return RedirectToAction("Evaluator", "Home");
                     }
-                    else if (roles.Contains("Chief"))
+                    else if (roles.Contains("Faculty"))
                     {
-                        return RedirectToAction("Chief", "Home");
+                        return RedirectToAction("Faculty", "Home");
                     }
                     /*return LocalRedirect(returnUrl);*/
                 }

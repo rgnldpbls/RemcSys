@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using RemcSys.Areas.Identity.Data;
 using RemcSys.Models;
 using System.Diagnostics;
 
@@ -9,11 +11,13 @@ namespace RemcSys.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly UserManager<SystemUser> _userManager;
 
-        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostingEnvironment)
+        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostingEnvironment, UserManager<SystemUser> userManager)
         {
             _logger = logger;
             _hostingEnvironment = hostingEnvironment;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -37,25 +41,26 @@ namespace RemcSys.Controllers
             return View();
         }
 
-        [Authorize(Roles = "TeamLeader")]
-        public IActionResult TeamLeader()
+        [Authorize(Roles = "Faculty")]
+        public IActionResult Faculty()
         {
             return View();
         }
 
-        [Authorize(Roles = "TeamLeader")]
+        /*[Authorize(Roles = "Faculty")]*/
         public IActionResult FRType()
         {
            return View();
         }
 
-        [Authorize(Roles = "TeamLeader")]
+        /*[Authorize(Roles = "Faculty")]*/
         public IActionResult Eligibility(string type)
         {
             ViewBag.Type = type;
             return View();
         }
 
+        /*[Authorize(Roles = "Faculty")]*/
         public IActionResult Forms()
         {
             string folderPath = Path.Combine(_hostingEnvironment.WebRootPath);
@@ -82,6 +87,7 @@ namespace RemcSys.Controllers
             return View();
         }
 
+        /*[Authorize(Roles = "Faculty")]*/
         public IActionResult PdfViewer(string pdf)
         {
             ViewBag.PdfFilePath = pdf;

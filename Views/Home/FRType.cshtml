@@ -1,10 +1,15 @@
 ﻿@{
     ViewData["Title"] = "Funded Research Type";
+    Layout = "_NavFaculty";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Select Research Type</h1>
-    <a class="btn" style="background-color: red; color: white;" href="@Url.Action("Eligibility", "Home", new { type = "UFR"})">University Funded Research</a>
-    <a class="btn" style="background-color: red; color: white;" href="@Url.Action("Eligibility", "Home", new { type = "EFR" })">Externally Funded Research</a>
-    <a class="btn" style="background-color: red; color: white;" href="@Url.Action("Eligibility", "Home", new { type = "UFRL" })">University Funded Research Load</a>
+<div class="type-section">
+    <div class="card">
+        <span class="title">Select Research Type</span>
+        <div class="d-grid gap-3 col-14 mx-auto">
+            <a href="@Url.Action("Eligibility", "Home", new { type = "University Funded Research" })" class="btn btn-danger btn-lg">University Funded Research</a>
+            <a href="@Url.Action("Eligibility", "Home", new { type = "Externally Funded Research" })" class="btn btn-danger btn-lg">Externally Funded Research</a>
+            <a href="@Url.Action("Eligibility", "Home", new { type = "University Funded Research Load" })" class="btn btn-danger btn-lg">University Funded Research Load</a>
+        </div>
+    </div>
 </div>

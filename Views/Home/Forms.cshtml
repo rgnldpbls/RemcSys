@@ -1,43 +1,46 @@
 ﻿@model List<Document>
+@{
+    Layout = "_NavTeamLeader";
+}
+<div class="container">
+    <!-- List of Documentary Requirements -->
+    <div class="document-section">
+        <h5>List of Documentary Requirements</h5><hr />
+        <p>All documents are required to be submitted by all of the applicants.</p>
+        <ul class="doc-list">
+            @if (ViewBag.docu != null)
+            {
+                @foreach (var file in ViewBag.docu)
+                {
+                    <li>
+                        <a class="btn" onclick="showDocument('@file.FilePath')">@file.FileName</a>
+                    </li>
+                }
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>List of Documentary Requirements</th>
-            <th>List of Memorandums & Executive Orders</th>
-        </tr>
-    </thead>
-    <tbody>
-       <tr>
-           <td>
-                @if(ViewBag.docu != null)
+            }
+        </ul>
+    </div>
+
+    <!-- List of Executive Orders -->
+    <div class="document-section">
+        <h5>List of Executive Orders</h5><hr />
+        <p>This document should be read if you’re applying Funded Research Work</p>
+        <ul class="doc-list">
+            @if (ViewBag.exec != null)
+            {
+                @foreach (var file in ViewBag.exec)
                 {
-                    <ul>
-                        @foreach(var file in ViewBag.docu)
-                        {
-                            <li>
-                                <a class="btn" style="color:blue" onclick="showDocument('@file.FilePath')">@file.FileName</a>
-                            </li>
-                        }
-                    </ul>
+                    <li>
+                        <a class="btn" onclick="showDocument('@file.FilePath')">@file.FileName</a>
+                    </li>
                 }
-            </td>
-            <td>
-                @if(ViewBag.exec != null)
-                {
-                    <ul>
-                        @foreach(var file in ViewBag.exec)
-                        {
-                            <li>
-                                <a class="btn" style="color:red" onclick="showDocument('@file.FilePath')">@file.FileName</a>
-                            </li>
-                        }
-                    </ul>
-                }
-            </td>
-       </tr>
-    </tbody>
-</table>
+
+            }
+        </ul>
+    </div>
+</div>
+
+<a class="proceed-btn" href="/Home/GeneralInfo">Proceed</a>
 
 <script type="text/javascript">
     function showDocument(filePath) {
