@@ -1,0 +1,85 @@
+﻿@model RemcSys.Models.FundedResearchApplication
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>FundedResearchApplication</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="fra_Id" />
+            <div class="form-group">
+                <label asp-for="fra_Type" class="control-label"></label>
+                <input asp-for="fra_Type" class="form-control" />
+                <span asp-validation-for="fra_Type" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="research_Title" class="control-label"></label>
+                <input asp-for="research_Title" class="form-control" />
+                <span asp-validation-for="research_Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="applicant_Name" class="control-label"></label>
+                <input asp-for="applicant_Name" class="form-control" />
+                <span asp-validation-for="applicant_Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="applicant_Email" class="control-label"></label>
+                <input asp-for="applicant_Email" class="form-control" />
+                <span asp-validation-for="applicant_Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="college" class="control-label"></label>
+                <input asp-for="college" class="form-control" />
+                <span asp-validation-for="college" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="branch" class="control-label"></label>
+                <input asp-for="branch" class="form-control" />
+                <span asp-validation-for="branch" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="field_of_Study" class="control-label"></label>
+                <input asp-for="field_of_Study" class="form-control" />
+                <span asp-validation-for="field_of_Study" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="application_Status" class="control-label"></label>
+                <input asp-for="application_Status" class="form-control" />
+                <span asp-validation-for="application_Status" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="submission_Date" class="control-label"></label>
+                <input asp-for="submission_Date" class="form-control" />
+                <span asp-validation-for="submission_Date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="dts_No" class="control-label"></label>
+                <input asp-for="dts_No" class="form-control" />
+                <span asp-validation-for="dts_No" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UserId" class="control-label"></label>
+                <input asp-for="UserId" class="form-control" />
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

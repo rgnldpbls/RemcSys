@@ -1,0 +1,85 @@
+﻿@model RemcSys.Models.FundedResearchApplication
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>FundedResearchApplication</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.fra_Type)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.fra_Type)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.research_Title)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.research_Title)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.applicant_Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.applicant_Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.applicant_Email)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.applicant_Email)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.college)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.college)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.branch)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.branch)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.field_of_Study)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.field_of_Study)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.application_Status)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.application_Status)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.submission_Date)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.submission_Date)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.dts_No)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.dts_No)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UserId)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UserId)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.fra_Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

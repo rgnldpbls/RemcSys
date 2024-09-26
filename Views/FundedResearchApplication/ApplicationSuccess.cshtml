@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Application Success";
+    Layout = "_NavFaculty";
+}
+
+<div class="application-success">
+    <div class="card">
+        <div class="icon-container" style="text-align: center; font-size: 100px">
+            <i class="bi bi-check-circle"></i>
+            <p>You have successfully submitted your application. You will receive an email when the status of your application changes. You may also check back here to see the status of you application</p>
+            <div class="apply-button d-grid gap-10 col-10 mx-auto">
+                <a class="btn btn-danger btn-lg" asp-controller="Home" asp-action="ApplicationTracker">VIEW APPLICATION</a>
+            </div>
+        </div>
+    </div>
+</div>

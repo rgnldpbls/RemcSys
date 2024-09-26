@@ -16,7 +16,8 @@ namespace RemcSys.Models
         public string? application_Status { get; set; }
         public DateTime? submission_Date { get; set; }
         public string? dts_No { get; set; }
-        /*public ICollection<ResearchStaff>? ResearchStaffs { get; set; }*/
+        public List<ResearchStaff>? ResearchStaffs { get; set; }
+        public List<FileRequirement>? FileRequirements { get; set; }
         public string? UserId { get; set; }
     }
 }

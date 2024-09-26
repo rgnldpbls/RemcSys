@@ -47,21 +47,21 @@ namespace RemcSys.Controllers
             return View();
         }
 
-        /*[Authorize(Roles = "Faculty")]*/
+        [Authorize(Roles = "Faculty")]
         public IActionResult FRType()
         {
            return View();
         }
 
-        /*[Authorize(Roles = "Faculty")]*/
+        [Authorize(Roles = "Faculty")]
         public IActionResult Eligibility(string type)
         {
             ViewBag.Type = type;
             return View();
         }
 
-        /*[Authorize(Roles = "Faculty")]*/
-        public IActionResult Forms()
+        [Authorize(Roles = "Faculty")]
+        public IActionResult Forms(string type)
         {
             string folderPath = Path.Combine(_hostingEnvironment.WebRootPath);
             string[] fileExtensions = { "*.doc","*.docx", "*.pdf" };
@@ -84,10 +84,11 @@ namespace RemcSys.Controllers
             var exec = allFiles.Where(f => f.FileType == ".pdf").ToList();
             ViewBag.docu = docu;
             ViewBag.exec = exec;
+            ViewBag.Type = type;
             return View();
         }
 
-        /*[Authorize(Roles = "Faculty")]*/
+        [Authorize(Roles = "Faculty")]
         public IActionResult PdfViewer(string pdf)
         {
             ViewBag.PdfFilePath = pdf;

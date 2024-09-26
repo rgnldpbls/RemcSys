@@ -14,6 +14,8 @@ namespace RemcSys.Data
         {
         }
 
-        public DbSet<RemcSys.Models.FundedResearchApplication> FundedResearchApplication { get; set; } = default!;
+        public DbSet<FundedResearchApplication> FundedResearchApplication { get; set; }
+        public DbSet<ResearchStaff> ResearchStaff { get; set; }
+        public DbSet<FileRequirement> FileRequirement { get; set; }
     }
 }

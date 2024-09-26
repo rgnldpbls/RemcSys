@@ -1,0 +1,37 @@
+﻿html, body {
+    overflow: auto;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.application-success {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+}
+
+    .application-success p {
+        padding: 4px 7px 2px 4px;
+        background-color: #ffffff;
+        color: #000;
+        font-size: 16px;
+        text-align: center;
+    }
+
+.card {
+    overflow: hidden;
+    position: relative;
+    background-color: #ffffff;
+    text-align: left;
+    border: 2px solid #000;
+    border-radius: 1rem;
+    width: 400px;
+    height: 350px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    opacity: 0.85;
+}

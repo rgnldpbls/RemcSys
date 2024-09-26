@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http.Features;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RemcDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RemcDBContext") ?? throw new InvalidOperationException("Connection string 'RemcDBContext' not found.")));
@@ -16,7 +17,10 @@ builder.Services.AddDefaultIdentity<SystemUser>(options => options.SignIn.Requir
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100 MB
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -40,7 +44,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-using (var scope = app.Services.CreateScope())
+/*using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
@@ -53,7 +57,7 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
-}
+}*/
 
 /*using (var scope = app.Services.CreateScope())
 {

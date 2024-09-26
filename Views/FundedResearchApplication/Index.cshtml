@@ -1,0 +1,96 @@
+﻿@model IEnumerable<RemcSys.Models.FundedResearchApplication>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.fra_Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.research_Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.applicant_Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.applicant_Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.college)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.branch)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.field_of_Study)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.application_Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.submission_Date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.dts_No)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UserId)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.fra_Type)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.research_Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.applicant_Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.applicant_Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.college)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.branch)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.field_of_Study)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.application_Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.submission_Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.dts_No)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserId)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.fra_Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.fra_Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.fra_Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

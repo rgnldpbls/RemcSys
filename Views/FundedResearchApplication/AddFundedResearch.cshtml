@@ -1,0 +1,192 @@
+﻿@model FundedResearchApplication;
+@{
+    ViewData["Title"] = "General Information";
+    Layout = "_NavTeamLeader";
+}
+
+<div class="container">
+    <div class="card bg-danger text-white p-4" style="border-radius: 20px;">
+        <h4 class="text-center font-weight-bold">General Information</h4>
+
+        <form asp-action="AddFundedResearch" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="fra_Type">Funded Research Type:</label>
+                <input asp-for="fra_Type" type="text" class="form-control" placeholder="Research Type..." value="@ViewBag.Type"/>
+                <span asp-validation-for="fra_Type" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="research_Title">Research Project Title:</label>
+                <input asp-for="research_Title" type="text" class="form-control" placeholder="Research Title..." />
+                <span asp-validation-for="research_Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="applicant_Name">Team Leader:</label>
+                <input asp-for="applicant_Name" type="text" class="form-control" placeholder="Team Leader..." value="@ViewBag.Name"/>
+                <span asp-validation-for="applicant_Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="applicant_Email">Team Leader Email:</label>
+                <input asp-for="applicant_Email" type="email" class="form-control" placeholder="Team Leader Email..." value="@ViewBag.Email"/>
+                <span asp-validation-for="applicant_Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="college">College:</label>
+                <input asp-for="college" type="text" class="form-control" placeholder="College..." value="@ViewBag.College" />
+                <span asp-validation-for="college" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="branch">Branch:</label>
+                <input asp-for="branch" type="text" class="form-control" placeholder="Branch..." value="@ViewBag.Branch"/>
+                <span asp-validation-for="branch" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="field_of_Study">Field of Study:</label>
+                <div class="dropdown-container">
+                    <select asp-for="field_of_Study" class="form-control custom-select">
+                        <option value="" disabled selected>Select Field of Study...</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="Education">Education</option>
+                        <option value="Business">Business</option>
+                        <option value="Humanities">Humanities</option>
+                        <option value="Science, Technology, and Engineering">Science, Technology, and Engineering</option>
+                    </select>
+                    <i class="arrow-down"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="button" id="btnAddStaff" class="btn btn-warning font-weight-bold px-4" value="Add Research Staff" data-toggle="modal" data-target="#researchStaffModal" />
+            </div>
+            <div id="researchStaffList"></div>
+            <div class="form-group">
+                <input asp-for="application_Status" class="form-control" type="hidden" value="@ViewBag.Status" />
+            </div>
+            <div class="form-group">
+                <input asp-for="submission_Date" class="form-control" type="hidden" value="@ViewBag.Date" />
+            </div>
+            <div class="form-group">
+                <input asp-for="dts_No" class="form-control" type="hidden" value="@ViewBag.DTSNo" />
+            </div>
+             <div class="form-group">
+                <input asp-for="UserId" class="form-control" type="hidden" value="@ViewBag.UserId" />
+            </div>
+            <div class="text-center mt-4">
+                <input type="submit" class="btn btn-warning font-weight-bold px-4" value="Proceed" style="border-radius: 5px;"/>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Research Staff Modal -->
+<div class="modal fade" id="researchStaffModal" tabindex="-1" role="dialog" aria-labelledby="researchStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="researchStaffModalLabel">Add Research Staff</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="eksBTN">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="staffName">Research Staff Name:</label>
+                    <input type="text" class="form-control" id="staffName" placeholder="Enter name" />
+                </div>
+                <div class="form-group">
+                    <label for="staffRole">Role:</label>
+                    <div class="dropdown-container">
+                        <select name="staffRole" class="form-control" custom-select id="staffRole">
+                            <option value="" disabled selected>Select Research Staff Role...</option>
+                            <option value="Senior Project Staff">Senior Project Staff</option>
+                            <option value="Junior Project Staff">Junior Project Staff</option>
+                        </select>
+                        <i class="arrow-down"></i>
+                </div>
+                <div class="form-group">
+                    <label for="staffEmail">Email:</label>
+                    <input type="email" class="form-control" id="staffEmail" placeholder="Enter email" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeBTN">Close</button>
+                <button type="button" id="btnSaveStaff" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script> *@
+    <script>
+        $(document).ready(function () {
+            let researchStaffList = [];
+
+            $('#btnAddStaff').click(function () {
+                $('#researchStaffModal').modal('show');
+            });
+            $('#eksBTN').click(function () {
+                $('#researchStaffModal').modal('hide');
+            });
+            $('#closeBTN').click(function () {
+                $('#researchStaffModal').modal('hide');
+            });
+            // Handle the save button click in the modal
+            $('#btnSaveStaff').click(function () {
+                var name = $('#staffName').val();
+                var role = $('#staffRole').val();
+                var email = $('#staffEmail').val();
+
+                if (name && role && email) {
+                    // Add the new research staff to the list
+                    var staffHtml = '<div class="alert alert-info">' +
+                        '<strong>Name:</strong> ' + name + ' | ' +
+                        '<strong>Role:</strong> ' + role + ' | ' +
+                        '<strong>Email:</strong> ' + email + '</div>';
+                    $('#researchStaffList').append(staffHtml);
+
+                    researchStaffList.push({
+                        rs_Name: name,
+                        rs_Role: role,
+                        Email: email
+                    });
+
+                    // Clear modal inputs
+                    $('#staffName').val('');
+                    $('#staffRole').val('');
+                    $('#staffEmail').val('');
+
+                    // Close modal
+                    $('#researchStaffModal').modal('hide');
+                } else {
+                    alert('Please fill all fields');
+                }
+            });
+
+            // On form submit, append the researchStaffList to the form as hidden fields
+            $('form').submit(function () {
+                researchStaffList.forEach(function (staff, index) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: `researchStaffList[${index}].rs_Name`,
+                        value: staff.rs_Name
+                    }).appendTo('form');
+
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: `researchStaffList[${index}].rs_Role`,
+                        value: staff.rs_Role
+                    }).appendTo('form');
+
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: `researchStaffList[${index}].Email`,
+                        value: staff.Email
+                    }).appendTo('form');
+                });
+            });
+        });
+    </script>
+}
