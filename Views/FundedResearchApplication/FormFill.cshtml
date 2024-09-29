@@ -1,0 +1,96 @@
+﻿@model RemcSys.Models.FormModel
+@{
+    ViewData["Title"] = "General Information";
+    Layout = "_NavTeamLeader";
+}
+
+<div class="container">
+    <div class="card bg-danger text-white p-4" style="border-radius: 20px;">
+        <h4 class="text-center font-weight-bold">General Information</h4>
+
+        <form asp-action="FormFill" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ResearchType">Funded Research Type:</label>
+                <input asp-for="ResearchType" type="text" class="form-control" placeholder="Research Type..." value="@ViewBag.Type" />
+                <span asp-validation-for="ResearchType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProjectTitle">Program/Project Title:</label>
+                <input asp-for="ProjectTitle" type="text" class="form-control" placeholder="Research Title..." />
+                <span asp-validation-for="ProjectTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProjectLeader">Program/Project Proponent:</label>
+                <input asp-for="ProjectLeader" type="text" class="form-control" placeholder="Project Leader..." value="@ViewBag.Name" />
+                <span asp-validation-for="ProjectLeader" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProjectMembers">Program/Project Co-Proponent's and Research Assistants:</label>
+                @Html.TextAreaFor(m => m.ProjectMembers, new {@class = "form-control", @placeholder = "Project Members..."})
+                <span asp-validation-for="ProjectMembers" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ImplementingInstitution">Implementing Institution:</label>
+                @Html.TextAreaFor(m => m.ImplementingInstitution, new { @class = "form-control", @placeholder = "Implementing Institution..." })
+                <span asp-validation-for="ImplementingInstitution" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CollaboratingInstitution">Collaborating Institution:</label>
+                @Html.TextAreaFor(m => m.CollaboratingInstitution, new { @class = "form-control", @placeholder = "Collaborating Institution..." })
+                <span asp-validation-for="CollaboratingInstitution" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProjectDuration">Project Duration:</label>
+                <input asp-for="ProjectDuration" type="text" class="form-control" placeholder="Project Duration..." />
+                <span asp-validation-for="ProjectDuration" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TotalProjectCost">Total Project Cost:</label>
+                <input asp-for="TotalProjectCost" type="text" class="form-control" placeholder="Total Project Cost..." />
+                <span asp-validation-for="TotalProjectCost" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Objectives">Objectives:</label>
+                @Html.TextAreaFor(m => m.Objectives, new { @class = "form-control", @placeholder = "Objectives..." })
+                <span asp-validation-for="Objectives" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Scope">Scope:</label>
+                @Html.TextAreaFor(m => m.Scope, new { @class = "form-control", @placeholder = "Scope..." })
+                <span asp-validation-for="Scope" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Methodology">Methodology:</label>
+                @Html.TextAreaFor(m => m.Methodology, new { @class = "form-control", @placeholder = "Methodology..." })
+                <span asp-validation-for="Methodology" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StudyField">Field of the Study:</label>
+                <div class="dropdown-container">
+                    <select asp-for="StudyField" class="form-control custom-select">
+                        <option value="" disabled selected>Select Field of Study...</option>
+                        <option value="Science">Science</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="Business">Business</option>
+                        <option value="Accountancy and Finance">Accountancy and Finance</option>
+                        <option value="Computer Science and Information System Technology">Computer Science and Information System Technology</option>
+                        <option value="Education">Education</option>
+                        <option value="Engineering, Architecture, Design, and Built Environment">Engineering, Architecture, Design, and Built Environment</option>
+                        <option value="Humanities, Language, and Communication">Humanities, Language, and Communication</option>
+                        <option value="Public Administration, Political Science, and Law">Public Administration, Political Science, and Law</option>
+                    </select>
+                    <i class="arrow-down"></i>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <input type="submit" class="btn btn-warning font-weight-bold px-4" value="Generate Documents" style="border-radius: 5px;" />
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

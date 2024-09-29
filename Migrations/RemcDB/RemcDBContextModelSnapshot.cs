@@ -30,9 +30,6 @@ namespace RemcSys.Migrations.RemcDB
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("fr_Id"));
 
-                    b.Property<string>("FundedResearchApplicationfra_Id")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<byte[]>("data")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
@@ -50,11 +47,16 @@ namespace RemcSys.Migrations.RemcDB
                         .HasColumnType("datetime2");
 
                     b.Property<string>("fra_Id")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("fundedResearchApplicationfra_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("fr_Id");
 
-                    b.HasIndex("FundedResearchApplicationfra_Id");
+                    b.HasIndex("fundedResearchApplicationfra_Id");
 
                     b.ToTable("FileRequirement");
                 });
@@ -65,36 +67,45 @@ namespace RemcSys.Migrations.RemcDB
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("applicant_Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("applicant_Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("application_Status")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("branch")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("college")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("dts_No")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("field_of_Study")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("fra_Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("research_Title")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("submission_Date")
+                    b.Property<DateTime>("submission_Date")
                         .HasColumnType("datetime2");
 
                     b.HasKey("fra_Id");
@@ -102,50 +113,51 @@ namespace RemcSys.Migrations.RemcDB
                     b.ToTable("FundedResearchApplication");
                 });
 
-            modelBuilder.Entity("RemcSys.Models.ResearchStaff", b =>
+            modelBuilder.Entity("RemcSys.Models.GeneratedForm", b =>
                 {
-                    b.Property<int>("rs_Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("rs_Id"));
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FundedResearchApplicationfra_Id")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<byte[]>("FileContent")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("fra_Id")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("rs_Name")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("rs_Role")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("fra_Id");
 
-                    b.HasKey("rs_Id");
-
-                    b.HasIndex("FundedResearchApplicationfra_Id");
-
-                    b.ToTable("ResearchStaff");
+                    b.ToTable("GeneratedForms");
                 });
 
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
                 {
-                    b.HasOne("RemcSys.Models.FundedResearchApplication", "FundedResearchApplication")
+                    b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
                         .WithMany("FileRequirements")
-                        .HasForeignKey("FundedResearchApplicationfra_Id");
+                        .HasForeignKey("fundedResearchApplicationfra_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("FundedResearchApplication");
+                    b.Navigation("fundedResearchApplication");
                 });
 
-            modelBuilder.Entity("RemcSys.Models.ResearchStaff", b =>
+            modelBuilder.Entity("RemcSys.Models.GeneratedForm", b =>
                 {
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "FundedResearchApplication")
-                        .WithMany("ResearchStaffs")
-                        .HasForeignKey("FundedResearchApplicationfra_Id");
+                        .WithMany("GeneratedForms")
+                        .HasForeignKey("fra_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("FundedResearchApplication");
                 });
@@ -154,7 +166,7 @@ namespace RemcSys.Migrations.RemcDB
                 {
                     b.Navigation("FileRequirements");
 
-                    b.Navigation("ResearchStaffs");
+                    b.Navigation("GeneratedForms");
                 });
 #pragma warning restore 612, 618
         }

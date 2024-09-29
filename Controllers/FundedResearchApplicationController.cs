@@ -8,10 +8,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
 using RemcSys.Models;
+using Xceed.Words.NET;
 
 namespace RemcSys.Controllers
 {
@@ -19,11 +21,13 @@ namespace RemcSys.Controllers
     {
         private readonly RemcDBContext _context;
         private readonly UserManager<SystemUser> _userManager;
+        private readonly IWebHostEnvironment _environment;
 
-        public FundedResearchApplicationController(RemcDBContext context, UserManager<SystemUser> userManager)
+        public FundedResearchApplicationController(RemcDBContext context, UserManager<SystemUser> userManager, IWebHostEnvironment environment)
         {
             _context = context;
             _userManager = userManager;
+            _environment = environment;
         }
 
         // GET: FundedResearchApplication
@@ -162,6 +166,160 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Faculty")]
+        public async Task<IActionResult> FormFill(string type)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            ViewBag.Name = user.Name;
+            ViewBag.Type = type;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FormFill(FormModel model, FundedResearchApplication fundedResearchApp)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            // Generate fra_Id with template "FRA" + current date + incremented number
+            string currentDate = DateTime.Now.ToString("yyyyMMdd");
+            var latestFra = await _context.FundedResearchApplication
+                .AsNoTracking()
+                .Where(f => f.fra_Id.Contains(currentDate))
+                .OrderByDescending(f => f.fra_Id)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (latestFra != null)
+            {
+                // Extract the last number in the current date's fra_Id and increment it
+                string[] parts = latestFra.fra_Id.Split('-');
+                if (parts.Length == 3 && int.TryParse(parts[2], out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
+
+            // Generate the unique fra_Id
+            fundedResearchApp.fra_Id = $"FRA-{currentDate}-{nextNumber:D3}";
+            var existingEntry = _context.Entry(fundedResearchApp);
+            if (existingEntry != null)
+            {
+                _context.Entry(fundedResearchApp).State = EntityState.Detached;
+            }
+            fundedResearchApp.fra_Type = model.ResearchType;
+            fundedResearchApp.research_Title = model.ProjectTitle;
+            fundedResearchApp.applicant_Name = model.ProjectLeader;
+            fundedResearchApp.applicant_Email = user.Email;
+            fundedResearchApp.college = user.College;
+            fundedResearchApp.branch = user.Branch;
+            fundedResearchApp.field_of_Study = model.StudyField;
+            fundedResearchApp.application_Status = "Pending";
+            fundedResearchApp.submission_Date = DateTime.Now;
+            fundedResearchApp.dts_No = null;
+            fundedResearchApp.UserId = user.Id;
+            _context.FundedResearchApplication.Add(fundedResearchApp);
+            _context.SaveChanges();
+
+            string[] templates = {"Capsulized-Research-Proposal-Template.docx","Form-1-Term-of-Reference.docx","Form-2-Line-Item-Budget.docx",
+                "Form-3-Schedule-of-Outputs.docx", "Form-4-Workplan.docx"};
+            string filledFolder = Path.Combine(_environment.WebRootPath, "content", "outputs");
+            Directory.CreateDirectory(filledFolder);
+
+            List<string> filledFiles = new List<string>();
+
+            foreach (var template in templates)
+            {
+                string templatePath = Path.Combine(_environment.WebRootPath, "content", "templates", template);
+                string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{template}");
+
+                using (DocX document = DocX.Load(templatePath))
+                {
+                    document.ReplaceText("{{ProjectTitle}}", model.ProjectTitle);
+                    document.ReplaceText("{{ProjectLead}}", model.ProjectLeader);
+                    document.ReplaceText("{{ProjectMembers}}", model.ProjectMembers);
+                    document.ReplaceText("{{ImplementInsti}}", model.ImplementingInstitution);
+                    document.ReplaceText("{{CollabInsti}}", model.CollaboratingInstitution);
+                    document.ReplaceText("{{ProjectDur}}", model.ProjectDuration);
+                    document.ReplaceText("{{TotalProjectCost}}", model.TotalProjectCost);
+                    document.ReplaceText("{{Objectives}}", model.Objectives);
+                    document.ReplaceText("{{Scope}}", model.Scope);
+                    document.ReplaceText("{{Methodology}}", model.Methodology);
+                    document.ReplaceText("{{ProjectLeaderCaps}}", model.ProjectLeader.ToUpper());
+
+                    document.SaveAs(filledDocumentPath);
+
+                    filledFiles.Add($"Generated_{template}");
+                }
+
+                byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
+
+                var doc = new GeneratedForm
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FileName = $"Generated_{template}",
+                    FileContent = fileBytes,
+                    GeneratedAt = DateTime.Now,
+                    fra_Id = fundedResearchApp.fra_Id
+                };
+
+                _context.GeneratedForms.Add(doc);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return View("ListDocuments", filledFiles);
+        }
+
+        [Authorize(Roles = "Faculty")]
+        public IActionResult ListDocuments()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Faculty")]
+        public async Task<IActionResult> GeneratedDocuments()
+        {
+            var documents = await _context.GeneratedForms.OrderBy(f => f.FileName).ToListAsync();
+            return View(documents);
+        }
+        
+        public async Task<IActionResult> Download(string id)
+        {
+            var document = await _context.GeneratedForms.FindAsync(id);
+
+            if(document == null)
+            {
+                return NotFound();
+            }
+            return File(document.FileContent, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", document.FileName);
+        }
+
+        public ActionResult Download2(string fileName)
+        {
+            string filePath = Path.Combine(_environment.WebRootPath, "content", "outputs", fileName);
+            byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Reset(string fraId)
+        {
+            var researchApp = await _context.FundedResearchApplication
+                .FirstOrDefaultAsync(f => f.fra_Id == fraId);
+
+            if(researchApp != null)
+            {
+                _context.FundedResearchApplication.Remove(researchApp);
+
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Faculty", "Home");
+        }
+
+        [Authorize(Roles = "Faculty")]
         public async Task<IActionResult> AddFundedResearch(string type)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -178,7 +336,7 @@ namespace RemcSys.Controllers
             return View();
         }
 
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddFundedResearch(FundedResearchApplication fra, List<ResearchStaff> researchStaffList)
         {
@@ -189,9 +347,9 @@ namespace RemcSys.Controllers
                 return RedirectToAction("UploadFile");
             }
             return View(fra);
-        }
+        }*/
 
-        [Authorize(Roles = "Faculty")]
+        /*[Authorize(Roles = "Faculty")]
         public IActionResult UploadFile()
         {
             var researchAppJson = TempData["FundedResearchApplication"] as string;
@@ -205,9 +363,9 @@ namespace RemcSys.Controllers
             TempData.Keep("FundedResearchApplication");
             TempData.Keep("ResearchStaffList");
             return View();
-        }
+        }*/
 
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadFile(List<IFormFile> files)
         {
@@ -286,7 +444,7 @@ namespace RemcSys.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction("ApplicationSuccess");
-        }
+        }*/
 
         [Authorize(Roles = "Faculty")]
         public IActionResult ApplicationSuccess()

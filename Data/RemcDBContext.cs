@@ -15,7 +15,18 @@ namespace RemcSys.Data
         }
 
         public DbSet<FundedResearchApplication> FundedResearchApplication { get; set; }
-        public DbSet<ResearchStaff> ResearchStaff { get; set; }
+        public DbSet<GeneratedForm> GeneratedForms { get; set; }
         public DbSet<FileRequirement> FileRequirement { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<FundedResearchApplication>()
+                .HasMany(f => f.GeneratedForms)
+                .WithOne(g => g.FundedResearchApplication)
+                .HasForeignKey(g => g.fra_Id)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            base .OnModelCreating(modelBuilder);
+        }
     }
 }

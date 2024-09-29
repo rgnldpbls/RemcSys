@@ -1,0 +1,35 @@
+﻿@model IEnumerable<RemcSys.Models.GeneratedForm>
+@{
+    ViewData["Title"] = "Generated Docuements";
+    Layout = "_NavTeamLeader";
+    var fraId = Model.FirstOrDefault()?.fra_Id;
+}
+<div class="container">
+    <!-- List of Generated Forms -->
+    <div class="document-section">
+        <h5>Generated Documents</h5><hr />
+        <p>Click the forms below to download it.</p>
+        <ul class="doc-list">
+            @foreach (var doc in Model)
+            {
+                <li>
+                    <a class="btn" href="@Url.Action("Download", "FundedResearchApplication", new { id = doc.Id })">
+                        @doc.FileName
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+<a class="proceed-btn" href="@Url.Action("#", "#")">Proceed</a>
+<form asp-controller="FundedResearchApplication" asp-action="Reset" method="post" style="display:inline;" onsubmit="return confirmReset();">
+    <input type="hidden" name="fraId" value="@fraId" />
+    <button type="submit" class="proceed-btn">Reset</button>
+</form>
+
+<script type="text/javascript">
+    function confirmReset() {
+        return confirm("Are you sure you want to reset? This will delete all generated documents and the funded research application.");
+    }
+</script>

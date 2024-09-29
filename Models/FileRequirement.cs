@@ -11,7 +11,7 @@ namespace RemcSys.Models
         public byte[] data { get; set; }
         public string? file_Status { get; set; }
         public DateTime file_Uploaded { get; set; }
-        public string? fra_Id { get; set; }
-        public FundedResearchApplication? FundedResearchApplication { get; set; }
+        public string fra_Id { get; set; }
+        public FundedResearchApplication fundedResearchApplication { get; set; }
     }
 }
