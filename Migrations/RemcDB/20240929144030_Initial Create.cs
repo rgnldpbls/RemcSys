@@ -20,6 +20,7 @@ namespace RemcSys.Migrations.RemcDB
                     research_Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     applicant_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     applicant_Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    team_Members = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     college = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     branch = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     field_of_Study = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -37,22 +38,20 @@ namespace RemcSys.Migrations.RemcDB
                 name: "FileRequirement",
                 columns: table => new
                 {
-                    fr_Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    file_Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    file_Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    fr_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    file_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    file_Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    file_Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    file_Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     file_Uploaded = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    fra_Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    fundedResearchApplicationfra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FileRequirement", x => x.fr_Id);
                     table.ForeignKey(
-                        name: "FK_FileRequirement_FundedResearchApplication_fundedResearchApplicationfra_Id",
-                        column: x => x.fundedResearchApplicationfra_Id,
+                        name: "FK_FileRequirement_FundedResearchApplication_fra_Id",
+                        column: x => x.fra_Id,
                         principalTable: "FundedResearchApplication",
                         principalColumn: "fra_Id",
                         onDelete: ReferentialAction.Cascade);
@@ -80,9 +79,9 @@ namespace RemcSys.Migrations.RemcDB
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_FileRequirement_fundedResearchApplicationfra_Id",
+                name: "IX_FileRequirement_fra_Id",
                 table: "FileRequirement",
-                column: "fundedResearchApplicationfra_Id");
+                column: "fra_Id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GeneratedForms_fra_Id",

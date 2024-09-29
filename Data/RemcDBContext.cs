@@ -26,6 +26,12 @@ namespace RemcSys.Data
                 .HasForeignKey(g => g.fra_Id)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<FundedResearchApplication>()
+                .HasMany(f => f.FileRequirements)
+                .WithOne(g => g.fundedResearchApplication)
+                .HasForeignKey(g => g.fra_Id)
+                .OnDelete(DeleteBehavior.Cascade);
+
             base .OnModelCreating(modelBuilder);
         }
     }

@@ -212,6 +212,7 @@ namespace RemcSys.Controllers
             fundedResearchApp.research_Title = model.ProjectTitle;
             fundedResearchApp.applicant_Name = model.ProjectLeader;
             fundedResearchApp.applicant_Email = user.Email;
+            fundedResearchApp.team_Members = model.ProjectMembers.Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries).ToList();
             fundedResearchApp.college = user.College;
             fundedResearchApp.branch = user.Branch;
             fundedResearchApp.field_of_Study = model.StudyField;
@@ -320,131 +321,53 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Faculty")]
-        public async Task<IActionResult> AddFundedResearch(string type)
+        public async Task<IActionResult> UploadFile()
         {
             var user = await _userManager.GetUserAsync(User);
-
-            ViewBag.Name = user.Name;
-            ViewBag.Email = user.Email;
-            ViewBag.College = user.College;
-            ViewBag.Branch = user.Branch;
-            ViewBag.Type = type;
-            ViewBag.Status = "Pending";
-            ViewBag.Date = DateTime.Now;
-            ViewBag.DTSNo = null;
-            ViewBag.UserId = user.Id;
+            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Pending" && s.UserId == user.Id)
+                .FirstOrDefaultAsync();
+            ViewBag.Title = fra.research_Title;
+            ViewBag.TeamLead = fra.applicant_Name;
+            ViewBag.TeamMembers = fra.team_Members;
             return View();
         }
 
-        /*[HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AddFundedResearch(FundedResearchApplication fra, List<ResearchStaff> researchStaffList)
+        public async Task<IActionResult> UploadFile(IFormCollection files)
         {
-            if(ModelState.IsValid)
-            {
-                TempData["FundedResearchApplication"] = JsonConvert.SerializeObject(fra);
-                TempData["ResearchStaffList"] = JsonConvert.SerializeObject(researchStaffList);
-                return RedirectToAction("UploadFile");
-            }
-            return View(fra);
-        }*/
-
-        /*[Authorize(Roles = "Faculty")]
-        public IActionResult UploadFile()
-        {
-            var researchAppJson = TempData["FundedResearchApplication"] as string;
-            var researchStaffListJson = TempData["ResearchStaffList"] as string;
-
-            var researchApp = JsonConvert.DeserializeObject<FundedResearchApplication>(researchAppJson);
-            ViewBag.ResearchTitle = researchApp.research_Title;
-            ViewBag.Proponent = researchApp.applicant_Name;
-            ViewBag.ResearchStaff = JsonConvert.DeserializeObject<List<ResearchStaff>>(researchStaffListJson);
-
-            TempData.Keep("FundedResearchApplication");
-            TempData.Keep("ResearchStaffList");
-            return View();
-        }*/
-
-        /*[HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadFile(List<IFormFile> files)
-        {
-            var researchAppJson = TempData["FundedResearchApplication"] as string;
-            var researchStaffListJson = TempData["ResearchStaffList"] as string;
-
-            var researchApp = JsonConvert.DeserializeObject<FundedResearchApplication>(researchAppJson);
-            var researchStaffList = JsonConvert.DeserializeObject<List<ResearchStaff>>(researchStaffListJson);
-
-            // Generate fra_Id with template "FRA" + current date + incremented number
-            string currentDate = DateTime.Now.ToString("yyyyMMdd");
-            var latestFra = await _context.FundedResearchApplication
-                .AsNoTracking()
-                .Where(f => f.fra_Id.Contains(currentDate))
-                .OrderByDescending(f => f.fra_Id)
+            var user = await _userManager.GetUserAsync(User);
+            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Pending" && s.UserId == user.Id)
                 .FirstOrDefaultAsync();
-
-            int nextNumber = 1;
-
-            if (latestFra != null)
+            fra.application_Status = "Submitted";
+            if (files != null && files.Files.Count > 0)
             {
-                // Extract the last number in the current date's fra_Id and increment it
-                string[] parts = latestFra.fra_Id.Split('-');
-                if (parts.Length == 3 && int.TryParse(parts[2], out int lastNumber))
+                foreach(var file in files.Files)
                 {
-                    nextNumber = lastNumber + 1;
-                }
-            }
-
-            // Generate the unique fra_Id
-            researchApp.fra_Id = $"FRA-{currentDate}-{nextNumber:D3}";
-            var existingEntry = _context.Entry(researchApp);
-            if (existingEntry != null)
-            {
-                _context.Entry(researchApp).State = EntityState.Detached;
-            }
-            _context.FundedResearchApplication.Add(researchApp);
-            _context.SaveChanges();
-
-            //Save Research Staff
-            foreach (var staff in researchStaffList)
-            {
-                staff.fra_Id = researchApp.fra_Id;
-                _context.ResearchStaff.Add(staff);
-            }
-            _context.SaveChanges();
-
-            if (files == null || files.Count == 0)
-            {
-                ModelState.AddModelError("files", "Please upload at least one file.");
-                return View();
-            }
-            List<FileRequirement> fileList = new List<FileRequirement>();
-
-            foreach (var file in files)
-            {
-                if (file.Length > 0)
-                {
-                    using (var memoryStream = new MemoryStream())
+                    if(file.Length > 0)
                     {
-                        await file.CopyToAsync(memoryStream);
-                        var fileData = new FileRequirement
+                        using(var ms = new MemoryStream())
                         {
-                            file_Name = file.Name,
-                            file_Type = file.ContentType,
-                            data = memoryStream.ToArray(),
-                            file_Status = "Pending",
-                            file_Uploaded = DateTime.UtcNow,
-                            fra_Id = researchApp.fra_Id
-                        };
-                        fileList.Add(fileData);
+                            await file.CopyToAsync(ms);
+                            var fileRequirement = new FileRequirement
+                            {
+                                fr_Id = Guid.NewGuid().ToString(),
+                                file_Name = file.FileName,
+                                file_Type = Path.GetExtension(file.FileName),
+                                data = ms.ToArray(),
+                                file_Status = "Pending",
+                                file_Uploaded = DateTime.Now,
+                                fra_Id = fra.fra_Id
+                            };
+
+                            _context.FileRequirement.Add(fileRequirement);
+                        }
                     }
                 }
             }
-            _context.FileRequirement.AddRange(fileList);
             await _context.SaveChangesAsync();
-
-            return RedirectToAction("ApplicationSuccess");
-        }*/
+            return RedirectToAction("ApplicationSuccess", "FundedResearchApplication");
+        }
 
         [Authorize(Roles = "Faculty")]
         public IActionResult ApplicationSuccess()

@@ -24,23 +24,23 @@ namespace RemcSys.Migrations.RemcDB
 
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
                 {
-                    b.Property<int>("fr_Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("fr_Id"));
+                    b.Property<string>("fr_Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<byte[]>("data")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("file_Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("file_Status")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("file_Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("file_Uploaded")
@@ -48,15 +48,11 @@ namespace RemcSys.Migrations.RemcDB
 
                     b.Property<string>("fra_Id")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fundedResearchApplicationfra_Id")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("fr_Id");
 
-                    b.HasIndex("fundedResearchApplicationfra_Id");
+                    b.HasIndex("fra_Id");
 
                     b.ToTable("FileRequirement");
                 });
@@ -108,6 +104,10 @@ namespace RemcSys.Migrations.RemcDB
                     b.Property<DateTime>("submission_Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("team_Members")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("fra_Id");
 
                     b.ToTable("FundedResearchApplication");
@@ -144,7 +144,7 @@ namespace RemcSys.Migrations.RemcDB
                 {
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
                         .WithMany("FileRequirements")
-                        .HasForeignKey("fundedResearchApplicationfra_Id")
+                        .HasForeignKey("fra_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

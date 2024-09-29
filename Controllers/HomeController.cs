@@ -48,8 +48,9 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Faculty")]
         public async Task<IActionResult> Faculty()
         {
-            var pendingResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Pending");
-            var submittedResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Submitted");
+            var user = await _userManager.GetUserAsync(User);
+            var pendingResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Pending" && f.UserId == user.Id);
+            var submittedResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Submitted" && f.UserId == user.Id);
             
             ViewBag.Pending = pendingResearchApp;
             ViewBag.Submitted = submittedResearchApp;

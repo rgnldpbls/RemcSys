@@ -10,6 +10,7 @@ namespace RemcSys.Models
         public string research_Title { get; set; }
         public string applicant_Name { get; set; }
         public string applicant_Email { get; set; }
+        public List<string> team_Members { get; set; }
         public string college { get; set; }
         public string branch { get; set; }
         public string field_of_Study { get; set; }

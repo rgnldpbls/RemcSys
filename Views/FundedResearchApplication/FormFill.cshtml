@@ -27,7 +27,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="ProjectMembers">Program/Project Co-Proponent's and Research Assistants:</label>
-                @Html.TextAreaFor(m => m.ProjectMembers, new {@class = "form-control", @placeholder = "Project Members..."})
+                @Html.TextAreaFor(m => m.ProjectMembers, new {@class = "form-control", @placeholder = "Project Member1...\nProject Member2..."})
                 <span asp-validation-for="ProjectMembers" class="text-danger"></span>
             </div>
             <div class="form-group">

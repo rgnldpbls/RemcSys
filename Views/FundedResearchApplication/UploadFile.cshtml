@@ -1,0 +1,171 @@
+﻿@{
+    Layout = "_NavTeamLeader";
+}
+<div class="application-requirements">
+    <h1>Application Requirements</h1>
+
+    <div class="research-info">
+        <h2><b>Research Title:</b> @ViewBag.Title</h2>
+        <h6><b>Proponents:</b><br>@ViewBag.TeamLead <br> 
+            @foreach(var member in @ViewBag.TeamMembers){
+                @member <br>
+            }
+       </h6>
+    </div>
+    <div class="upload-container">
+        <!-- Your Attachments -->
+        <div class="upload-section">
+            <h3>Your Attachments</h3><hr />
+            <p><b>NOTE:</b> Please follow the file naming format (Ex: FORM # - FormName)</p>
+
+            <div class="attachments">
+                <form id="uploadForm" method="post" enctype="multipart/form-data">
+                    <div class="file-input">
+                        <label for="capsulizedResearch">Capsulized Research Proposal:</label>
+                        <input type="file" id="capsulizedResearch" name="capsulizedResearch" accept=".pdf" required>
+                        <span class="file-name" data-for="capsulizedResearch"></span>
+                    </div>
+                    <div class="file-input">
+                        <label for="form1">Form 1 - Term of Reference:</label>
+                        <input type="file" id="form1" name="form1" accept=".pdf" required>
+                        <span class="file-name" data-for="form1"></span>
+                    </div>
+                    <div class="file-input">
+                        <label for="form2">Form 2 - Line Item Budget:</label>
+                        <input type="file" id="form2" name="form2" accept=".pdf" required>
+                        <span class="file-name" data-for="form2"></span>
+                    </div>
+                    <div class="file-input">
+                        <label for="form3">Form 3 - Schedule of Outputs/Tranche Release:</label>
+                        <input type="file" id="form3" name="form3" accept=".pdf" required>
+                        <span class="file-name" data-for="form3"></span>
+                    </div>
+                    <div class="file-input">
+                        <label for="form4">Form 4 - Workplan:</label>
+                        <input type="file" id="form4" name="form4" accept=".pdf" required>
+                        <span class="file-name" data-for="form4"></span>
+                    </div>
+                    <div id="additionalFiles"></div>
+                    <button type="button" id="addFileBtn">Add Another File</button>
+                    <button type="button" id="uploadFilesBtn">Upload Files</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Pop-up -->
+<div class="warning_section" id="warningPopup" style="display: none">
+    <div class="card">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="title">Please review all information before submitting.</span>
+        <div class="d-grid gap-3 col-14 mx-auto">
+            <p>Changes may not be possible after submission.</p>
+        </div>
+        <button class="wsubmit-btn" id="confirmSubmitBtn"
+           style="position: absolute; background-color: #FFDB89;color: #850000; bottom: 10px;right: 10px;font-size: 20px;width: 150px;height: 50px;font-weight: 500;border: 1px #FFDB89;border-radius: 5px; text-align: center; margin-top: 10px;line-height: 50px;"> Submit</butt''>
+        <button class="wback-btn" id="backBtn">Back</button>
+    </div>
+</div>
+
+<script>
+    // Show warning pop-up when Upload Files button is clicked
+    document.getElementById('uploadFilesBtn').addEventListener('click', function () {
+        document.getElementById('warningPopup').style.display = 'block';
+    });
+
+    // Close the pop-up when Back button is clicked
+    document.getElementById('backBtn').addEventListener('click', function () {
+        document.getElementById('warningPopup').style.display = 'none';
+    });
+
+    // Submit the form when the Submit button in the pop-up is clicked
+    document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
+        document.getElementById('uploadForm').submit();
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('uploadForm');
+        const addFileBtn = document.getElementById('addFileBtn');
+        const additionalFiles = document.getElementById('additionalFiles');
+        let fileCount = 5;
+
+        function addFileNameListener(input) {
+            input.addEventListener('change', function () {
+                const fileName = this.files[0] ? this.files[0].name : '';
+                const fileNameSpan = this.nextElementSibling;
+                fileNameSpan.textContent = fileName;
+                fileNameSpan.style.cursor = fileName ? 'pointer' : 'default';
+            });
+        }
+
+        function addFilePreviewListener(span) {
+            span.addEventListener('click', function () {
+                const inputId = this.getAttribute('data-for');
+                const input = document.getElementById(inputId);
+                if (input.files && input.files[0]) {
+                    const fileURL = URL.createObjectURL(input.files[0]);
+                    window.open(fileURL, '_blank');
+                }
+            });
+        }
+
+        // Add listeners to existing file inputs
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            addFileNameListener(input);
+            addFilePreviewListener(input.nextElementSibling);
+        });
+
+        addFileBtn.addEventListener('click', function () {
+            if (fileCount < 10) {
+                const newFileInput = document.createElement('div');
+                newFileInput.className = 'file-input';
+                newFileInput.innerHTML = `
+                        <label for="additionalFile${fileCount}">Additional File ${fileCount - 4}:</label>
+                        <input type="file" id="additionalFile${fileCount}" name="additionalFile${fileCount}" accept=".pdf" required>
+                        <span class="file-name" data-for="additionalFile${fileCount}"></span>
+                        <button type="button" class="remove-file">X</button>
+                    `;
+                additionalFiles.appendChild(newFileInput);
+
+                const input = newFileInput.querySelector('input[type="file"]');
+                const span = newFileInput.querySelector('.file-name');
+                addFileNameListener(input);
+                addFilePreviewListener(span);
+
+                const removeBtn = newFileInput.querySelector('.remove-file');
+                removeBtn.addEventListener('click', function () {
+                    newFileInput.remove();
+                    fileCount--;
+                });
+
+                fileCount++;
+            } else {
+                alert('You can only add up to 5 files.');
+            }
+        });
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const files = form.querySelectorAll('input[type="file"]');
+            let isValid = true;
+
+            files.forEach(file => {
+                if (file.files.length > 0) {
+                    const fileSize = file.files[0].size / 1024 / 1024; // size in MB
+                    if (fileSize > 10) {
+                        alert(`File ${file.name} is larger than 10MB. Please choose a smaller file.`);
+                        isValid = false;
+                    }
+                }
+            });
+
+            if (isValid) {
+                // Here you would typically send the form data to the server
+                alert('Files are valid. Ready to upload!');
+                // form.submit(); // Uncomment this line to actually submit the form
+            }
+        });
+    });
+</script>

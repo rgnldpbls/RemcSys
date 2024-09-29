@@ -17,10 +17,6 @@ builder.Services.AddDefaultIdentity<SystemUser>(options => options.SignIn.Requir
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 104857600; // 100 MB
-});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
