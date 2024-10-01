@@ -18,6 +18,7 @@ namespace RemcSys.Data
         public DbSet<GeneratedForm> GeneratedForms { get; set; }
         public DbSet<FileRequirement> FileRequirement { get; set; }
         public DbSet<FundedResearchEthics> FundedResearchEthics { get; set; }
+        public DbSet<ActionLog> ActionLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

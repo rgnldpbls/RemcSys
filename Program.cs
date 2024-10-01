@@ -4,6 +4,7 @@ using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http.Features;
+using RemcSys.Models;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RemcDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RemcDBContext") ?? throw new InvalidOperationException("Connection string 'RemcDBContext' not found.")));
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<RemcSysDBContext>(options => options.UseSqlServer(
 builder.Services.AddDefaultIdentity<SystemUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<RemcSysDBContext>();
+
+builder.Services.AddScoped<ActionLoggerService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

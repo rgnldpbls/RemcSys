@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<RemcSys.Models.ActionLog>
+@{
     ViewData["Title"] = "Application Tracker";
     Layout = "_NavTeamLeader";
 }
@@ -23,7 +24,6 @@
                 <span class="progress_line"></span>
             </div>
             <strong>Application Submitted</strong>
-            <p>@ViewBag.DateFormat</p>
         </div>
         <div class="step">
             <div class="step-icon complete">
@@ -31,7 +31,6 @@
                 <i class="bi bi-list-check" style="font-size: 35px"></i>
             </div>
             <strong>Document Under Review</strong>
-            <p style="margin-bottom: 0; display: inline;">@ViewBag.Date</p>
             <a class="view-btn" href="/FundedResearchApplication/ApplicationStatus" style="font-size:12px; margin-left: 5px;">View</a>
         </div>
         <form asp-action="GoToEthics" method="post">
@@ -89,59 +88,18 @@
         <div class="col-md-6">
             <div class="document-history">
                 <h5><strong>Document History</strong></h5>
-                <div class="document-history-item">
-                    <div class="history-item-content">
-                        <div class="check-icon">
-                            <span class="track_line"></span>
-                            <i class="bi bi-check-circle" style="font-size: 20px;"></i>
+                @foreach(var log in Model)
+                {
+                    <div class="document-history-item">
+                        <div class="history-item-content">
+                            <div class="check-icon">
+                                <span class="track_line"></span>
+                                <i class="bi bi-check-circle" style="font-size: 20px;"></i>
+                            </div>
+                            <span>@log.Timestamp.ToString("MM-dd-yyyy HH:mm") - @log.Description</span>
                         </div>
-                        <span>08/05/2024 9:00 AM - The documents are under review</span>
                     </div>
-                </div>
-                <div class="document-history-item">
-                    <div class="history-item-content">
-                        <div class="check-icon">
-                            <i class="bi bi-check-circle" style="font-size: 20px;"></i>
-                        </div>
-                        <span>08/01/2024 5:00 AM - Application Submitted</span>
-
-                    </div>
-                </div>
-                <!-- Para makita kung scrollable -->
-                <div class="document-history-item">
-                    <div class="history-item-content">
-                        <div class="check-icon">
-                            <span class="track_line"></span>
-                            <i class="bi bi-check-circle" style="font-size: 20px;"></i>
-                        </div>
-                        <span>08/05/2024 9:00 AM - The documents are under review</span>
-                    </div>
-                </div>
-                <div class="document-history-item">
-                    <div class="history-item-content">
-                        <div class="check-icon">
-                            <i class="bi bi-check-circle" style="font-size: 20px;"></i>
-                        </div>
-                        <span>08/01/2024 5:00 AM - Application Submitted</span>
-                    </div>
-                </div>
-                <div class="document-history-item">
-                    <div class="history-item-content">
-                        <div class="check-icon">
-                            <span class="track_line"></span>
-                            <i class="bi bi-check-circle" style="font-size: 20px;"></i>
-                        </div>
-                        <span>08/05/2024 9:00 AM - The documents are under review</span>
-                    </div>
-                </div>
-                <div class="document-history-item">
-                    <div class="history-item-content">
-                        <div class="check-icon">
-                            <i class="bi bi-check-circle" style="font-size: 20px;"></i>
-                        </div>
-                        <span>08/01/2024 5:00 AM - Application Submitted</span>
-                    </div>
-                </div>
+                }
             </div>
         </div>
 

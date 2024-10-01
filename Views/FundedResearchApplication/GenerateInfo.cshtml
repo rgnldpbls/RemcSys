@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Application Success";
+    Layout = "_NavFaculty";
+}
+
+<div class="application-success">
+    <div class="card">
+        <div class="icon-container" style="text-align: center; font-size: 100px">
+            <i class="bi bi-check-circle"></i>
+            <p>You have generated the forms which needed in your application for Funded Research Application. Kindly download all the forms and edit it to supply other blank fields.</p>
+            <div class="apply-button d-grid gap-10 col-10 mx-auto">
+                <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="GeneratedDocuments">VIEW GENERATED DOCUMENTS</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -22,12 +22,15 @@ namespace RemcSys.Controllers
         private readonly RemcDBContext _context;
         private readonly UserManager<SystemUser> _userManager;
         private readonly IWebHostEnvironment _environment;
+        private readonly ActionLoggerService _actionLogger;
 
-        public FundedResearchApplicationController(RemcDBContext context, UserManager<SystemUser> userManager, IWebHostEnvironment environment)
+        public FundedResearchApplicationController(RemcDBContext context, UserManager<SystemUser> userManager, 
+            IWebHostEnvironment environment, ActionLoggerService actionLogger)
         {
             _context = context;
             _userManager = userManager;
             _environment = environment;
+            _actionLogger = actionLogger;
         }
 
         // GET: FundedResearchApplication
@@ -270,11 +273,11 @@ namespace RemcSys.Controllers
 
             await _context.SaveChangesAsync();
 
-            return View("ListDocuments", filledFiles);
+            return RedirectToAction("GenerateInfo");
         }
 
         [Authorize(Roles = "Faculty")]
-        public IActionResult ListDocuments()
+        public IActionResult GenerateInfo()
         {
             return View();
         }
@@ -297,13 +300,6 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
             return File(document.FileContent, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", document.FileName);
-        }
-
-        public ActionResult Download2(string fileName)
-        {
-            string filePath = Path.Combine(_environment.WebRootPath, "content", "outputs", fileName);
-            byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
-            return File(fileBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
         }
 
         [HttpPost]
@@ -368,6 +364,8 @@ namespace RemcSys.Controllers
                     }
                 }
             }
+            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, "Funded Research Application was submitted.");
+            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, "Application Form was uploaded.");
             await _context.SaveChangesAsync();
             return RedirectToAction("ApplicationSuccess", "FundedResearchApplication");
         }
@@ -384,6 +382,9 @@ namespace RemcSys.Controllers
             var user = await _userManager.GetUserAsync(User);
             var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
                 .FirstOrDefaultAsync();
+            var logs = await _context.ActionLogs
+                .Where(f => f.FraId == fra.fra_Id)
+                .OrderByDescending(log => log.Timestamp).ToListAsync();
             ViewBag.FraId = fra.fra_Id;
             ViewBag.ProjTitle = fra.research_Title;
             ViewBag.TeamLead = fra.applicant_Name;
@@ -392,7 +393,7 @@ namespace RemcSys.Controllers
             ViewBag.Date = fra.submission_Date.ToString("MM-dd-yyyy");
             ViewBag.DateFormat = fra.submission_Date.ToString("MM-dd-yyyy HH:mm:ss");
             ViewBag.DTS = fra.dts_No;
-            return View();
+            return View(logs);
         }
 
         [HttpPost]
