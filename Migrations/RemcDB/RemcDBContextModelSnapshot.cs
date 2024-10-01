@@ -31,6 +31,9 @@ namespace RemcSys.Migrations.RemcDB
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<string>("file_Feedback")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("file_Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -113,6 +116,32 @@ namespace RemcSys.Migrations.RemcDB
                     b.ToTable("FundedResearchApplication");
                 });
 
+            modelBuilder.Entity("RemcSys.Models.FundedResearchEthics", b =>
+                {
+                    b.Property<string>("fre_Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("completionCertificate_Id")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ethicClearance_Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("fra_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("urec_No")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("fre_Id");
+
+                    b.HasIndex("fra_Id")
+                        .IsUnique();
+
+                    b.ToTable("FundedResearchEthics");
+                });
+
             modelBuilder.Entity("RemcSys.Models.GeneratedForm", b =>
                 {
                     b.Property<string>("Id")
@@ -151,6 +180,17 @@ namespace RemcSys.Migrations.RemcDB
                     b.Navigation("fundedResearchApplication");
                 });
 
+            modelBuilder.Entity("RemcSys.Models.FundedResearchEthics", b =>
+                {
+                    b.HasOne("RemcSys.Models.FundedResearchApplication", "FundedResearchApplication")
+                        .WithOne("FundedResearchEthics")
+                        .HasForeignKey("RemcSys.Models.FundedResearchEthics", "fra_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FundedResearchApplication");
+                });
+
             modelBuilder.Entity("RemcSys.Models.GeneratedForm", b =>
                 {
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "FundedResearchApplication")
@@ -165,6 +205,9 @@ namespace RemcSys.Migrations.RemcDB
             modelBuilder.Entity("RemcSys.Models.FundedResearchApplication", b =>
                 {
                     b.Navigation("FileRequirements");
+
+                    b.Navigation("FundedResearchEthics")
+                        .IsRequired();
 
                     b.Navigation("GeneratedForms");
                 });

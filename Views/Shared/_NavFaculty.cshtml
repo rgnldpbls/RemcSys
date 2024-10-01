@@ -30,9 +30,13 @@
                         Faculty
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" asp-action="Faculty">Faculty</a></li>
+                        <li><a class="dropdown-item" asp-action="Faculty" asp-controller="Home">Faculty</a></li>
                     </ul>
-                    <i class="bi-person-circle" style="font-size: 35px;"></i>
+                    <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">
+                            <i class="bi-person-circle" style="font-size: 35px;"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

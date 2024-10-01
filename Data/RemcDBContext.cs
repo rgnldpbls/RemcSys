@@ -17,6 +17,7 @@ namespace RemcSys.Data
         public DbSet<FundedResearchApplication> FundedResearchApplication { get; set; }
         public DbSet<GeneratedForm> GeneratedForms { get; set; }
         public DbSet<FileRequirement> FileRequirement { get; set; }
+        public DbSet<FundedResearchEthics> FundedResearchEthics { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +31,12 @@ namespace RemcSys.Data
                 .HasMany(f => f.FileRequirements)
                 .WithOne(g => g.fundedResearchApplication)
                 .HasForeignKey(g => g.fra_Id)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FundedResearchApplication>()
+                .HasOne(f => f.FundedResearchEthics)
+                .WithOne(g => g.FundedResearchApplication)
+                .HasForeignKey<FundedResearchEthics>(g => g.fra_Id)
                 .OnDelete(DeleteBehavior.Cascade);
 
             base .OnModelCreating(modelBuilder);

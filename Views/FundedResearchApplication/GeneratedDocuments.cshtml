@@ -23,13 +23,44 @@
 </div>
 
 <a class="proceed-btn" href="@Url.Action("UploadFile", "FundedResearchApplication")">Proceed</a>
-<form asp-controller="FundedResearchApplication" asp-action="Reset" method="post" style="display:inline;" onsubmit="return confirmReset();">
+<form id="resetForm" method="post" asp-action="Reset">
     <input type="hidden" name="fraId" value="@fraId" />
-    <button type="submit" class="proceed-btn">Reset</button>
+    <button type="button" class="proceed-btn" id="resetBtn">Reset</button>
 </form>
 
-<script type="text/javascript">
-    function confirmReset() {
-        return confirm("Are you sure you want to reset? This will delete all generated documents and the funded research application.");
-    }
+<!-- Warning Pop-up -->
+<div class="warning_section" id="warningPopup" style="display: none">
+    <div class="card5">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="wtitle">Are you sure you want to withdraw your application?</span>
+    </div>
+    <button class="wsubmit-btn" id="confirmSubmitBtn"
+            style="position: absolute; background-color: #FFDB89;color: #850000; bottom: 10px;right: 10px;font-size: 20px;width: 150px;height: 50px;font-weight: 500;border: 1px #FFDB89;border-radius: 5px; text-align: center; margin-top: 10px;line-height: 50px;">
+        Yes
+    </button>
+    <button class="wback-btn" id="backBtn"
+            style="background-color: #850000; color: white; width: 150px; height: 50px; font-size: 20px; position: absolute; bottom: 10px; left: 10px;">
+        Cancel
+    </button>
+</div>
+<script>
+    const resetBtn = document.getElementById('resetBtn');
+    const warningPopup = document.getElementById('warningPopup');
+    const backBtn = document.getElementById('backBtn');
+    const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+    const resetForm = document.getElementById('resetForm');
+
+    resetBtn.addEventListener('click', function () {
+        warningPopup.style.display = 'block';
+    });
+
+    // Hide the pop-up when 'Cancel' is clicked
+    backBtn.addEventListener('click', function () {
+        warningPopup.style.display = 'none';
+    });
+
+    // Submit the form when 'Yes' is clicked
+    confirmSubmitBtn.addEventListener('click', function () {
+        resetForm.submit(); // Submits the form to the post action specified in the form
+    });
 </script>

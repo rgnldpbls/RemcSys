@@ -1,0 +1,219 @@
+﻿@model IEnumerable<RemcSys.Models.FileRequirement>
+@{
+    ViewData["Title"] = "Application Status";
+    Layout = "_NavTeamLeader";
+}
+
+<div class="document-management-container">
+    <h3><b>RESEARCH TITLE:</b> @ViewBag.ProjTitle</h3>
+    <p><b>Field of Study:</b> @ViewBag.Field</p>
+    <p><b>Proponents:</b><br /> @ViewBag.TeamLead
+        @foreach(var member in ViewBag.TeamMembers)
+        {
+            <br />
+            @member
+        }
+    </p>
+    <form id="withdrawForm" method="post" asp-action="Reset">
+        <input type="hidden" name="fraId" value="@ViewBag.FraId"/>
+        <button type="button" class="withdraw-btn" id="withdrawBtn">Withdraw Application</button>
+    </form>
+    <table class="document-table">
+        <thead>
+            <tr>
+                <th>Document Title</th>
+                <th>Upload DateTime</th>
+                <th>
+                    Document Status
+                    <button class="status-button" id="statusBtn"><i class="bi bi-question-circle-fill"></i></button>
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var fileRequirement in Model)
+            {
+                <tr>
+                    <td>@fileRequirement.file_Name</td>
+                    <td>@fileRequirement.file_Uploaded.ToString("MM-dd-yyyy HH:mm:ss")</td>
+                    <td>
+                        @if(fileRequirement.file_Status == "Pending")
+                        {
+                            <span class="status pending">Pending</span>
+                        }
+                        @if(fileRequirement.file_Status == "Compliance")
+                        {
+                            <span class="status compliance">For Compliance</span>
+                            <button class="feedback-button" id="feedbackBtn-@fileRequirement.fr_Id" onclick="showFeedback('@fileRequirement.fr_Id')">
+                                <i class="bi bi-chat-left-text-fill"></i>
+                            </button>
+
+                            <!--feedback pop-up-->
+                            <div class="feedback" id="feedback-@fileRequirement.fr_Id" style="display: none;">
+                                <div class="card1">
+                                    <button type="button" class="fdismiss" id="xBtn-@fileRequirement.fr_Id" onclick="hideFeedback('@fileRequirement.fr_Id')">×</button>
+                                    <span class="title">Feedback</span>
+                                    <div class="card2">
+                                        <p>
+                                            @fileRequirement.file_Feedback
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if(fileRequirement.file_Status == "Checked")
+                        {
+                            <span class="status approved">Checked by the Chief</span>
+                        }
+                    </td>
+                    <td class="action-buttons">
+                        @if(fileRequirement.file_Status == "Pending" || fileRequirement.file_Status == "Checked")
+                        {
+                            @if (fileRequirement.file_Type == ".pdf")
+                            {
+                                <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = fileRequirement.fr_Id }) " target="_blank">
+                                    <i class="bi bi-file-pdf"></i>Preview
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            @if (fileRequirement.file_Type == ".pdf")
+                            {
+                                <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = fileRequirement.fr_Id }) " target="_blank">
+                                    <i class="bi bi-file-pdf"></i>Preview
+                                </a>
+                            }
+                            <form asp-action="UpdateFile" method="post" enctype="multipart/form-data">
+                                <div class="file-upload-container">
+                                    <div class="file-input-wrapper">
+                                        <input type="file" id="newFile" name="newFile" accept=".pdf" style="display: none" required/>
+                                        <label for="newFile" class="choose-file-btn">Choose File</label>
+                                        <span id="fileNameDisplay">No file chosen</span>
+                                    </div>
+                                    <input type="hidden" name="id" value="@fileRequirement.fr_Id" />
+                                    <div class="submit-button-wrapper">
+                                        <button type="submit" class="resubmit-btn"><i class="bi bi-upload"></i> Re-submit Document</button>
+                                    </div>
+                                </div>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <a class="back-btn" href=" /FundedResearchApplication/ApplicationTracker" style="background-color: #850000;
+       color: #FFF;
+       margin-top: 20px;
+       float: right;
+       margin-bottom: 100px;
+       width: 100px;
+       font-weight: 500;">Back</a>
+</div>
+
+<!--status-tag pop-up-->
+<div class="status_tag" id="statusTag">
+    <div class="card3">
+        <button type="button" class="sdismiss" id="xBtn">×</button>
+        <span class="title">Status Tags</span>
+        <div class="card4">
+            <ol>
+                <li>
+                    <span class="sstatus pending">Pending</span>
+                    <p>- For Validation</p>
+                </li>
+                <li>
+                    <span class="sstatus compliance">For Compliance</span>
+                    <p>- Return for resubmission of requirements.</p>
+                </li>
+                <li>
+                    <span class="sstatus approved">Checked by the Chief</span>
+                    <p>- The document has been checked by the Chief.</p>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Pop-up -->
+<div class="warning_section" id="warningPopup" style="display: none">
+    <div class="card5">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="wtitle">Are you sure you want to withdraw your application?</span>
+    </div>
+    <button class="wsubmit-btn" id="confirmSubmitBtn"
+       style="position: absolute; background-color: #FFDB89;color: #850000; bottom: 10px;right: 10px;font-size: 20px;width: 150px;height: 50px;font-weight: 500;border: 1px #FFDB89;border-radius: 5px; text-align: center; margin-top: 10px;line-height: 50px;"> 
+       Yes
+   </button>
+    <button class="wback-btn" id="backBtn"
+            style="background-color: #850000; color: white; width: 150px; height: 50px; font-size: 20px; position: absolute; bottom: 10px; left: 10px;">
+            Cancel
+    </button>
+</div>
+
+
+<script>
+    const withdrawBtn = document.getElementById('withdrawBtn');
+    const warningPopup = document.getElementById('warningPopup');
+    const backBtn = document.getElementById('backBtn');
+    const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+    const withdrawForm = document.getElementById('withdrawForm');
+
+    const statusBtn = document.getElementById('statusBtn');
+    const statusTag = document.getElementById('statusTag');
+    const xBtn = document.getElementById('xBtn')
+
+    withdrawBtn.addEventListener('click', function () {
+        warningPopup.style.display = 'block';
+    });
+
+    // Hide the pop-up when 'Cancel' is clicked
+    backBtn.addEventListener('click', function () {
+        warningPopup.style.display = 'none';
+    });
+
+    // Submit the form when 'Yes' is clicked
+    confirmSubmitBtn.addEventListener('click', function () {
+        withdrawForm.submit(); // Submits the form to the post action specified in the form
+    });
+
+    statusBtn.addEventListener('click', function () {
+        statusTag.style.display = 'block';
+    });
+
+    xBtn.addEventListener('click', function () {
+        statusTag.style.display = 'none';
+    });
+
+    // Function to show the feedback pop-up
+    function showFeedback(id) {
+        var feedbackPopup = document.getElementById("feedback-" + id);
+        feedbackPopup.style.display = "block";
+    }
+
+    // Function to hide the feedback pop-up
+    function hideFeedback(id) {
+        var feedbackPopup = document.getElementById("feedback-" + id);
+        feedbackPopup.style.display = "none";
+    }
+</script>
+<script>
+    document.getElementById('newFile').addEventListener('change', function (e) {
+        var fileNameDisplay = document.getElementById('fileNameDisplay');
+        var file = e.target.files[0];
+
+        if (file) {
+            fileNameDisplay.textContent = file.name;
+            fileNameDisplay.classList.remove('no-file');
+            fileNameDisplay.onclick = function () {
+                var fileURL = URL.createObjectURL(file);
+                window.open(fileURL, '_blank');
+            };
+        } else {
+            fileNameDisplay.textContent = 'No file chosen';
+            fileNameDisplay.classList.add('no-file');
+            fileNameDisplay.onclick = null;
+        }
+    });
+</script>

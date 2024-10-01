@@ -1,0 +1,72 @@
+﻿@{
+    Layout = null;  // This assumes you don't want to use the site's default layout
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page Under Maintenance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .maintenance-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+            .maintenance-container h1 {
+                font-size: 48px;
+                color: #ff6b6b;
+                margin-bottom: 20px;
+            }
+
+            .maintenance-container p {
+                font-size: 18px;
+                margin-bottom: 30px;
+            }
+
+            .maintenance-container .icon {
+                font-size: 100px;
+                color: #ff6b6b;
+                margin-bottom: 30px;
+            }
+
+            .maintenance-container a {
+                text-decoration: none;
+                color: white;
+                background-color: #ff6b6b;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 18px;
+                transition: background-color 0.3s ease;
+            }
+
+                .maintenance-container a:hover {
+                    background-color: #ff5252;
+                }
+    </style>
+</head>
+<body>
+    <div class="maintenance-container">
+        <div class="icon">🚧</div>
+        <h1>Page Under Maintenance</h1>
+        <p>We're currently making some improvements to this page. Please check back soon.</p>
+    </div>
+</body>
+</html>

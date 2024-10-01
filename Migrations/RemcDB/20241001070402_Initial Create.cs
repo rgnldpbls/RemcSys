@@ -43,6 +43,7 @@ namespace RemcSys.Migrations.RemcDB
                     file_Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     file_Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    file_Feedback = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     file_Uploaded = table.Column<DateTime>(type: "datetime2", nullable: false),
                     fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
@@ -51,6 +52,27 @@ namespace RemcSys.Migrations.RemcDB
                     table.PrimaryKey("PK_FileRequirement", x => x.fr_Id);
                     table.ForeignKey(
                         name: "FK_FileRequirement_FundedResearchApplication_fra_Id",
+                        column: x => x.fra_Id,
+                        principalTable: "FundedResearchApplication",
+                        principalColumn: "fra_Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FundedResearchEthics",
+                columns: table => new
+                {
+                    fre_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    urec_No = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ethicClearance_Id = table.Column<int>(type: "int", nullable: true),
+                    completionCertificate_Id = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FundedResearchEthics", x => x.fre_Id);
+                    table.ForeignKey(
+                        name: "FK_FundedResearchEthics_FundedResearchApplication_fra_Id",
                         column: x => x.fra_Id,
                         principalTable: "FundedResearchApplication",
                         principalColumn: "fra_Id",
@@ -84,6 +106,12 @@ namespace RemcSys.Migrations.RemcDB
                 column: "fra_Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FundedResearchEthics_fra_Id",
+                table: "FundedResearchEthics",
+                column: "fra_Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GeneratedForms_fra_Id",
                 table: "GeneratedForms",
                 column: "fra_Id");
@@ -94,6 +122,9 @@ namespace RemcSys.Migrations.RemcDB
         {
             migrationBuilder.DropTable(
                 name: "FileRequirement");
+
+            migrationBuilder.DropTable(
+                name: "FundedResearchEthics");
 
             migrationBuilder.DropTable(
                 name: "GeneratedForms");

@@ -282,7 +282,9 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Faculty")]
         public async Task<IActionResult> GeneratedDocuments()
         {
-            var documents = await _context.GeneratedForms.OrderBy(f => f.FileName).ToListAsync();
+            var user = await _userManager.GetUserAsync(User);
+            var fra = await _context.FundedResearchApplication.Where(f => f.UserId == user.Id).FirstOrDefaultAsync();
+            var documents = await _context.GeneratedForms.Where(e => e.fra_Id == fra.fra_Id ).OrderBy(f => f.FileName).ToListAsync();
             return View(documents);
         }
         
@@ -356,6 +358,7 @@ namespace RemcSys.Controllers
                                 file_Type = Path.GetExtension(file.FileName),
                                 data = ms.ToArray(),
                                 file_Status = "Pending",
+                                file_Feedback = null,
                                 file_Uploaded = DateTime.Now,
                                 fra_Id = fra.fra_Id
                             };
@@ -373,6 +376,135 @@ namespace RemcSys.Controllers
         public IActionResult ApplicationSuccess()
         {
             return View();
+        }
+
+        [Authorize(Roles = "Faculty")]
+        public async Task<IActionResult> ApplicationTracker()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
+                .FirstOrDefaultAsync();
+            ViewBag.FraId = fra.fra_Id;
+            ViewBag.ProjTitle = fra.research_Title;
+            ViewBag.TeamLead = fra.applicant_Name;
+            ViewBag.TeamMembers = fra.team_Members;
+            ViewBag.Field = fra.field_of_Study;
+            ViewBag.Date = fra.submission_Date.ToString("MM-dd-yyyy");
+            ViewBag.DateFormat = fra.submission_Date.ToString("MM-dd-yyyy HH:mm:ss");
+            ViewBag.DTS = fra.dts_No;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetDTS(string DTSNo, string fraId)
+        {
+            var fra = await _context.FundedResearchApplication
+                .FirstOrDefaultAsync(f => f.fra_Id == fraId);
+
+            if(fra == null)
+            {
+                return NotFound();
+            }
+
+            fra.dts_No = DTSNo;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("ApplicationTracker");
+        }
+
+        [Authorize(Roles ="Faculty")]
+        public async Task<IActionResult> ApplicationStatus()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
+                .FirstOrDefaultAsync();
+            ViewBag.FraId = fra.fra_Id;
+            ViewBag.ProjTitle = fra.research_Title;
+            ViewBag.TeamLead = fra.applicant_Name;
+            ViewBag.TeamMembers = fra.team_Members;
+            ViewBag.Field = fra.field_of_Study;
+            var fileRequirements = await _context.FileRequirement
+                .Where(fr => fr.fra_Id == fra.fra_Id)
+                .OrderBy(fr => fr.file_Name)
+                .ToListAsync();
+            return View(fileRequirements);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GoToEthics(FundedResearchEthics fundedResearchEthics)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var fra = await _context.FundedResearchApplication
+                .Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
+                .FirstOrDefaultAsync();
+
+            if(fra == null)
+            {
+                return NotFound("No submitted application found for this user.");
+            }
+
+            var existingEthics = await _context.FundedResearchEthics
+                .FirstOrDefaultAsync(e => e.fra_Id == fra.fra_Id);
+
+            if(existingEthics == null)
+            {
+                var fre = new FundedResearchEthics
+                {
+                    fre_Id = Guid.NewGuid().ToString(),
+                    fra_Id = fra.fra_Id,
+                    urec_No = null,
+                    ethicClearance_Id = null,
+                    completionCertificate_Id = null
+                };
+                _context.FundedResearchEthics.Add(fre);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("UnderMaintenance", "Home");
+            }
+            return RedirectToAction("UnderMaintenance", "Home");
+        }
+
+        public async Task<IActionResult> PreviewFile(string id)
+        {
+            var fileRequirement = await _context.FileRequirement.FindAsync(id);
+            if(fileRequirement == null)
+            {
+                return NotFound();
+            }
+
+            if(fileRequirement.file_Type == ".pdf")
+            {
+                return File(fileRequirement.data, "application/pdf");
+            }
+
+            return BadRequest("Only PDF files can be previewed.");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateFile(string id, IFormFile newFile)
+        {
+            var fileRequirement = await _context.FileRequirement.FindAsync(id);
+            if( fileRequirement == null)
+            {
+                return NotFound();
+            }
+
+            if(newFile != null && newFile.Length > 0)
+            {
+                using (var memoryStream = new  MemoryStream())
+                {
+                    await newFile.CopyToAsync(memoryStream);
+                    fileRequirement.data = memoryStream.ToArray();
+                    fileRequirement.file_Name = newFile.FileName;
+                    fileRequirement.file_Type = Path.GetExtension(newFile.FileName);
+                    fileRequirement.file_Uploaded = DateTime.Now;
+                    fileRequirement.file_Status = "Pending";
+                    fileRequirement.file_Feedback = null;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("ApplicationStatus");
         }
     }
 }

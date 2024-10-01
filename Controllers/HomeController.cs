@@ -45,6 +45,11 @@ namespace RemcSys.Controllers
             return View();
         }
 
+        public IActionResult UnderMaintenance()
+        {
+            return View();
+        }
+
         [Authorize(Roles = "Faculty")]
         public async Task<IActionResult> Faculty()
         {
