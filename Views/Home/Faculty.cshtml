@@ -1,6 +1,20 @@
 ﻿@{
     ViewData["Title"] = "Apply for Funded Research";
-    Layout = "_NavFaculty";
+    @if (ViewBag.Pending == true || ViewBag.Submitted == true)
+    {
+        @if(ViewBag.Pending == true)
+        {
+            Layout = "_NavFaculty3";
+        }
+        else
+        {
+            Layout = "_NavFaculty2";
+        }
+    }
+    else
+    {
+        Layout = "_NavFaculty";   
+    }
 }
 <div class="hero-section">
     <h1>RESEARCH EVALUATION AND MONITORING CENTER</h1>

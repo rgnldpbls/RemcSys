@@ -19,12 +19,12 @@
                     <img src="~/img/research-management-logo.png" alt="RMO" style="height: 60px;">
                 </div>
                 <nav class="nav nav-pills nav-fill">
-                    <a class="nav-link active" href="#">Home</a>
-                    <a class="nav-link active" href="#"> Dashboard</a>
-                    <a class="nav-link active" href="#">Application</a>
-                    <a class="nav-link active" href="#">Evaluators</a>
-                    <a class="nav-link active" href="#">Reports</a>
-                    <a class="nav-link active" href="#">Notify</a>
+                    <a class="nav-link active" href="/Home/Chief">Home</a>
+                    <a class="nav-link active" href="/Chief/ChiefDashboard">Dashboard</a>
+                    <a class="nav-link active" href="/Chief/UFResearchApp">Application</a>
+                    <a class="nav-link active" href="/Home/AccessDenied">Evaluators</a>
+                    <a class="nav-link active" href="/Home/AccessDenied">Reports</a>
+                    <a class="nav-link active" href="/Home/AccessDenied">Notify</a>
                 </nav>
                 <div class="profile">
                     <i class="bi bi-bell-fill" style="font-size: 30px;"></i>
@@ -36,7 +36,11 @@
                         <li><a class="dropdown-item" asp-action="Evaluator">Evaluator</a></li>
                         <li><a class="dropdown-item" asp-action="Chief">Chief</a></li>
                     </ul>
-                    <i class="bi-person-circle" style="font-size: 35px;"></i>
+                    <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">
+                            <i class="bi-person-circle" style="font-size: 35px;"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
     </header>

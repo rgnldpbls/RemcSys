@@ -1,5 +1,80 @@
 ﻿@{
-    Layout = "";
+    Layout = null; // Optional: If you want to use a layout page, remove this line
 }
-<h2>Access Denied</h2>
-<p>You do not have permission to view this page.</p>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access Denied</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .access-denied-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+        }
+
+        .access-denied-card {
+            background-color: #fff;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+            .access-denied-card h1 {
+                font-size: 48px;
+                color: #ff4d4d;
+                margin-bottom: 20px;
+            }
+
+            .access-denied-card p {
+                font-size: 18px;
+                color: #666;
+                margin-bottom: 40px;
+            }
+
+            .access-denied-card a {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border-radius: 5px;
+                text-decoration: none;
+                font-size: 16px;
+                transition: background-color 0.3s;
+            }
+
+                .access-denied-card a:hover {
+                    background-color: #0056b3;
+                }
+
+        .icon {
+            font-size: 80px;
+            color: #ff4d4d;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="access-denied-container">
+        <div class="access-denied-card">
+            <div class="icon">
+                <i class="bi bi-exclamation-triangle-fill"></i> <!-- Optional: Use an icon from Bootstrap Icons if available -->
+            </div>
+            <h1>Access Denied</h1>
+            <p>You do not have permission to view this page.</p>
+        </div>
+    </div>
+</body>
+</html>

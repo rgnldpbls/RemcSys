@@ -9,6 +9,7 @@ namespace RemcSys.Models
         public string LogId { get; set; }
         public string UserId { get; set; }
         public string FraId { get; set; }
+        public FundedResearchApplication fundedResearchApplication { get; set; }
         public string Description { get; set; }
         public DateTime Timestamp { get; set; }
 

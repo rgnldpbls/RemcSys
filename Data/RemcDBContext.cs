@@ -40,6 +40,12 @@ namespace RemcSys.Data
                 .HasForeignKey<FundedResearchEthics>(g => g.fra_Id)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<FundedResearchApplication>()
+                .HasMany(f => f.ActionLogs)
+                .WithOne(g => g.fundedResearchApplication)
+                .HasForeignKey(g => g.FraId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             base .OnModelCreating(modelBuilder);
         }
     }

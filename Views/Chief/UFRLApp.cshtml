@@ -1,0 +1,62 @@
+﻿@model IEnumerable<RemcSys.Models.FundedResearchApplication>
+@{
+    ViewData["Title"] = "University Funded Research Applications";
+    Layout = "_NavChief1";
+}
+
+<h1>University Funded Research Applications</h1>
+<p>
+    <a asp-action="UFResearchApp">University Funded Research Application</a>
+    <a asp-action="EFResearchApp">Externally Funded Research Application</a>
+    <a asp-action="UFRLApp">University Funded Research Load Application</a>
+</p>
+
+<!-- Search Form -->
+<form asp-controller="Chief" asp-action="UFRLApp" method="get" class="form-inline mb-3">
+    <input type="text" name="searchString" class="form-control" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
+    <button type="submit"><i class="bi bi-search"></i></button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                DTS No.
+            </th>
+            <th>
+                Details
+            </th>
+            <th>
+                Assign Evaluators
+            </th>
+            <th>
+                Action
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.dts_No)
+                </td>
+                <td>
+                    <b>Research Title:</b> @Html.DisplayFor(modelItem => item.research_Title)<br />
+                    <b>Field of Study:</b> @Html.DisplayFor(modelItem => item.field_of_Study)
+                </td>
+                <td>
+                    No evaluator yet<br />
+                    No evaluator yet<br />
+                    No evaluator yet<br />
+                    No evaluator yet<br />
+                    No evaluator yet
+                </td>
+                <td>
+                    <a asp-controller="Home" asp-action="UnderMaintenance"><i class="bi bi-person-fill-add"></i></a>
+                    <a asp-action="DocuList" asp-route-id="@item.fra_Id"><i class="bi bi-pencil-square"></i></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

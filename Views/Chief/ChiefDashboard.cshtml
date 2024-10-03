@@ -1,0 +1,158 @@
+﻿@{
+    ViewData["Title"] = "Chief Dashboard";
+    Layout = "_NavChief1";
+}
+<div class="dashboard">
+    <div class="welcome-section">
+        <h2>Welcome,</h2>
+        <h1>REMC Chief!</h1>
+    </div>
+
+    <div class="stats-cards">
+        <div class="stat-card red">
+            <h3>1,757</h3>
+            <p>Total</p>
+            <span>University Funded Research</span>
+        </div>
+        <div class="stat-card yellow">
+            <h3>567</h3>
+            <p>Total</p>
+            <span>Externally-Funded Research</span>
+        </div>
+        <div class="stat-card green">
+            <h3>2</h3>
+            <p>Total</p>
+            <span>University Funded Research Load</span>
+        </div>
+    </div>
+
+    <!-- First row: Pie Chart and Quick Access Menu -->
+    <div class="content-row">
+        <div class="chart">
+            <h3>Most Funded Research (University and Externally-Funded Research)</h3>
+            <div class="pie-chart">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <div class="quick-access">
+            <h3>Quick Access Menu</h3>
+            <ul>
+                <li>
+                    <a href="/Chief/UFResearchApp">
+                        <div class="icon">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>LIST OF APPLICATIONS</span>
+                            <strong>PENDING APPLICATION</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <div class="icon">
+                            <i class="bi bi-clock-fill"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>LIST OF UFRW</span>
+                            <strong>EVALUATION RESULT</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <div class="icon">
+                            <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>LIST OF RESEARCH</span>
+                            <strong>PROGRESS REPORTS</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <div class="icon">
+                            <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>LIST OF RESEARCH TYPE</span>
+                            <strong>REPORT GENERATION</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <div class="icon">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>TUKLAS AND LATHALA</span>
+                            <strong>GAWAD</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Second row: Top Research and Top Branches -->
+    <div class="content-row">
+        <div class="top-research-section">
+            <h2>TOP <br /> <span>3</span></h2>
+            <h3>Most Funded Research</h3>
+            <p>University and Externally-Funded Research</p>
+            <ol class="top-research-list">
+                <li class="first-place">
+                    <div class="rank">1.</div>
+                    <img src="~/img/ccis_logo.png" alt="CCIS" style="height:30px; margin-right: 10px;" class="icon">
+                    <span>College of Computer and Information Sciences</span>
+                </li>
+                <li class="second-place">
+                    <div class="rank">2.</div>
+                    <img src="~/img/ccis_logo.png" alt="COL" style="height: 30px; margin-right: 10px;" class="icon">
+                    <span>College of Law</span>
+                </li>
+                <li class="third-place">
+                    <div class="rank">3.</div>
+                    <img src="~/img/ccis_logo.png" alt="CS" style="height: 30px; margin-right: 10px;" class="icon">
+                    <span>College of Science</span>
+                </li>
+            </ol>
+        </div>
+
+        <div class="top-branches">
+            <h3>Top Performing Branches</h3>
+            <ul>
+                <li>Sta. Mesa, Manila Branch - 1st</li>
+                <li>Paranaque City Branch - 2nd</li>
+                <li>Sta Rosa, Laguna Branch - 3rd</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        // Pie chart rendering logic
+        var ctx = document.getElementById('pieChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'],
+                datasets: [{
+                    label: 'Funding Breakdown',
+                    data: [10, 35, 20, 20, 15],
+                    backgroundColor: ['#850000', '#FF5C5C', '#E23E57', '#FF9999', '#FFD9D9'],
+                }]
+            }
+        });
+    </script>
+}

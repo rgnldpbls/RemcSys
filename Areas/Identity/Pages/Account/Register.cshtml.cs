@@ -113,13 +113,13 @@ namespace RemcSys.Areas.Identity.Pages.Account
         }
 
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = "/Identity/Account/Login")
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = "/Identity/Account/Login")
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
