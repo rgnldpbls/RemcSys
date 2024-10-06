@@ -12,7 +12,7 @@ using RemcSys.Data;
 namespace RemcSys.Migrations.RemcDB
 {
     [DbContext(typeof(RemcDBContext))]
-    [Migration("20241001070402_Initial Create")]
+    [Migration("20241007020211_Initial-Create")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,6 +24,42 @@ namespace RemcSys.Migrations.RemcDB
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("RemcSys.Models.ActionLog", b =>
+                {
+                    b.Property<string>("LogId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Action")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FraId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FraType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProjLead")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("LogId");
+
+                    b.HasIndex("FraId");
+
+                    b.ToTable("ActionLogs");
+                });
 
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
                 {
@@ -172,6 +208,17 @@ namespace RemcSys.Migrations.RemcDB
                     b.ToTable("GeneratedForms");
                 });
 
+            modelBuilder.Entity("RemcSys.Models.ActionLog", b =>
+                {
+                    b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
+                        .WithMany("ActionLogs")
+                        .HasForeignKey("FraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("fundedResearchApplication");
+                });
+
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
                 {
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
@@ -207,6 +254,8 @@ namespace RemcSys.Migrations.RemcDB
 
             modelBuilder.Entity("RemcSys.Models.FundedResearchApplication", b =>
                 {
+                    b.Navigation("ActionLogs");
+
                     b.Navigation("FileRequirements");
 
                     b.Navigation("FundedResearchEthics")

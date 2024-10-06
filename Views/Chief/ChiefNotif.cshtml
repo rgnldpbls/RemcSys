@@ -1,0 +1,11 @@
+﻿@model IEnumerable<RemcSys.Models.ActionLog>
+@{
+    Layout = "_NavChief1";
+    ViewData["Title"] = "Notification";
+}
+
+<h1>Notifications</h1>
+@foreach(var log in Model)
+{
+    <p><b>@log.FraType: </b> @log.ProjLead @log.Action | @ActionLog.GetTimeAgo(log.Timestamp)</p>
+}

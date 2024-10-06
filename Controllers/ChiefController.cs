@@ -22,11 +22,19 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Chief")]
+        public async Task<IActionResult> ChiefNotif()
+        {
+            var logs = await _context.ActionLogs.OrderByDescending(log => log.Timestamp).ToListAsync();
+            return View(logs);
+        }
+
+        [Authorize(Roles = "Chief")]
         public async Task<IActionResult> UFResearchApp(string searchString)
         {
             ViewData["currentFilter"] = searchString;
+            var fileReq = _context.FileRequirement.FirstOrDefault();
             var application = from app in _context.FundedResearchApplication
-                              .Where(f => f.fra_Type == "University Funded Research")
+                              .Where(f => f.fra_Type == "University Funded Research" && f.fra_Id == fileReq.fra_Id)
                               select app;
 
             if (!String.IsNullOrEmpty(searchString))
@@ -41,8 +49,9 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> EFResearchApp(string searchString)
         {
             ViewData["currentFilter"] = searchString;
+            var fileReq = _context.FileRequirement.FirstOrDefault();
             var application = from app in _context.FundedResearchApplication
-                              .Where(f => f.fra_Type == "Externally Funded Research")
+                              .Where(f => f.fra_Type == "Externally Funded Research" && f.fra_Id == fileReq.fra_Id)
                               select app;
 
             if (!String.IsNullOrEmpty(searchString))
@@ -57,8 +66,9 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> UFRLApp(string searchString)
         {
             ViewData["currentFilter"] = searchString;
+            var fileReq = _context.FileRequirement.FirstOrDefault();
             var application = from app in _context.FundedResearchApplication
-                              .Where(f => f.fra_Type == "University Funded Research Load")
+                              .Where(f => f.fra_Type == "University Funded Research Load" && f.fra_Id == fileReq.fra_Id)
                               select app;
 
             if (!String.IsNullOrEmpty(searchString))
@@ -156,6 +166,24 @@ namespace RemcSys.Controllers
             }
 
             return BadRequest("Only PDF files can be previewed.");
+        }
+
+        [Authorize(Roles ="Chief")]
+        public IActionResult GawadTuklas()
+        {
+            return View();
+        }
+
+        [Authorize(Roles ="Chief")]
+        public IActionResult GawadLathala()
+        {
+            return View();
+        }
+
+        [Authorize(Roles ="Chief")]
+        public IActionResult GawadWinners()
+        {
+            return View();
         }
     }
 }

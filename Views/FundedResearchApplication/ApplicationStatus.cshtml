@@ -87,9 +87,11 @@
                             <form asp-action="UpdateFile" method="post" enctype="multipart/form-data">
                                 <div class="file-upload-container">
                                     <div class="file-input-wrapper">
-                                        <input type="file" id="newFile" name="newFile" accept=".pdf" style="display: none" required/>
-                                        <label for="newFile" class="choose-file-btn">Choose File</label>
-                                        <span id="fileNameDisplay">No file chosen</span>
+                                        <input type="file" id="newFile_@fileRequirement.fr_Id" name="newFile" accept=".pdf" style="display: none;" onchange="updateFileName('@fileRequirement.fr_Id')" required/>
+                                        <label for="newFile_@fileRequirement.fr_Id" class="choose-file-btn">Choose File</label>
+                                        <a id="previewLink_@fileRequirement.fr_Id" href="#" target="_blank" style="display: none;">
+                                            <span id="fileNameDisplay_@fileRequirement.fr_Id">No file chosen</span>
+                                        </a>
                                     </div>
                                     <input type="hidden" name="id" value="@fileRequirement.fr_Id" />
                                     <div class="submit-button-wrapper">
@@ -199,21 +201,31 @@
     }
 </script>
 <script>
-    document.getElementById('newFile').addEventListener('change', function (e) {
-        var fileNameDisplay = document.getElementById('fileNameDisplay');
-        var file = e.target.files[0];
+        function updateFileName(fr_Id) {
+            var input = document.getElementById('newFile_' + fr_Id);
+            var fileNameDisplay = document.getElementById('fileNameDisplay_' + fr_Id);
+            var previewLink = document.getElementById('previewLink_' + fr_Id);
 
-        if (file) {
-            fileNameDisplay.textContent = file.name;
-            fileNameDisplay.classList.remove('no-file');
-            fileNameDisplay.onclick = function () {
-                var fileURL = URL.createObjectURL(file);
-                window.open(fileURL, '_blank');
-            };
-        } else {
-            fileNameDisplay.textContent = 'No file chosen';
-            fileNameDisplay.classList.add('no-file');
-            fileNameDisplay.onclick = null;
+            if (input.files && input.files.length > 0) {
+                // Update the file name display with the selected file name
+                fileNameDisplay.textContent = input.files[0].name;
+
+                // Check if the selected file is a PDF
+                if (input.files[0].type === 'application/pdf') {
+                    // Create a URL for the selected file
+                    var fileURL = URL.createObjectURL(input.files[0]);
+                    // Set the href of the preview link to the file URL
+                    previewLink.href = fileURL;
+                    // Show the preview link (span will be clickable)
+                    previewLink.style.display = 'inline-block';
+                } else {
+                    // Hide the preview link if it's not a PDF
+                    previewLink.style.display = 'none';
+                }
+            } else {
+                // No file chosen, reset the file name display and hide the preview link
+                fileNameDisplay.textContent = 'No file chosen';
+                previewLink.style.display = 'none';
+            }
         }
-    });
 </script>

@@ -27,12 +27,21 @@ namespace RemcSys.Migrations.RemcDB
                     b.Property<string>("LogId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Action")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FraId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FraType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProjLead")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Timestamp")
@@ -43,6 +52,8 @@ namespace RemcSys.Migrations.RemcDB
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("LogId");
+
+                    b.HasIndex("FraId");
 
                     b.ToTable("ActionLogs");
                 });
@@ -194,6 +205,17 @@ namespace RemcSys.Migrations.RemcDB
                     b.ToTable("GeneratedForms");
                 });
 
+            modelBuilder.Entity("RemcSys.Models.ActionLog", b =>
+                {
+                    b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
+                        .WithMany("ActionLogs")
+                        .HasForeignKey("FraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("fundedResearchApplication");
+                });
+
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
                 {
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
@@ -229,6 +251,8 @@ namespace RemcSys.Migrations.RemcDB
 
             modelBuilder.Entity("RemcSys.Models.FundedResearchApplication", b =>
                 {
+                    b.Navigation("ActionLogs");
+
                     b.Navigation("FileRequirements");
 
                     b.Navigation("FundedResearchEthics")

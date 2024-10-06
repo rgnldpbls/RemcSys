@@ -270,7 +270,6 @@ namespace RemcSys.Controllers
 
                 _context.GeneratedForms.Add(doc);
             }
-            await _actionLogger.LogActionAsync(user.Id, fundedResearchApp.fra_Id, "Funded Research Application was submitted.");
             await _context.SaveChangesAsync();
 
             return RedirectToAction("GenerateInfo");
@@ -364,7 +363,8 @@ namespace RemcSys.Controllers
                     }
                 }
             }
-            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, "Application Form was uploaded.");
+            /*await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, "Application Form was uploaded.");*/
+            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, fra.applicant_Name, fra.fra_Type, "Application was submitted.", "submitted application.");
             await _context.SaveChangesAsync();
             return RedirectToAction("ApplicationSuccess", "FundedResearchApplication");
         }

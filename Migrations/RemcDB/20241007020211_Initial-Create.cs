@@ -35,6 +35,30 @@ namespace RemcSys.Migrations.RemcDB
                 });
 
             migrationBuilder.CreateTable(
+                name: "ActionLogs",
+                columns: table => new
+                {
+                    LogId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FraId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProjLead = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FraType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActionLogs", x => x.LogId);
+                    table.ForeignKey(
+                        name: "FK_ActionLogs_FundedResearchApplication_FraId",
+                        column: x => x.FraId,
+                        principalTable: "FundedResearchApplication",
+                        principalColumn: "fra_Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FileRequirement",
                 columns: table => new
                 {
@@ -101,6 +125,11 @@ namespace RemcSys.Migrations.RemcDB
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ActionLogs_FraId",
+                table: "ActionLogs",
+                column: "FraId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FileRequirement_fra_Id",
                 table: "FileRequirement",
                 column: "fra_Id");
@@ -120,6 +149,9 @@ namespace RemcSys.Migrations.RemcDB
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ActionLogs");
+
             migrationBuilder.DropTable(
                 name: "FileRequirement");
 

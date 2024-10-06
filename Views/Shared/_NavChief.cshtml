@@ -27,7 +27,9 @@
                     <a class="nav-link active" href="/Home/AccessDenied">Notify</a>
                 </nav>
                 <div class="profile">
-                    <i class="bi bi-bell-fill" style="font-size: 30px;"></i>
+                    <a asp-controller="Chief" asp-action="ChiefNotif">
+                        <i class="bi bi-bell-fill" style="font-size: 30px;"></i>
+                    </a>
                     <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         Chief
                     </button>
