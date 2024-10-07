@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["Title"] = "Research Evaluation Form";
+    Layout = "_NavEvaluator1";
+}
+
+<div class="evaluation-sheet-container">
+    <div class="card2">
+        <div class="tab-container">
+            <div class="tab">
+                <button class="tablinks active" id="capsuled">Capsuled Research</button>
+            </div>
+            <div class="tab">
+                <button class="tablinks" id="form1">Form 1</button>
+            </div>
+            <div class="tab">
+                <button class="tablinks" id="form2">Form 2</button>
+            </div>
+            <div class="tab">
+                <button class="tablinks" id="form3">Form 3</button>
+            </div>
+            <div class="tab">
+                <button class="tablinks" id="form4">Form 4</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="evaluation-form">
+                <h3>Research Project Evaluation Sheet (Form 1)</h3>
+
+                <!-- Track Record and Competence -->
+                <h5>Track Record and Competence</h5>
+                <div>
+                    <label>1. Academic Qualification</label>
+                    <textarea name="academicQualification" rows="3" placeholder="Type here your comments and suggestions"></textarea>
+                </div>
+                <div>
+                    <label>2. Research Experience in the field of specialization</label>
+                    <textarea name="researchExperience" rows="3" placeholder="Type here your comments and suggestions"></textarea>
+                </div>
+
+                <!-- Technical Quality -->
+                <h5>Technical Quality</h5>
+                <div>
+                    <label>1. Relevance & Impact</label>
+                    <textarea name="relevanceImpact" rows="3" placeholder="Type here your comments and suggestions"></textarea>
+                </div>
+                <div>
+                    <label>2. Level of Collaboration</label>
+                    <textarea name="levelOfCollaboration" rows="3" placeholder="Type here your comments and suggestions"></textarea>
+                </div>
+                <div>
+                    <label>3. Appropriateness of Research Design or Methodology</label>
+                    <textarea name="researchDesign" rows="3" placeholder="Type here your comments and suggestions"></textarea>
+                </div>
+                <div>
+                    <label>4. Feasibility of Work and Financial Plan</label>
+                    <textarea name="financialPlan" rows="3" placeholder="Type here your comments and suggestions"></textarea>
+                </div>
+
+                <!-- General Comments -->
+                <h5>General Comments and Suggestions</h5>
+                <textarea name="generalComments" rows="5" placeholder="Type here your comments and suggestions"></textarea>
+                <div>
+                    <button type="submit" class="submit-btn">Submit Evaluation</button>
+                </div>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Pop-up -->
+<div class="warning_section">
+    <div class="card3">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i><br />
+        <span class="wtitle">Please review all information before submitting.</span>
+        <div class="d-grid gap-3 col-14 mx-auto">
+            <p class="deets">Changes may not be possible after submission.</p>
+        </div>
+        <button class="wsubmit-btn">Submit</button>
+        <button class="wback-btn">Back</button>
+    </div>
+</div>
+
+<script>
+    document.querySelector('.submit-btn').addEventListener('click', function () {
+        document.querySelector('.warning_section').style.display = 'flex';
+    });
+
+    document.querySelector('.wback-btn').addEventListener('click', function () {
+        document.querySelector('.warning_section').style.display = 'none';
+    });
+</script>

@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Evaluator Pending Evaluations";
+    Layout = "_NavEvaluator1";
+}
+<div class="pending-evaluations-container">
+    <h2 class="title">EVALUATIONS</h2>
+    <div class="eval-categories">
+        <div class="eval-category to-be">
+            <h3>To be Evaluated</h3>
+        </div>
+        <a href="/Home/EvaluatorMissed" class="eval-category missed">
+            <h3>Missed </h3>
+        </a>
+        <a href="/Home/EvaluatorEvaluated" class="eval-category evaluated">
+            <h3>Evaluated</h3>
+        </a>
+    </div>
+    <table class="document-table">
+        <thead>
+            <tr>
+                <th>DTS No.</th>
+                <th>Details</th>
+                <th>Application Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>2024-01234</td>
+                <td>
+                    <b>Research Title:</b> A web-based... <br />
+                    <b>Researchers:</b> Dela Cruz et al.
+                </td>
+                <td>08/01/24</td>
+                <td><span class="status underevaluation">Under Evaluation</span></td>
+                <td class="action-buttons">
+                    <a href="/Home/EvaluationForm" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td>2024-01234</td>
+                <td>
+                    <b>Research Title:</b> A web-based... <br />
+                    <b>Researchers:</b> Dela Cruz et al.
+                </td>
+                <td>08/01/24</td>
+                <td><span class="status underevaluation">Under Evaluation</span></td>
+                <td class="action-buttons">
+                    <a href="/Home/EvaluationForm" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
+                </td>
+            </tr>
+
+            <tr>
+                <td>2024-01234</td>
+                <td>
+                    <b>Research Title:</b> A web-based... <br />
+                    <b>Researchers:</b> Dela Cruz et al.
+                </td>
+                <td>08/01/24</td>
+                <td><span class="status underevaluation">Under Evaluation</span></td>
+                <td class="action-buttons">
+                    <a href="#" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td>2024-01234</td>
+                <td>
+                    <b>Research Title:</b> A web-based... <br />
+                    <b>Researchers:</b> Dela Cruz et al.
+                </td>
+                <td>08/01/24</td>
+                <td><span class="status underevaluation">Under Evaluation</span></td>
+                <td class="action-buttons">
+                    <a href="#" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td>2024-01234</td>
+                <td>
+                    <b>Research Title:</b> A web-based... <br />
+                    <b>Researchers:</b> Dela Cruz et al.
+                </td>
+                <td>08/01/24</td>
+                <td><span class="status underevaluation">Under Evaluation</span></td>
+                <td class="action-buttons">
+                    <a href="#" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="/Home/EvaluatorDashboard" class="back-btn">Back</a>
+</div>

@@ -59,6 +59,30 @@ namespace RemcSys.Migrations.RemcDB
                 });
 
             migrationBuilder.CreateTable(
+                name: "Evaluations",
+                columns: table => new
+                {
+                    evaluation_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    evaluation_Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    evaluator_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    evaluation_Grade = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    assigned_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    evaluation_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    evaluator_Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Evaluations", x => x.evaluation_Id);
+                    table.ForeignKey(
+                        name: "FK_Evaluations_FundedResearchApplication_fra_Id",
+                        column: x => x.fra_Id,
+                        principalTable: "FundedResearchApplication",
+                        principalColumn: "fra_Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FileRequirement",
                 columns: table => new
                 {
@@ -130,6 +154,11 @@ namespace RemcSys.Migrations.RemcDB
                 column: "FraId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Evaluations_fra_Id",
+                table: "Evaluations",
+                column: "fra_Id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FileRequirement_fra_Id",
                 table: "FileRequirement",
                 column: "fra_Id");
@@ -151,6 +180,9 @@ namespace RemcSys.Migrations.RemcDB
         {
             migrationBuilder.DropTable(
                 name: "ActionLogs");
+
+            migrationBuilder.DropTable(
+                name: "Evaluations");
 
             migrationBuilder.DropTable(
                 name: "FileRequirement");

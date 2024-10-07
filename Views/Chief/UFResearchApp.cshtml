@@ -1,62 +1,175 @@
-﻿@model IEnumerable<RemcSys.Models.FundedResearchApplication>
+﻿@model Tuple<List<FundedResearchApplication>, List<Evaluation>>
 @{
     ViewData["Title"] = "University Funded Research Applications";
     Layout = "_NavChief1";
 }
+<div class="funded-research-container">
+    <h2 class="title">UNIVERSITY FUNDED RESEARCH APPLICATIONS</h2>
 
-<h1>University Funded Research Applications</h1>
-<p>
-    <a asp-action="UFResearchApp">University Funded Research Application</a>
-    <a asp-action="EFResearchApp">Externally Funded Research Application</a>
-    <a asp-action="UFRLApp">University Funded Research Load Application</a>
-</p>
+    <div class="research-categories">
+        <div class="research-category university-funded">
+            <a asp-action="UFResearchApp"><h3>University Funded Research</h3></a>
+        </div>
+        <div class="research-category externally-funded">
+            <a asp-action="EFResearchApp"><h3>Externally Funded Research</h3></a>
+        </div>
+        <div class="research-category research-load">
+            <a asp-action="UFRLApp"><h3>University Funded Research Load</h3></a>
+        </div>
+    </div>
+    <hr />
 
-<!-- Search Form -->
-<form asp-controller="Chief" asp-action="UFResearchApp" method="get" class="form-inline mb-3">
-    <input type="text" name="searchString" class="form-control" placeholder="Search by Research Title" value="@ViewData["currentFilter"]"/>
-    <button type="submit"><i class="bi bi-search"></i></button>
-</form>
+    <div class="search-section">
+        <!-- Search Form -->
+        <form asp-controller="Chief" asp-action="UFResearchApp" method="get" class="form-inline mb-3">
+            <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
+            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                DTS No.
-            </th>
-            <th>
-                Details
-            </th>
-            <th>
-                Assign Evaluators
-            </th>
-            <th>
-                Action
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach(var item in Model)
-        {
+    <table class="document-table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.dts_No)
-                </td>
-                <td>
-                    <b>Research Title:</b> @Html.DisplayFor(modelItem => item.research_Title)<br />
-                    <b>Field of Study:</b> @Html.DisplayFor(modelItem => item.field_of_Study)
-                </td>
-                <td>
-                    No evaluator yet<br />
-                    No evaluator yet<br />
-                    No evaluator yet<br />
-                    No evaluator yet<br />
-                    No evaluator yet
-                </td>
-                <td>
-                    <a asp-controller="Home" asp-action="UnderMaintenance"><i class="bi bi-person-fill-add"></i></a>
-                    <a asp-action="DocuList" asp-route-id="@item.fra_Id"><i class="bi bi-pencil-square"></i></a>
-                </td>
+                <th>DTS No.</th>
+                <th>Application Details</th>
+                <th>Assign Evaluators</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach(var app in Model.Item1)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => app.dts_No)
+                    </td>
+                    <td class="research-details">
+                        <b>Research Title:</b> @Html.DisplayFor(modelItem => app.research_Title)<br />
+                        <b>Field of Study:</b> @Html.DisplayFor(modelItem => app.field_of_Study)
+                    </td>
+                    <td>
+                        @{
+                            //Filter the evaluations list by the current application ID (fra_Id)
+                            var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
+                        }
+                        @if(assignedEvaluators.Count > 0)
+                        {
+                            foreach (var eval in assignedEvaluators)
+                            {
+                                <span class="assign wevaluator">@eval.evaluator_Name</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="assign noevaluator">No Evaluator yet</span>
+                        }
+                    </td>
+                    <td>
+                        <button class="manageevaluator-btn"><i class="bi bi-people-fill"></i></button>
+                        <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!--modal evaluator-->
+<div class="evaluators-modal">
+    <div class="header">
+        <h1>LIST OF EVALUATORS</h1>
+        <button class="close-btn">&times;</button>
+    </div>
+
+    <div class="esearch-container">
+        <input type="text" class="esearch-bar" placeholder="Search" />
+        <button class="esearch-btn"><i class="bi bi-search"></i></button>
+    </div>
+
+    <hr />
+
+    <div class="category-dropdown">
+        <label for="specialization">Category: </label>
+        <select id="specialization" class="category-select">
+            <option value="Science">Science</option>
+            <option value="Social Science">Social Science</option>
+            <option value="Business">Business</option>
+            <option value="Accountancy and Finance">Accountancy and Finance</option>
+            <option value="CCIS Tech">CCIS Tech</option>
+            <option value="Education">Education</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Humanities">Humanities</option>
+            <option value="Public Administration">Public Administration</option>
+        </select>
+    </div>
+
+    <div class="evaluator-list">
+        <div class="evaluator-item">
+            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
+            <div class="evaluator-details">
+                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
+                <p>Completed: 20</p>
+                <p>Pending: 4</p>
+                <p>Declined: 3</p>
+            </div>
+            <button class="assign-btn">ASSIGN</button>
+        </div>
+        <div class="evaluator-item">
+            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
+            <div class="evaluator-details">
+                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
+                <p>Completed: 20</p>
+                <p>Pending: 4</p>
+                <p>Declined: 3</p>
+            </div>
+            <button class="assign-btn">ASSIGN</button>
+        </div>
+        <div class="evaluator-item">
+            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
+            <div class="evaluator-details">
+                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
+                <p>Completed: 20</p>
+                <p>Pending: 4</p>
+                <p>Declined: 3</p>
+            </div>
+            <button class="assign-btn">ASSIGN</button>
+        </div>
+        <div class="evaluator-item">
+            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
+            <div class="evaluator-details">
+                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
+                <p>Completed: 20</p>
+                <p>Pending: 4</p>
+                <p>Declined: 3</p>
+            </div>
+            <button class="assign-btn">ASSIGN</button>
+        </div>
+        <div class="evaluator-item">
+            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
+            <div class="evaluator-details">
+                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
+                <p>Completed: 20</p>
+                <p>Pending: 4</p>
+                <p>Declined: 3</p>
+            </div>
+            <button class="assign-btn">ASSIGN</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.querySelectorAll('.manageevaluator-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            document.querySelector('.evaluators-modal').style.display = 'block';
+        });
+    });
+
+    document.querySelector('.close-btn').addEventListener('click', function () {
+        document.querySelector('.evaluators-modal').style.display = 'none';
+    });
+
+
+</script>

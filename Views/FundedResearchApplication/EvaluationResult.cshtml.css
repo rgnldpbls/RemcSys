@@ -1,0 +1,53 @@
+﻿body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent body from scrolling outside of the container */
+}
+
+h1 {
+    margin-top: 20px;
+    color: #850000;
+}
+
+h2 {
+    color: #000000;
+}
+
+p {
+    font-size: 14px;
+}
+
+.document-management-container {
+    margin-top: 20px;
+}
+
+.document-table {
+    margin-top: 20px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+    .document-table th,
+    .document-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .document-table th {
+        background-color: #850000;
+        color: white;
+        font-weight: bold;
+    }
+
+.back-btn {
+    background-color: #850000;
+    color: #FFF;
+    margin-top: 20px;
+    float: right;
+    margin-bottom: 100px;
+    width: 100px;
+    font-weight: 500;
+}

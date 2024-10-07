@@ -4,59 +4,58 @@
     Layout = "_NavChief1";
 }
 
-<h1>University Funded Research Load Applications</h1>
-<p>
-    <a asp-action="UFResearchApp">University Funded Research Application</a>
-    <a asp-action="EFResearchApp">Externally Funded Research Application</a>
-    <a asp-action="UFRLApp">University Funded Research Load Application</a>
-</p>
+<div class="funded-research-container">
+    <h2 class="title">UNIVERSITY FUNDED RESEARCH LOAD APPLICATIONS</h2>
 
-<!-- Search Form -->
-<form asp-controller="Chief" asp-action="UFRLApp" method="get" class="form-inline mb-3">
-    <input type="text" name="searchString" class="form-control" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
-    <button type="submit"><i class="bi bi-search"></i></button>
-</form>
+    <div class="research-categories">
+        <div class="research-category university-funded">
+            <a asp-action="UFResearchApp"><h3>University Funded Research</h3></a>
+        </div>
+        <div class="research-category externally-funded">
+            <a asp-action="EFResearchApp"><h3>Externally Funded Research</h3></a>
+        </div>
+        <div class="research-category research-load">
+            <a asp-action="UFRLApp"><h3>University Funded Research Load</h3></a>
+        </div>
+    </div>
+    <hr />
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                DTS No.
-            </th>
-            <th>
-                Details
-            </th>
-            <th>
-                Assign Evaluators
-            </th>
-            <th>
-                Action
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <div class="search-section">
+        <!-- Search Form -->
+        <form asp-controller="Chief" asp-action="UFRLApp" method="get" class="form-inline mb-3">
+            <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
+            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    <table class="document-table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.dts_No)
-                </td>
-                <td>
-                    <b>Research Title:</b> @Html.DisplayFor(modelItem => item.research_Title)<br />
-                    <b>Field of Study:</b> @Html.DisplayFor(modelItem => item.field_of_Study)
-                </td>
-                <td>
-                    No evaluator yet<br />
-                    No evaluator yet<br />
-                    No evaluator yet<br />
-                    No evaluator yet<br />
-                    No evaluator yet
-                </td>
-                <td>
-                    <a asp-controller="Home" asp-action="UnderMaintenance"><i class="bi bi-person-fill-add"></i></a>
-                    <a asp-action="DocuList" asp-route-id="@item.fra_Id"><i class="bi bi-pencil-square"></i></a>
-                </td>
+                <th>DTS No.</th>
+                <th>Application Details</th>
+                <th>Application Time Span</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.dts_No)
+                    </td>
+                    <td class="research-details">
+                        <b>Research Title:</b> @Html.DisplayFor(modelItem => item.research_Title)<br />
+                        <b>Field of Study:</b> @Html.DisplayFor(modelItem => item.field_of_Study)
+                    </td>
+                    <td>
+                        <p>@ActionLog.GetTimeAgo(item.submission_Date)</p>
+                    </td>
+                    <td>
+                        <a asp-action="DocuList" asp-route-id="@item.fra_Id" class="edit-btn"><i class="bi bi-pencil-square"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

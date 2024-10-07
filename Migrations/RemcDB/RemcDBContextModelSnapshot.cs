@@ -58,6 +58,43 @@ namespace RemcSys.Migrations.RemcDB
                     b.ToTable("ActionLogs");
                 });
 
+            modelBuilder.Entity("RemcSys.Models.Evaluation", b =>
+                {
+                    b.Property<string>("evaluation_Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("assigned_Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("evaluation_Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("evaluation_Grade")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("evaluation_Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("evaluator_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("evaluator_Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("fra_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("evaluation_Id");
+
+                    b.HasIndex("fra_Id");
+
+                    b.ToTable("Evaluations");
+                });
+
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
                 {
                     b.Property<string>("fr_Id")
@@ -216,6 +253,17 @@ namespace RemcSys.Migrations.RemcDB
                     b.Navigation("fundedResearchApplication");
                 });
 
+            modelBuilder.Entity("RemcSys.Models.Evaluation", b =>
+                {
+                    b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
+                        .WithMany("Evaluations")
+                        .HasForeignKey("fra_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("fundedResearchApplication");
+                });
+
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
                 {
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
@@ -252,6 +300,8 @@ namespace RemcSys.Migrations.RemcDB
             modelBuilder.Entity("RemcSys.Models.FundedResearchApplication", b =>
                 {
                     b.Navigation("ActionLogs");
+
+                    b.Navigation("Evaluations");
 
                     b.Navigation("FileRequirements");
 

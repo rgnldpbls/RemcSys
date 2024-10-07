@@ -506,5 +506,10 @@ namespace RemcSys.Controllers
             }
             return RedirectToAction("ApplicationStatus");
         }
+
+        public IActionResult EvaluationResult()
+        {
+            return View();
+        }
     }
 }

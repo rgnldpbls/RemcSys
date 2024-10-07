@@ -19,6 +19,7 @@ namespace RemcSys.Models
         public string? dts_No { get; set; }
         public ICollection<GeneratedForm> GeneratedForms { get; set; }
         public ICollection<FileRequirement> FileRequirements { get; set; }
+        public ICollection<Evaluation> Evaluations { get; set; } 
         public ICollection<ActionLog> ActionLogs { get; set; }
         public FundedResearchEthics FundedResearchEthics { get; set; }
         public string UserId { get; set; }

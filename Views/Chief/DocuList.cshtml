@@ -48,7 +48,11 @@
                     </td>
                     <td>
                         <div class="dropdown-container">
-                            <select class="form-control custom-select status-dropdown" data-row-id="@item.fr_Id" onchange="updateStatus(this)">
+                            <select class="form-control custom-select status-dropdown" data-row-id="@item.fr_Id" onchange="handleStatusChange(this)"
+                            @if (@item.file_Status == "Checked")
+                            {
+                                <text>disabled</text>
+                            }>
                                 <option value="@item.file_Status" disabled selected>@item.file_Status</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Compliance">For Compliance</option>
@@ -113,6 +117,15 @@
     </div>
 </div>
 
+<!-- Warning Pop-up -->
+<div class="warning_section" id="warningPopup" style="display: none;">
+    <div class="card">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="wtitle">Are you sure you already checked the document?</span>
+        <button class="wsubmit-btn" onclick="submitChange()">Yes</button>
+        <button class="wback-btn" onclick="hideWarning()">Cancel</button>
+    </div>
+</div>
 <script>
     document.querySelector('.status-button').addEventListener('click', function () {
         document.querySelector('.status_tag').style.display = 'block';
@@ -121,8 +134,7 @@
     document.querySelector('.sdismiss').addEventListener('click', function () {
         document.querySelector('.status_tag').style.display = 'none';
     });
-</script>
-<script>
+
     document.addEventListener('DOMContentLoaded', function () {
         let currentRowId = '';
 
@@ -220,10 +232,36 @@
             
         });
     });
+</script>
+<script>
+    let selectedRowId = null; 
+    let previousStatus = null;
 
-    function updateStatus(element) {
-        var frId = element.getAttribute("data-row-id");
-        var selectedStatus = element.value;
+    function handleStatusChange(selectElement) {
+        const selectedStatus = selectElement.value;
+        const rowId = selectElement.getAttribute("data-row-id");
+
+        if (selectedStatus === "Compliance") {
+            selectElement.value = selectedStatus;
+        } else if (selectedStatus === "Checked") {
+            selectedRowId = rowId;
+            previousStatus = selectElement.value;
+            document.getElementById("warningPopup").style.display = "block";
+        } else {
+            previousStatus = selectedStatus;
+        }
+    }
+
+    function hideWarning() {
+        document.getElementById("warningPopup").style.display = "none";
+        const dropdown = document.querySelector(`select[data-row-id='${selectedRowId}']`);
+        dropdown.value = previousStatus;
+    }
+
+    function submitChange() {
+        document.getElementById("warningPopup").style.display = "none";
+        var frId = selectedRowId;
+        var selectedStatus = "Checked";
 
         $.ajax({
             url: '/Chief/UpdateStatus',
@@ -239,5 +277,6 @@
                 alert('Error updating status: ' + error);
             }
         });
+
     }
 </script>
