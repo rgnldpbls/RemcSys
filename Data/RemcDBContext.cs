@@ -20,6 +20,7 @@ namespace RemcSys.Data
         public DbSet<FundedResearchEthics> FundedResearchEthics { get; set; }
         public DbSet<ActionLog> ActionLogs { get; set; }
         public DbSet<Evaluation> Evaluations { get; set; }
+        public DbSet<Evaluator> Evaluator { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +53,11 @@ namespace RemcSys.Data
                 .WithOne(g => g.fundedResearchApplication)
                 .HasForeignKey(g => g.fra_Id)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Evaluator>()
+                .HasMany(e => e.Evaluations)
+                .WithOne(g => g.evaluator)
+                .HasForeignKey(g => g.evaluator_Id);
 
             base .OnModelCreating(modelBuilder);
         }

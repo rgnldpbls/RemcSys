@@ -56,9 +56,11 @@ namespace RemcSys.Controllers
             var user = await _userManager.GetUserAsync(User);
             var pendingResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Pending" && f.UserId == user.Id);
             var submittedResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Submitted" && f.UserId == user.Id);
-            
+            var evalResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "UnderEvaluation" && f.UserId == user.Id);
+
             ViewBag.Pending = pendingResearchApp;
             ViewBag.Submitted = submittedResearchApp;
+            ViewBag.Evals = evalResearchApp;
             return View();
         }
 
@@ -100,8 +102,26 @@ namespace RemcSys.Controllers
         }
         
         [Authorize(Roles = "Evaluator")]
-        public IActionResult Evaluator()
+        public async Task<IActionResult> Evaluator()
         {
+            var user = await _userManager.GetUserAsync(User);
+            var haveEvaluator = await _context.Evaluator.AnyAsync(e => e.UserId == user.Id);
+            if (!haveEvaluator)
+            {
+                var evaluator = new Evaluator
+                {
+                    evaluator_Name = user.Name,
+                    evaluator_Email = user.Email,
+                    field_of_Interest = ["Computer Science and Information System Technology",
+                    "Engineering, Architecture, Design, and Built Environment"],
+                    UserId = user.Id,
+                    UserType = null,
+                    center = ["REMC"]
+                };
+                _context.Evaluator.Add(evaluator);
+                _context.SaveChanges();
+                return View();
+            }
             return View();
         }
 

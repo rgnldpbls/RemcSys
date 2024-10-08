@@ -11,8 +11,9 @@ namespace RemcSys.Models
         public string? evaluation_Grade { get; set; }
         public DateTime assigned_Date { get; set; }
         public DateTime? evaluation_Date { get; set; }
-        public string evaluator_Id { get; set; }
+        public int evaluator_Id { get; set; }
         public string fra_Id { get; set; }
         public FundedResearchApplication? fundedResearchApplication { get; set; }
+        public Evaluator? evaluator { get; set; }
     }
 }

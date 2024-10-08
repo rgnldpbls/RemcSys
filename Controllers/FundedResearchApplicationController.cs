@@ -24,7 +24,7 @@ namespace RemcSys.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly ActionLoggerService _actionLogger;
 
-        public FundedResearchApplicationController(RemcDBContext context, UserManager<SystemUser> userManager, 
+        public FundedResearchApplicationController(RemcDBContext context, UserManager<SystemUser> userManager,
             IWebHostEnvironment environment, ActionLoggerService actionLogger)
         {
             _context = context;
@@ -215,7 +215,10 @@ namespace RemcSys.Controllers
             fundedResearchApp.research_Title = model.ProjectTitle;
             fundedResearchApp.applicant_Name = model.ProjectLeader;
             fundedResearchApp.applicant_Email = user.Email;
-            fundedResearchApp.team_Members = model.ProjectMembers.Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries).ToList();
+            fundedResearchApp.team_Members = model.ProjectMembers
+                .Split(new[] { Environment.NewLine, "," }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(member => member.Trim())
+                .ToList();
             fundedResearchApp.college = user.College;
             fundedResearchApp.branch = user.Branch;
             fundedResearchApp.field_of_Study = model.StudyField;
@@ -226,12 +229,10 @@ namespace RemcSys.Controllers
             _context.FundedResearchApplication.Add(fundedResearchApp);
             _context.SaveChanges();
 
-            string[] templates = {"Capsulized-Research-Proposal-Template.docx","Form-1-Term-of-Reference.docx","Form-2-Line-Item-Budget.docx",
+            string[] templates = {"Capsule-Research-Proposal.docx","Form-1-Term-of-Reference.docx","Form-2-Line-Item-Budget.docx",
                 "Form-3-Schedule-of-Outputs.docx", "Form-4-Workplan.docx"};
             string filledFolder = Path.Combine(_environment.WebRootPath, "content", "outputs");
             Directory.CreateDirectory(filledFolder);
-
-            List<string> filledFiles = new List<string>();
 
             foreach (var template in templates)
             {
@@ -242,7 +243,8 @@ namespace RemcSys.Controllers
                 {
                     document.ReplaceText("{{ProjectTitle}}", model.ProjectTitle);
                     document.ReplaceText("{{ProjectLead}}", model.ProjectLeader);
-                    document.ReplaceText("{{ProjectMembers}}", model.ProjectMembers);
+                    document.ReplaceText("{{LeadEmail}}", user.Email);
+                    document.ReplaceText("{{ProjectStaff}}", string.Join(Environment.NewLine, fundedResearchApp.team_Members));
                     document.ReplaceText("{{ImplementInsti}}", model.ImplementingInstitution);
                     document.ReplaceText("{{CollabInsti}}", model.CollaboratingInstitution);
                     document.ReplaceText("{{ProjectDur}}", model.ProjectDuration);
@@ -253,8 +255,6 @@ namespace RemcSys.Controllers
                     document.ReplaceText("{{ProjectLeaderCaps}}", model.ProjectLeader.ToUpper());
 
                     document.SaveAs(filledDocumentPath);
-
-                    filledFiles.Add($"Generated_{template}");
                 }
 
                 byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
@@ -271,7 +271,6 @@ namespace RemcSys.Controllers
                 _context.GeneratedForms.Add(doc);
             }
             await _context.SaveChangesAsync();
-
             return RedirectToAction("GenerateInfo");
         }
 
@@ -286,15 +285,15 @@ namespace RemcSys.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             var fra = await _context.FundedResearchApplication.Where(f => f.UserId == user.Id).FirstOrDefaultAsync();
-            var documents = await _context.GeneratedForms.Where(e => e.fra_Id == fra.fra_Id ).OrderBy(f => f.FileName).ToListAsync();
+            var documents = await _context.GeneratedForms.Where(e => e.fra_Id == fra.fra_Id).OrderBy(f => f.FileName).ToListAsync();
             return View(documents);
         }
-        
+
         public async Task<IActionResult> Download(string id)
         {
             var document = await _context.GeneratedForms.FindAsync(id);
 
-            if(document == null)
+            if (document == null)
             {
                 return NotFound();
             }
@@ -307,7 +306,7 @@ namespace RemcSys.Controllers
             var researchApp = await _context.FundedResearchApplication
                 .FirstOrDefaultAsync(f => f.fra_Id == fraId);
 
-            if(researchApp != null)
+            if (researchApp != null)
             {
                 _context.FundedResearchApplication.Remove(researchApp);
 
@@ -339,11 +338,11 @@ namespace RemcSys.Controllers
             fra.application_Status = "Submitted";
             if (files != null && files.Files.Count > 0)
             {
-                foreach(var file in files.Files)
+                foreach (var file in files.Files)
                 {
-                    if(file.Length > 0)
+                    if (file.Length > 0)
                     {
-                        using(var ms = new MemoryStream())
+                        using (var ms = new MemoryStream())
                         {
                             await file.CopyToAsync(ms);
                             var fileRequirement = new FileRequirement
@@ -363,7 +362,6 @@ namespace RemcSys.Controllers
                     }
                 }
             }
-            /*await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, "Application Form was uploaded.");*/
             await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, fra.applicant_Name, fra.fra_Type, "Application was submitted.", "submitted application.");
             await _context.SaveChangesAsync();
             return RedirectToAction("ApplicationSuccess", "FundedResearchApplication");
@@ -379,7 +377,7 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> ApplicationTracker()
         {
             var user = await _userManager.GetUserAsync(User);
-            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
+            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" || s.application_Status == "UnderEvaluation" && s.UserId == user.Id)
                 .FirstOrDefaultAsync();
             var logs = await _context.ActionLogs
                 .Where(f => f.FraId == fra.fra_Id)
@@ -401,7 +399,7 @@ namespace RemcSys.Controllers
             var fra = await _context.FundedResearchApplication
                 .FirstOrDefaultAsync(f => f.fra_Id == fraId);
 
-            if(fra == null)
+            if (fra == null)
             {
                 return NotFound();
             }
@@ -413,11 +411,11 @@ namespace RemcSys.Controllers
             return RedirectToAction("ApplicationTracker");
         }
 
-        [Authorize(Roles ="Faculty")]
+        [Authorize(Roles = "Faculty")]
         public async Task<IActionResult> ApplicationStatus()
         {
             var user = await _userManager.GetUserAsync(User);
-            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
+            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" || s.application_Status == "UnderEvaluation" && s.UserId == user.Id)
                 .FirstOrDefaultAsync();
             ViewBag.FraId = fra.fra_Id;
             ViewBag.ProjTitle = fra.research_Title;
@@ -436,7 +434,7 @@ namespace RemcSys.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             var fra = await _context.FundedResearchApplication
-                .Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
+                .Where(s => s.application_Status == "Submitted" || s.application_Status == "UnderEvaluation" && s.UserId == user.Id)
                 .FirstOrDefaultAsync();
 
             if(fra == null)

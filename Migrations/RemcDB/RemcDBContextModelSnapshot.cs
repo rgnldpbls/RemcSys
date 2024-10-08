@@ -76,9 +76,8 @@ namespace RemcSys.Migrations.RemcDB
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("evaluator_Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("evaluator_Id")
+                        .HasColumnType("int");
 
                     b.Property<string>("evaluator_Name")
                         .IsRequired()
@@ -90,9 +89,46 @@ namespace RemcSys.Migrations.RemcDB
 
                     b.HasKey("evaluation_Id");
 
+                    b.HasIndex("evaluator_Id");
+
                     b.HasIndex("fra_Id");
 
                     b.ToTable("Evaluations");
+                });
+
+            modelBuilder.Entity("RemcSys.Models.Evaluator", b =>
+                {
+                    b.Property<int>("evaluator_Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("evaluator_Id"));
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("center")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("evaluator_Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("evaluator_Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("field_of_Interest")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("evaluator_Id");
+
+                    b.ToTable("Evaluator");
                 });
 
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
@@ -255,11 +291,19 @@ namespace RemcSys.Migrations.RemcDB
 
             modelBuilder.Entity("RemcSys.Models.Evaluation", b =>
                 {
+                    b.HasOne("RemcSys.Models.Evaluator", "evaluator")
+                        .WithMany("Evaluations")
+                        .HasForeignKey("evaluator_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
                         .WithMany("Evaluations")
                         .HasForeignKey("fra_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("evaluator");
 
                     b.Navigation("fundedResearchApplication");
                 });
@@ -295,6 +339,11 @@ namespace RemcSys.Migrations.RemcDB
                         .IsRequired();
 
                     b.Navigation("FundedResearchApplication");
+                });
+
+            modelBuilder.Entity("RemcSys.Models.Evaluator", b =>
+                {
+                    b.Navigation("Evaluations");
                 });
 
             modelBuilder.Entity("RemcSys.Models.FundedResearchApplication", b =>

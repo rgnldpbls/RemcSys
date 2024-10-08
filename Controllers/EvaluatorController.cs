@@ -1,20 +1,27 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RemcSys.Controllers
 {
     public class EvaluatorController : Controller
     {
-        public IActionResult Index()
+        [Authorize(Roles ="Evaluator")]
+        public IActionResult EvaluatorPending()
         {
             return View();
         }
 
-        public IActionResult EvaluationForm()
+        public IActionResult EvaluatorMissed()
         {
             return View();
         }
 
         public IActionResult EvaluatorEvaluated()
+        {
+            return View();
+        }
+
+        public IActionResult EvaluationForm()
         {
             return View();
         }

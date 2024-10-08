@@ -12,6 +12,24 @@ namespace RemcSys.Migrations.RemcDB
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Evaluator",
+                columns: table => new
+                {
+                    evaluator_Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    evaluator_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    evaluator_Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    field_of_Interest = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    center = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Evaluator", x => x.evaluator_Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FundedResearchApplication",
                 columns: table => new
                 {
@@ -68,12 +86,18 @@ namespace RemcSys.Migrations.RemcDB
                     evaluation_Grade = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     assigned_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     evaluation_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    evaluator_Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    evaluator_Id = table.Column<int>(type: "int", nullable: false),
                     fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Evaluations", x => x.evaluation_Id);
+                    table.ForeignKey(
+                        name: "FK_Evaluations_Evaluator_evaluator_Id",
+                        column: x => x.evaluator_Id,
+                        principalTable: "Evaluator",
+                        principalColumn: "evaluator_Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Evaluations_FundedResearchApplication_fra_Id",
                         column: x => x.fra_Id,
@@ -154,6 +178,11 @@ namespace RemcSys.Migrations.RemcDB
                 column: "FraId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Evaluations_evaluator_Id",
+                table: "Evaluations",
+                column: "evaluator_Id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Evaluations_fra_Id",
                 table: "Evaluations",
                 column: "fra_Id");
@@ -192,6 +221,9 @@ namespace RemcSys.Migrations.RemcDB
 
             migrationBuilder.DropTable(
                 name: "GeneratedForms");
+
+            migrationBuilder.DropTable(
+                name: "Evaluator");
 
             migrationBuilder.DropTable(
                 name: "FundedResearchApplication");

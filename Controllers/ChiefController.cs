@@ -1,8 +1,11 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using MimeKit;
 using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
 using RemcSys.Models;
@@ -51,7 +54,7 @@ namespace RemcSys.Controllers
                 appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
             }
 
-            var researchAppList = await appQuery.ToListAsync();
+            var researchAppList = await appQuery.OrderByDescending(f => f.submission_Date).ToListAsync();
             var evaluatorList = _context.Evaluations
                 .Where(e => researchAppList.Select(r => r.fra_Id).Contains(e.fra_Id))
                 .ToList();
@@ -157,7 +160,7 @@ namespace RemcSys.Controllers
 
                 if (allFilesChecked)
                 {
-                    await CheckAndAssignEvaluators(fra.fra_Id);
+                    await AssignEvaluators(fra.fra_Id);
                 }
                 return Json(new { success = true });
             }
@@ -198,7 +201,7 @@ namespace RemcSys.Controllers
             return BadRequest("Only PDF files can be previewed.");
         }
 
-        public async Task CheckAndAssignEvaluators(string fraId)
+        public async Task AssignEvaluators(string fraId)
         {
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
             var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
@@ -209,18 +212,29 @@ namespace RemcSys.Controllers
                 throw new Exception("No eligible evaluators found for this research application.");
             }
 
+            var alreadyAssignedEvaluatorIds = _context.Evaluations.Where(e => e.fra_Id == fraId)
+                .Select(e => e.evaluator_Id).ToList();
+
+            eligibleEvaluators = eligibleEvaluators.Where(e => !alreadyAssignedEvaluatorIds.Contains(e.evaluator_Id)).ToList();
+
+            if(eligibleEvaluators.Count == 0)
+            {
+                throw new Exception("All eligible evaluators are already assigned.");
+            }
+
             var assignedEvaluators = new List<Evaluation>();
+            int totalEvaluatorsToAssign = Math.Min(5, eligibleEvaluators.Count);
             int evaluatorIndex = 0;
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < totalEvaluatorsToAssign; i++)
             {
                 var evaluator = eligibleEvaluators[evaluatorIndex];
                 var newEvaluation = new Evaluation
                 {
                     evaluation_Id = Guid.NewGuid().ToString(),
                     evaluation_Status = "Pending",
-                    evaluator_Id = evaluator.Id,
-                    evaluator_Name = evaluator.Name,
+                    evaluator_Id = evaluator.evaluator_Id,
+                    evaluator_Name = evaluator.evaluator_Name,
                     fra_Id = fraId,
                     evaluation_Grade = null,
                     assigned_Date = DateTime.Now,
@@ -228,14 +242,16 @@ namespace RemcSys.Controllers
                 };
 
                 assignedEvaluators.Add(newEvaluation);
+                await SendEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name);
                 evaluatorIndex = (evaluatorIndex + 1) % eligibleEvaluators.Count;
             }
             _context.Evaluations.AddRange(assignedEvaluators);
+            fra.application_Status = "UnderEvaluation";
             await _context.SaveChangesAsync();
             await _actionLogger.LogActionAsync(user.Id, fraId, null, null, fra.research_Title + " already under evaluation.", null);
         }
 
-        public async Task<List<SystemUser>> GetEligibleEvaluators(string fraId)
+        public async Task<List<Evaluator>> GetEligibleEvaluators(string fraId)
         {
             var researchApp = await _context.FundedResearchApplication
                     .FirstOrDefaultAsync(fra => fra.fra_Id == fraId);
@@ -245,22 +261,52 @@ namespace RemcSys.Controllers
                 throw new Exception("Research application not found.");
             }
 
-            var evaluators = await GetEvaluatorsAsync();
-            var eligibleEvaluators = evaluators.Where(e => e.College == researchApp.college).ToList();
+            var evaluators = await _context.Evaluator.ToListAsync();
+            var eligibleEvaluators = evaluators.Where(e => e.field_of_Interest.Contains(researchApp.field_of_Study) && 
+                e.evaluator_Name != researchApp.applicant_Name && !researchApp.team_Members.Contains(e.evaluator_Name)).ToList();
             return eligibleEvaluators;
         }
 
-        private async Task<List<SystemUser>> GetEvaluatorsAsync()
+        public async Task SendEvaluatorEmail(string email, string researchTitle, string name)
         {
-            var evaluatorRole = await _roleManager.FindByNameAsync("Evaluator");
-            if (evaluatorRole == null)
+            try
             {
-                throw new Exception("Role Evaluator does not exist.");
-            }
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
 
-            var evaluators = await _userManager.GetUsersInRoleAsync("Evaluator");
-            return evaluators.ToList();
+                string recipientName = email.Split('@')[0];
+                message.To.Add(new MailboxAddress(recipientName, email));
+
+                message.Subject = "Assigned for Evaluation";
+
+                var bodyBuilder = new BodyBuilder();
+
+                var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'>
+                        <div style='margin-bottom: 20px;'>
+                            Greetings, {name}! <br> You have been assigned to evaluate the research titled: <strong>{researchTitle}</strong>.
+                        </div>
+                        <p>Please review the provided materials and submit your evaluation in the system.</p>
+                    </body>
+                </html>";
+
+                bodyBuilder.HtmlBody = htmlBody;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+            }catch (Exception ex)
+            {
+                throw new Exception($"Error occurred while sending email: {ex.Message}");
+            }
         }
+
 
         [Authorize(Roles ="Chief")]
         public IActionResult GawadTuklas()

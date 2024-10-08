@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Apply for Funded Research";
-    @if (ViewBag.Pending == true || ViewBag.Submitted == true)
+    @if (ViewBag.Pending == true || ViewBag.Submitted == true || ViewBag.Evals == true)
     {
         @if(ViewBag.Pending == true)
         {
@@ -24,7 +24,7 @@
         {
             <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="GeneratedDocuments">PROCEED</a>
         }
-        else if(ViewBag.Submitted == true)
+        else if(ViewBag.Submitted == true || ViewBag.Evals == true)
         {
             <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="ApplicationTracker">PROCEED</a>
         }
