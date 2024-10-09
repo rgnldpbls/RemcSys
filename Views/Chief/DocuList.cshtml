@@ -9,7 +9,8 @@
         <form asp-action="SetDTS" method="post">
             <div class="dts-container mb-4">
                 <label for="dtsNumber">DTS No.:</label>
-                <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..." value="@ViewBag.DTSNo" />
+                <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..." 
+                    value="@ViewBag.DTSNo" />
                 <button type="submit" class="dts_edit-button"><i class="bi bi-pencil"></i></button>
                 <input type="hidden" name="fraId" value="@ViewBag.FraId" />
             </div>
@@ -28,7 +29,7 @@
         <thead>
             <tr>
                 <th>Document Title</th>
-                <th>Application DateTime</th>
+                <th>Application Date</th>
                 <th>
                     Status
                     <button class="status-button"><i class="bi bi-question-circle-fill"></i></button>
@@ -41,10 +42,10 @@
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(modelItem => item.file_Name)
+                        @item.file_Name
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.file_Uploaded)
+                        @item.file_Uploaded.ToString("MMMM d, yyyy")
                     </td>
                     <td>
                         <div class="dropdown-container">

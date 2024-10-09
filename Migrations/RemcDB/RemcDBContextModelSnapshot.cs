@@ -140,6 +140,9 @@ namespace RemcSys.Migrations.RemcDB
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<string>("document_Type")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("file_Feedback")
                         .HasColumnType("nvarchar(max)");
 

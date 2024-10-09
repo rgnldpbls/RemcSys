@@ -1,4 +1,4 @@
-﻿@model Tuple<List<FundedResearchApplication>, List<Evaluation>>
+﻿@model Tuple<List<FundedResearchApplication>, List<Evaluation>, List<Evaluator>>
 @{
     ViewData["Title"] = "University Funded Research Applications";
     Layout = "_NavChief1";
@@ -41,22 +41,24 @@
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(modelItem => app.dts_No)
+                        @(app.dts_No != null ? app.dts_No : "-")
                     </td>
                     <td class="research-details">
-                        <b>Research Title:</b> @Html.DisplayFor(modelItem => app.research_Title)<br />
-                        <b>Field of Study:</b> @Html.DisplayFor(modelItem => app.field_of_Study)
+                        <b>Research Title:</b> @app.research_Title<br />
+                        <b>Field of Study:</b> @app.field_of_Study
                     </td>
                     <td>
                         @{
                             //Filter the evaluations list by the current application ID (fra_Id)
-                            var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
+                            var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id && 
+                                e.evaluation_Status == "Pending").ToList();
                         }
                         @if(assignedEvaluators.Count > 0)
                         {
                             foreach (var eval in assignedEvaluators)
                             {
-                                <span class="assign wevaluator">@eval.evaluator_Name</span>
+                                <button class="assign wevaluator"
+                                    data-evaluation-id="@eval.evaluation_Id">@eval.evaluator_Name</button>
                             }
                         }
                         else
@@ -76,90 +78,55 @@
     </table>
 </div>
 
+
 <!--modal evaluator-->
-<div class="evaluators-modal">
+<div class="evaluators-modal" style="display:none;">
     <div class="header">
         <h1>LIST OF EVALUATORS</h1>
         <button class="close-btn">&times;</button>
     </div>
 
-    <div class="esearch-container">
-        <input type="text" class="esearch-bar" placeholder="Search" />
-        <button class="esearch-btn"><i class="bi bi-search"></i></button>
-    </div>
-
-    <hr />
-
-    <div class="category-dropdown">
-        <label for="specialization">Category: </label>
-        <select id="specialization" class="category-select">
-            <option value="Science">Science</option>
-            <option value="Social Science">Social Science</option>
-            <option value="Business">Business</option>
-            <option value="Accountancy and Finance">Accountancy and Finance</option>
-            <option value="CCIS Tech">CCIS Tech</option>
-            <option value="Education">Education</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Humanities">Humanities</option>
-            <option value="Public Administration">Public Administration</option>
-        </select>
-    </div>
-
     <div class="evaluator-list">
-        <div class="evaluator-item">
-            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
-            <div class="evaluator-details">
-                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
-                <p>Completed: 20</p>
-                <p>Pending: 4</p>
-                <p>Declined: 3</p>
-            </div>
-            <button class="assign-btn">ASSIGN</button>
-        </div>
-        <div class="evaluator-item">
-            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
-            <div class="evaluator-details">
-                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
-                <p>Completed: 20</p>
-                <p>Pending: 4</p>
-                <p>Declined: 3</p>
-            </div>
-            <button class="assign-btn">ASSIGN</button>
-        </div>
-        <div class="evaluator-item">
-            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
-            <div class="evaluator-details">
-                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
-                <p>Completed: 20</p>
-                <p>Pending: 4</p>
-                <p>Declined: 3</p>
-            </div>
-            <button class="assign-btn">ASSIGN</button>
-        </div>
-        <div class="evaluator-item">
-            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
-            <div class="evaluator-details">
-                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
-                <p>Completed: 20</p>
-                <p>Pending: 4</p>
-                <p>Declined: 3</p>
-            </div>
-            <button class="assign-btn">ASSIGN</button>
-        </div>
-        <div class="evaluator-item">
-            <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
-            <div class="evaluator-details">
-                <h5 class="evaluator-name"><b>Evaluator Name</b></h5>
-                <p>Completed: 20</p>
-                <p>Pending: 4</p>
-                <p>Declined: 3</p>
-            </div>
-            <button class="assign-btn">ASSIGN</button>
-        </div>
+        @foreach(var eval in Model.Item3)
+        {
+            @foreach(var app in Model.Item1)
+            {
+                bool isApplicant = eval.evaluator_Name == app.applicant_Name;
+                bool isTeamMember = app.team_Members.Contains(eval.evaluator_Name);
+                
+                var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
+                
+                int pendingCount = Model.Item2.Count(e => e.evaluator_Name == eval.evaluator_Name &&
+                    e.evaluation_Status == "Pending");
+
+                int assignedCount = assignedEvaluators.Count;
+
+                bool isAlrAssigned = assignedEvaluators.Any(e => e.evaluator_Name == eval.evaluator_Name);
+
+                <div class="evaluator-item">
+                    <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
+                    <div class="evaluator-details">
+                        <h5 class="evaluator-name"><b>@eval.evaluator_Name</b></h5>
+                        <p>Fields of Interest: @string.Join("; ", eval.field_of_Interest)</p>
+                        <p>Pending: @pendingCount</p>
+                    </div>
+                    @if (isApplicant || isTeamMember || isAlrAssigned || assignedCount >= 5)
+                    {
+                        <button class="primary-btn" disabled>CANNOT BE ASSIGNED</button>
+                    }
+                    else
+                    {
+                        <button class="assign-btn" 
+                            data-evaluator-id="@eval.evaluator_Id"
+                            data-fra-id="@app.fra_Id">ASSIGN</button>
+                    }
+                </div>
+            }
+        }
     </div>
 </div>
 
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     document.querySelectorAll('.manageevaluator-btn').forEach(button => {
         button.addEventListener('click', function () {
@@ -171,5 +138,70 @@
         document.querySelector('.evaluators-modal').style.display = 'none';
     });
 
+    $(document).ready(function () {
+        $(document).on('click', '.assign-btn', function () {
+            var evaluatorId = $(this).data('evaluator-id');
+            var fraId = $(this).data('fra-id');
 
+            // Show confirmation dialog
+            var confirmAssign = confirm("Are you sure you want to assign this evaluator?");
+
+            if (confirmAssign) {
+                // User clicked "Yes", proceed with assignment
+                $.ajax({
+                    url: '@Url.Action("AssignEvaluator", "Chief")', // Update with your actual controller name
+                    type: 'POST',
+                    data: {
+                        evaluatorId: evaluatorId,
+                        fraId: fraId
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Evaluator assigned successfully!');
+                            location.reload(); // Reload to update the list and counts
+                        } else {
+                            alert('Failed to assign evaluator. ' + response.message);
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        alert('An error occurred.');
+                    }
+                });
+            } else {
+                alert("Assignment canceled.");
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $(document).on('click', '.assign', function () {
+            var evaluationId = $(this).data('evaluation-id');
+
+            var confirmAssign = confirm("Are you sure you want to remove this evaluator?");
+            if (confirmAssign) {
+                $.ajax({
+                    url: '@Url.Action("DeclineEvaluator", "Chief")', // Update with your actual controller name
+                    type: 'POST',
+                    data: {
+                        evaluationId: evaluationId
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Evaluator removed successfully!');
+                            location.reload(); // Reload to update the list and counts
+                        } else {
+                            alert('Failed to remove evaluator. ' + response.message);
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        alert('An error occurred.');
+                    }
+                });
+            } else {
+                alert('Removed canceled');
+            }
+        });
+    });
 </script>

@@ -115,6 +115,7 @@ namespace RemcSys.Migrations.RemcDB
                     file_Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     file_Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    document_Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     file_Feedback = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     file_Uploaded = table.Column<DateTime>(type: "datetime2", nullable: false),
                     fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)

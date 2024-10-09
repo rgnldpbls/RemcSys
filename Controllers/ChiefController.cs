@@ -58,43 +58,54 @@ namespace RemcSys.Controllers
             var evaluatorList = _context.Evaluations
                 .Where(e => researchAppList.Select(r => r.fra_Id).Contains(e.fra_Id))
                 .ToList();
-            var model = new Tuple<List<FundedResearchApplication>, List<Evaluation>>(researchAppList, evaluatorList);
 
-            return View(model);
+            var eligibleEvaluators = _context.Evaluator
+                .Where(e => e.field_of_Interest.Any(f => researchAppList.Select(r => r.field_of_Study).Contains(f)))
+                .OrderBy(f => f.evaluator_Name).ToList();
+            var model = new Tuple<List<FundedResearchApplication>, List<Evaluation>, List<Evaluator>>(researchAppList, evaluatorList, eligibleEvaluators);
+
+            return View(model); 
         }
 
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> EFResearchApp(string searchString)
         {
             ViewData["currentFilter"] = searchString;
-            var fileReq = _context.FileRequirement.FirstOrDefault();
-            var application = from app in _context.FundedResearchApplication
-                              .Where(f => f.fra_Type == "Externally Funded Research" && f.fra_Id == fileReq.fra_Id)
-                              select app;
+            var application = _context.FundedResearchApplication
+                .Where(f => f.fra_Type == "Externally Funded Research");
 
             if (!String.IsNullOrEmpty(searchString))
             {
                 application = application.Where(s => s.research_Title.Contains(searchString));
             }
 
-            return View(await application.ToListAsync());
+            if(application != null)
+            {
+                var researchApp = await application.ToListAsync();
+                return View(researchApp);
+            }
+
+            return View(new List<FundedResearchApplication>());
         }
 
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> UFRLApp(string searchString)
         {
             ViewData["currentFilter"] = searchString;
-            var fileReq = _context.FileRequirement.FirstOrDefault();
-            var application = from app in _context.FundedResearchApplication
-                              .Where(f => f.fra_Type == "University Funded Research Load" && f.fra_Id == fileReq.fra_Id)
-                              select app;
+            var application = _context.FundedResearchApplication
+                .Where(f => f.fra_Type == "University Funded Research Load");
 
             if (!String.IsNullOrEmpty(searchString))
             {
                 application = application.Where(s => s.research_Title.Contains(searchString));
             }
+            if(application != null)
+            {
+                var researchApp = await application.ToListAsync();
+                return View(researchApp);
+            }
 
-            return View(await application.ToListAsync());
+            return View(new List<FundedResearchApplication>());
         }
 
         [Authorize(Roles = "Chief")]
@@ -201,6 +212,65 @@ namespace RemcSys.Controllers
             return BadRequest("Only PDF files can be previewed.");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> DeclineEvaluator(string evaluationId)
+        {
+            var evals = _context.Evaluations.Where(e => e.evaluation_Id == evaluationId).FirstOrDefault();
+            var evaluator = _context.Evaluator.Where(e => e.evaluator_Id == evals.evaluator_Id).FirstOrDefault();
+            var fra = _context.FundedResearchApplication.Where(f => f.fra_Id == evals.fra_Id).FirstOrDefault();
+            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
+            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, evals.evaluator_Name, null,
+                    "The chief remove you to evaluate " + fra.research_Title + ".", null);
+            await SendRemoveEmail(evaluator.evaluator_Email, fra.research_Title, evals.evaluator_Name);
+            evals.evaluation_Status = "Decline";
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AssignEvaluator(int evaluatorId, string fraId)
+        {
+            var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
+            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
+
+            var assignedEvaluators = await _context.Evaluations
+                .Where(e => e.fra_Id == fraId)
+                .ToListAsync();
+
+            if(assignedEvaluators.Count >= 5)
+            {
+                return Json(new { success = false, message = "Maximum 5 evaluators can be assigned." });
+            }
+
+            bool isAlreadyAssigned = assignedEvaluators.Any(e => e.evaluator_Id == evaluatorId);
+            if (isAlreadyAssigned)
+            {
+                return Json(new { success = false, message = "Evaluator is already assigned." });
+            }
+
+            var evaluation = new Evaluation
+            {
+                evaluation_Id = Guid.NewGuid().ToString(),
+                evaluation_Status = "Pending",
+                evaluator_Name = _context.Evaluator.Find(evaluatorId).evaluator_Name,
+                evaluation_Grade = null,
+                assigned_Date = DateTime.Now,
+                evaluation_Date = null,
+                evaluator_Id = evaluatorId,
+                fra_Id = fraId
+            };
+
+            await _actionLogger.LogActionAsync(user.Id, fraId, _context.Evaluator.Find(evaluatorId).evaluator_Name, null,
+                    "The chief assign you to evaluate " + fra.research_Title + ".", null);
+            await SendEvaluatorEmail(_context.Evaluator.Find(evaluatorId).evaluator_Email, 
+                _context.FundedResearchApplication.Find(fraId).research_Title, _context.Evaluator.Find(evaluatorId).evaluator_Name);
+            _context.Evaluations.Add(evaluation);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
         public async Task AssignEvaluators(string fraId)
         {
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
@@ -242,6 +312,8 @@ namespace RemcSys.Controllers
                 };
 
                 assignedEvaluators.Add(newEvaluation);
+                await _actionLogger.LogActionAsync(user.Id, fraId, evaluator.evaluator_Name, null,
+                    "The chief assign you to evaluate " + fra.research_Title + ".", null);
                 await SendEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name);
                 evaluatorIndex = (evaluatorIndex + 1) % eligibleEvaluators.Count;
             }
@@ -302,6 +374,46 @@ namespace RemcSys.Controllers
                     await client.DisconnectAsync(true);
                 }
             }catch (Exception ex)
+            {
+                throw new Exception($"Error occurred while sending email: {ex.Message}");
+            }
+        }
+
+        public async Task SendRemoveEmail(string email, string researchTitle, string name)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
+
+                string recipientName = email.Split('@')[0];
+                message.To.Add(new MailboxAddress(recipientName, email));
+
+                message.Subject = "Assigned for Evaluation";
+
+                var bodyBuilder = new BodyBuilder();
+
+                var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'>
+                        <div style='margin-bottom: 20px;'>
+                            Greetings, {name}! <br> You have been removed to evaluate the research titled: <strong>{researchTitle}</strong>.
+                        </div>
+                    </body>
+                </html>";
+
+                bodyBuilder.HtmlBody = htmlBody;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
             {
                 throw new Exception($"Error occurred while sending email: {ex.Message}");
             }

@@ -12,7 +12,7 @@ using RemcSys.Data;
 namespace RemcSys.Migrations.RemcDB
 {
     [DbContext(typeof(RemcDBContext))]
-    [Migration("20241008142320_Initial-Create")]
+    [Migration("20241009144124_Initial Create")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -142,6 +142,9 @@ namespace RemcSys.Migrations.RemcDB
                     b.Property<byte[]>("data")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("document_Type")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("file_Feedback")
                         .HasColumnType("nvarchar(max)");

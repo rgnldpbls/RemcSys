@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<RemcSys.Models.FundedResearchApplication>
+@{
     ViewData["Title"] = "Evaluator Evaluated Evaluations";
     Layout = "_NavEvaluator1";
 }
@@ -12,83 +13,57 @@
         <a href="/Evaluator/EvaluatorMissed" class="eval-category missed">
             <h3>Missed </h3>
         </a>
-        <div class="eval-category evaluated">
+        <a href="/Evaluator/EvaluatorEvaluated" class="eval-category evaluated">
             <h3>Evaluated</h3>
-        </div>
+        </a>
     </div>
-    <table class="document-table">
-        <thead>
-            <tr>
-                <th>DTS No.</th>
-                <th>Details</th>
-                <th>Application Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status approved">Approved</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-eye-fill"></i></a>
-                </td>
-            </tr>
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status approved">Approved</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-eye-fill"></i></a>
-                </td>
-            </tr>
-
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status approved">Approved</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-eye-fill"></i></a>
-                </td>
-            </tr>
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status rejected">Rejected</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-eye-fill"></i></a>
-                </td>
-            </tr>
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status rejected">Rejected</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-eye-fill"></i></a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <a href="/Home/EvaluatorDashboard" class="back-btn">Back</a>
+    @if(Model != null && Model.Any())
+    {
+        <table class="document-table">
+            <thead>
+                <tr>
+                    <th>DTS No.</th>
+                    <th>Details</th>
+                    <th>Application Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @(item.dts_No != null ? item.dts_No : "-")
+                        </td>
+                        <td>
+                            <b>Research Title:</b> @item.research_Title<br />
+                            <b>Field of Study:</b> @item.field_of_Study
+                        </td>
+                        <td>
+                            @item.submission_Date.ToString("MMMM d, yyyy")
+                        </td>
+                        <td>
+                            @if(item.application_Status == "Approved")
+                            {
+                                <span class="status approved">@item.application_Status</span>
+                            }
+                            else
+                            {
+                                <span class="status rejected">@item.application_Status</span>
+                            }
+                        </td>
+                        <td class="action-buttons">
+                            <a href="/Home/UnderMaintenance" class="fillup-btn"><i class="bi bi-eye-fill"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No done evaluations at this time.</p>
+    }
+    <a href="/Home/UnderMaintenance" class="back-btn">Back</a>
 </div>

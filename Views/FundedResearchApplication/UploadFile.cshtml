@@ -150,27 +150,5 @@
                 alert('You can only add up to 5 files.');
             }
         });
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const files = form.querySelectorAll('input[type="file"]');
-            let isValid = true;
-
-            files.forEach(file => {
-                if (file.files.length > 0) {
-                    const fileSize = file.files[0].size / 1024 / 1024; // size in MB
-                    if (fileSize > 10) {
-                        alert(`File ${file.name} is larger than 10MB. Please choose a smaller file.`);
-                        isValid = false;
-                    }
-                }
-            });
-
-            if (isValid) {
-                // Here you would typically send the form data to the server
-                alert('Files are valid. Ready to upload!');
-                // form.submit(); // Uncomment this line to actually submit the form
-            }
-        });
     });
 </script>

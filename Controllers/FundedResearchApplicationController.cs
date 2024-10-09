@@ -271,6 +271,7 @@ namespace RemcSys.Controllers
                 _context.GeneratedForms.Add(doc);
             }
             await _context.SaveChangesAsync();
+            Directory.Delete(filledFolder, true );
             return RedirectToAction("GenerateInfo");
         }
 
@@ -335,35 +336,63 @@ namespace RemcSys.Controllers
             var user = await _userManager.GetUserAsync(User);
             var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Pending" && s.UserId == user.Id)
                 .FirstOrDefaultAsync();
-            fra.application_Status = "Submitted";
-            if (files != null && files.Files.Count > 0)
+            
+            if(fra == null)
             {
-                foreach (var file in files.Files)
-                {
-                    if (file.Length > 0)
-                    {
-                        using (var ms = new MemoryStream())
-                        {
-                            await file.CopyToAsync(ms);
-                            var fileRequirement = new FileRequirement
-                            {
-                                fr_Id = Guid.NewGuid().ToString(),
-                                file_Name = file.FileName,
-                                file_Type = Path.GetExtension(file.FileName),
-                                data = ms.ToArray(),
-                                file_Status = "Pending",
-                                file_Feedback = null,
-                                file_Uploaded = DateTime.Now,
-                                fra_Id = fra.fra_Id
-                            };
+                return NotFound();
+            }
 
-                            _context.FileRequirement.Add(fileRequirement);
-                        }
+            var manuscriptFile = files.Files["manuscript"];
+            if(manuscriptFile != null && manuscriptFile.Length > 0)
+            {
+                using(var ms = new MemoryStream())
+                {
+                    await manuscriptFile.CopyToAsync(ms);
+                    var manuscriptReq = new FileRequirement
+                    {
+                        fr_Id = Guid.NewGuid().ToString(),
+                        file_Name = manuscriptFile.FileName,
+                        file_Type = Path.GetExtension(manuscriptFile.FileName),
+                        data = ms.ToArray(),
+                        file_Status = "Pending",
+                        document_Type = "Manuscript",
+                        file_Feedback = null,
+                        file_Uploaded = DateTime.Now,
+                        fra_Id = fra.fra_Id
+                    };
+
+                    _context.FileRequirement.Add(manuscriptReq);
+                }
+            }
+
+            foreach(var file in files.Files)
+            {
+                if(file.Name != "manuscript" && file.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        await file.CopyToAsync(ms);
+                        var fileRequirement = new FileRequirement
+                        {
+                            fr_Id = Guid.NewGuid().ToString(),
+                            file_Name = file.FileName,
+                            file_Type = Path.GetExtension(file.FileName),
+                            data = ms.ToArray(),
+                            file_Status = "Pending",
+                            document_Type = "Forms",
+                            file_Feedback = null,
+                            file_Uploaded = DateTime.Now,
+                            fra_Id = fra.fra_Id
+                        };
+
+                        _context.FileRequirement.Add(fileRequirement);
                     }
                 }
             }
+            fra.application_Status = "Submitted";
             await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, fra.applicant_Name, fra.fra_Type, "Application was submitted.", "submitted application.");
             await _context.SaveChangesAsync();
+
             return RedirectToAction("ApplicationSuccess", "FundedResearchApplication");
         }
 

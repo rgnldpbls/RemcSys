@@ -22,7 +22,7 @@
         <thead>
             <tr>
                 <th>Document Title</th>
-                <th>Upload DateTime</th>
+                <th>Upload Date</th>
                 <th>
                     Document Status
                     <button class="status-button" id="statusBtn"><i class="bi bi-question-circle-fill"></i></button>
@@ -35,7 +35,7 @@
             {
                 <tr>
                     <td>@fileRequirement.file_Name</td>
-                    <td>@fileRequirement.file_Uploaded.ToString("MM-dd-yyyy HH:mm:ss")</td>
+                    <td>@fileRequirement.file_Uploaded.ToString("MMMM d, yyyy")</td>
                     <td>
                         @if(fileRequirement.file_Status == "Pending")
                         {

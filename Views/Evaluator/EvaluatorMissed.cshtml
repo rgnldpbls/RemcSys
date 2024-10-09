@@ -1,93 +1,65 @@
-﻿@{
+﻿@model IEnumerable<RemcSys.Models.FundedResearchApplication>
+@{
     ViewData["Title"] = "Evaluator Missed Evaluations";
     Layout = "_NavEvaluator1";
 }
 <div class="pending-evaluations-container">
     <h2 class="title">EVALUATIONS</h2>
-    <daiv class="eval-categories">
+    <div class="eval-categories">
         <a href="/Evaluator/EvaluatorPending" class="eval-category to-be">
             <h3>To be Evaluated</h3>
         </a>
-        <div class="eval-category missed">
+        <a href="/Evaluator/EvaluatorMissed" class="eval-category missed">
             <h3>Missed </h3>
-        </div>
+        </a>
         <a href="/Evaluator/EvaluatorEvaluated" class="eval-category evaluated">
             <h3>Evaluated</h3>
         </a>
-    </daiv>
-    <table class="document-table">
-        <thead>
-            <tr>
-                <th>DTS No.</th>
-                <th>Details</th>
-                <th>Application Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status underevaluation">Under Evaluation</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
-                </td>
-            </tr>
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status underevaluation">Under Evaluation</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
-                </td>
-            </tr>
-
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status underevaluation">Under Evaluation</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
-                </td>
-            </tr>
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status underevaluation">Under Evaluation</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
-                </td>
-            </tr>
-            <tr>
-                <td>2024-01234</td>
-                <td>
-                    <b>Research Title:</b> A web-based... <br />
-                    <b>Researchers:</b> Dela Cruz et al.
-                </td>
-                <td>08/01/24</td>
-                <td><span class="status underevaluation">Under Evaluation</span></td>
-                <td class="action-buttons">
-                    <a href="#" class="fillup-btn"><i class="bi bi-journal-text"></i></a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <a href="/Home/EvaluatorDashboard" class="back-btn">Back</a>
+    </div>
+    @if(Model != null && Model.Any())
+    {
+        <table class="document-table">
+            <thead>
+                <tr>
+                    <th>DTS No.</th>
+                    <th>Details</th>
+                    <th>Application Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @(item.dts_No != null ? item.dts_No : "-")
+                        </td>
+                        <td>
+                            <b>Research Title:</b> @item.research_Title<br />
+                            <b>Field of Study:</b> @item.field_of_Study
+                        </td>
+                        <td>
+                            @item.submission_Date.ToString("MMMM d, yyyy")
+                        </td>
+                        <td>
+                            <span class="status underevaluation">
+                                @item.application_Status
+                            </span>
+                        </td>
+                        <td class="action-buttons">
+                            <a asp-action="EvaluationForm" asp-route-id="@item.fra_Id" class="fillup-btn">
+                                <i class="bi bi-journal-text"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No missed evaluations at this time.</p>
+    }
+    <a href="/Home/UnderMaintenance" class="back-btn">Back</a>
 </div>

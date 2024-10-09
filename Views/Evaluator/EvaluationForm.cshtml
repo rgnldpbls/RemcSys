@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<RemcSys.Models.FileRequirement>
+@{
     ViewData["Title"] = "Research Evaluation Form";
     Layout = "_NavEvaluator1";
 }
@@ -6,21 +7,23 @@
 <div class="evaluation-sheet-container">
     <div class="card2">
         <div class="tab-container">
-            <div class="tab">
-                <button class="tablinks active" id="capsuled">Capsuled Research</button>
-            </div>
-            <div class="tab">
-                <button class="tablinks" id="form1">Form 1</button>
-            </div>
-            <div class="tab">
-                <button class="tablinks" id="form2">Form 2</button>
-            </div>
-            <div class="tab">
-                <button class="tablinks" id="form3">Form 3</button>
-            </div>
-            <div class="tab">
-                <button class="tablinks" id="form4">Form 4</button>
-            </div>
+            @foreach(var file in Model)
+            {
+                <div class="tab">
+                    <button class="tablinks" onclick="openFile(event, 'file-@file.fr_Id')">
+                        @file.file_Name
+                    </button>
+                </div>
+            }
+        </div>
+        <div class="file-preview-container">
+            @foreach (var file in Model)
+            {
+                <div id="file-@file.fr_Id" class="tabcontent">
+                    <iframe src="@Url.Action("PreviewFile", "Evaluator", new {id = file.fr_Id})"
+                            width="100%;" height="1200px;" frameborder="0"></iframe>
+                </div>
+            }
         </div>
     </div>
 
@@ -81,6 +84,29 @@
     </div>
 </div>
 
+<script>
+    function openFile(evt, fileId) {
+        var tabcontent = document.getElementsByClassName("tabcontent");
+        for (var i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        var tablinks = document.getElementsByClassName("tablinks");
+        for (var i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        document.getElementById(fileId).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var defaultTab = document.getElementsByClassName("tablinks")[0];
+        if (defaultTab) {
+            defaultTab.click();
+        }
+    });
+</script>
 <script>
     document.querySelector('.submit-btn').addEventListener('click', function () {
         document.querySelector('.warning_section').style.display = 'flex';

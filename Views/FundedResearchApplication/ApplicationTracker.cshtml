@@ -96,7 +96,7 @@
                                 <span class="track_line"></span>
                                 <i class="bi bi-check-circle" style="font-size: 20px;"></i>
                             </div>
-                            <span>@log.Timestamp.ToString("MM-dd-yyyy HH:mm") - @log.Description</span>
+                            <span>@log.Description - @ActionLog.GetTimeAgo(log.Timestamp)</span>
                         </div>
                     </div>
                 }
