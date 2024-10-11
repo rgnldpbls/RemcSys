@@ -10,6 +10,7 @@ namespace RemcSys.Models
         public string evaluator_Name { get; set; }
         public string? evaluation_Grade { get; set; }
         public DateTime assigned_Date { get; set; }
+        public DateTime evaluation_Deadline { get; set; }
         public DateTime? evaluation_Date { get; set; }
         public int evaluator_Id { get; set; }
         public string fra_Id { get; set; }

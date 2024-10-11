@@ -256,6 +256,7 @@ namespace RemcSys.Controllers
                 evaluator_Name = _context.Evaluator.Find(evaluatorId).evaluator_Name,
                 evaluation_Grade = null,
                 assigned_Date = DateTime.Now,
+                evaluation_Deadline = DateTime.Now.AddDays(7),
                 evaluation_Date = null,
                 evaluator_Id = evaluatorId,
                 fra_Id = fraId
@@ -308,6 +309,7 @@ namespace RemcSys.Controllers
                     fra_Id = fraId,
                     evaluation_Grade = null,
                     assigned_Date = DateTime.Now,
+                    evaluation_Deadline = DateTime.Now.AddDays(7),
                     evaluation_Date = null
                 };
 

@@ -67,23 +67,21 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Faculty")]
         public IActionResult Forms()
         {
-            string folderPath = Path.Combine(_hostingEnvironment.WebRootPath);
-            string[] fileExtensions = { "*.docx", "*.pdf" };
+            string folderPath = Path.Combine(_hostingEnvironment.WebRootPath, "forms");
+            string extension = "*.pdf";
             List<Document> files = new List<Document>();
-            foreach (var extension in fileExtensions)
+
+            foreach (var file in Directory.GetFiles(folderPath, extension, SearchOption.AllDirectories))
             {
-                foreach (var file in Directory.GetFiles(folderPath, extension, SearchOption.AllDirectories))
+                string fileExtension = Path.GetExtension(file).ToLower();
+                files.Add(new Document
                 {
-                    string fileExtension = Path.GetExtension(file).ToLower();
-                    files.Add(new Document
-                    {
-                        FileName = Path.GetFileName(file),
-                        FilePath = Path.GetRelativePath(_hostingEnvironment.WebRootPath, file).Replace('\\', '/'),
-                        FileType = fileExtension
-                    });
-                }
+                    FileName = Path.GetFileName(file),
+                    FilePath = Path.GetRelativePath(_hostingEnvironment.WebRootPath, file).Replace('\\', '/'),
+                    FileType = fileExtension
+                });
             }
-            var exec = files.Where(f => f.FileType == ".pdf").ToList();
+            var exec = files.OrderBy(f => f.FileName).ToList();
             ViewBag.exec = exec;
             return View();
         }

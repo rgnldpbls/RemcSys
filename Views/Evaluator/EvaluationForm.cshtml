@@ -21,7 +21,7 @@
             {
                 <div id="file-@file.fr_Id" class="tabcontent">
                     <iframe src="@Url.Action("PreviewFile", "Evaluator", new {id = file.fr_Id})"
-                            width="100%;" height="1200px;" frameborder="0"></iframe>
+                            width="100%;" height="1500px;" frameborder="0"></iframe>
                 </div>
             }
         </div>
@@ -29,90 +29,280 @@
 
     <div class="card">
         <div class="evaluation-form">
-                <h3>Research Project Evaluation Sheet (Form 1)</h3>
+                <h3>IR Evaluation Sheet</h3>
+                <p>For Reference: Kindly click the links below.</p>
+                <ul>
+                    @if(ViewBag.exec != null)
+                    {
+                        @foreach(var file in ViewBag.exec)
+                        {
+                            <li>
+                                <a onclick="showDocument('@file.FilePath')">@file.FileName</a>
+                            </li>
+                        }
+                    }
+                </ul>
+                <form id="evalForm">
+                    <input type="hidden" id="fraId" value="@ViewBag.Id"/>
+                    <!-- Track Record and Competence -->
+                    <h6>Track Record and Competence (10%)</h6>
+                    <div class="form-group">
+                        <label>Academic Qualification</label>
+                        <select id="AQScore" class="form-control custom-select">
+                            <option value="" disabled selected>Select score...</option>
+                            <option value=1>1 [Does not meet expectations]</option>
+                            <option value=2>2 [Does not meet expectations]</option>
+                            <option value=3>3 [Does not meet expectations]</option>
+                            <option value=4>4 [Does not meet expectations]</option>
+                            <option value=5>5 [Meet expectations]</option>
+                            <option value=6>6 [Meet expectations]</option>
+                            <option value=7>7 [Meet expectations]</option>
+                            <option value=8>8 [Exceeds expectations]</option>
+                            <option value=9>9 [Exceeds expectations]</option>
+                            <option value=10>10 [Exceeds expectations]</option>
+                        </select>
+                        <textarea id="AQComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <label>Research Experience in the field of specialization</label>
+                        <select id="REScore" class="form-control custom-select">
+                            <option value="" disabled selected>Select score...</option>
+                            <option value=1>1 [Does not meet expectations]</option>
+                            <option value=2>2 [Does not meet expectations]</option>
+                            <option value=3>3 [Does not meet expectations]</option>
+                            <option value=4>4 [Does not meet expectations]</option>
+                            <option value=5>5 [Meet expectations]</option>
+                            <option value=6>6 [Meet expectations]</option>
+                            <option value=7>7 [Meet expectations]</option>
+                            <option value=8>8 [Exceeds expectations]</option>
+                            <option value=9>9 [Exceeds expectations]</option>
+                            <option value=10>10 [Exceeds expectations]</option>
+                        </select>
+                        <textarea id="REComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                    </div>
+                    <br />
+                
+                    <!-- Dissemination/Utilization of Results  -->
+                    <h6>Dissemination/Utilization of Results (60%)</h6>
+                    <div class="form-group">
+                        <label>Relevance & Impact</label>
+                        <select id="RIScore" class="form-control custom-select">
+                            <option value="" disabled selected>Select score...</option>
+                            <option value=1>1 [Does not meet expectations]</option>
+                            <option value=2>2 [Does not meet expectations]</option>
+                            <option value=3>3 [Does not meet expectations]</option>
+                            <option value=4>4 [Does not meet expectations]</option>
+                            <option value=5>5 [Meet expectations]</option>
+                            <option value=6>6 [Meet expectations]</option>
+                            <option value=7>7 [Meet expectations]</option>
+                            <option value=8>8 [Exceeds expectations]</option>
+                            <option value=9>9 [Exceeds expectations]</option>
+                            <option value=10>10 [Exceeds expectations]</option>
+                        </select>
+                        <textarea id="RIComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <label>Level of Collaboration</label>
+                        <select id="LCScore" class="form-control custom-select">
+                            <option value="" disabled selected>Select score...</option>
+                            <option value=1>1 [Does not meet expectations]</option>
+                            <option value=2>2 [Does not meet expectations]</option>
+                            <option value=3>3 [Does not meet expectations]</option>
+                            <option value=4>4 [Does not meet expectations]</option>
+                            <option value=5>5 [Meet expectations]</option>
+                            <option value=6>6 [Meet expectations]</option>
+                            <option value=7>7 [Meet expectations]</option>
+                            <option value=8>8 [Exceeds expectations]</option>
+                            <option value=9>9 [Exceeds expectations]</option>
+                            <option value=10>10 [Exceeds expectations]</option>
+                        </select>
+                        <textarea id="LCComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <label>Appropriateness of Research Design or Methodology</label>
+                        <select id="RDScore" class="form-control custom-select">
+                            <option value="" disabled selected>Select score...</option>
+                            <option value=1>1 [Does not meet expectations]</option>
+                            <option value=2>2 [Does not meet expectations]</option>
+                            <option value=3>3 [Does not meet expectations]</option>
+                            <option value=4>4 [Does not meet expectations]</option>
+                            <option value=5>5 [Meet expectations]</option>
+                            <option value=6>6 [Meet expectations]</option>
+                            <option value=7>7 [Meet expectations]</option>
+                            <option value=8>8 [Exceeds expectations]</option>
+                            <option value=9>9 [Exceeds expectations]</option>
+                            <option value=10>10 [Exceeds expectations]</option>
+                        </select>
+                        <textarea id="RDComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                    </div>
+                    <br />
 
-                <!-- Track Record and Competence -->
-                <h5>Track Record and Competence</h5>
-                <div>
-                    <label>1. Academic Qualification</label>
-                    <textarea name="academicQualification" rows="3" placeholder="Type here your comments and suggestions"></textarea>
-                </div>
-                <div>
-                    <label>2. Research Experience in the field of specialization</label>
-                    <textarea name="researchExperience" rows="3" placeholder="Type here your comments and suggestions"></textarea>
-                </div>
-
-                <!-- Technical Quality -->
-                <h5>Technical Quality</h5>
-                <div>
-                    <label>1. Relevance & Impact</label>
-                    <textarea name="relevanceImpact" rows="3" placeholder="Type here your comments and suggestions"></textarea>
-                </div>
-                <div>
-                    <label>2. Level of Collaboration</label>
-                    <textarea name="levelOfCollaboration" rows="3" placeholder="Type here your comments and suggestions"></textarea>
-                </div>
-                <div>
-                    <label>3. Appropriateness of Research Design or Methodology</label>
-                    <textarea name="researchDesign" rows="3" placeholder="Type here your comments and suggestions"></textarea>
-                </div>
-                <div>
-                    <label>4. Feasibility of Work and Financial Plan</label>
-                    <textarea name="financialPlan" rows="3" placeholder="Type here your comments and suggestions"></textarea>
-                </div>
-
-                <!-- General Comments -->
-                <h5>General Comments and Suggestions</h5>
-                <textarea name="generalComments" rows="5" placeholder="Type here your comments and suggestions"></textarea>
-                <div>
-                    <button type="submit" class="submit-btn">Submit Evaluation</button>
-                </div>
+                    <!-- Technical Quality  -->
+                    <h6>Technical Quality (30%)</h6>
+                    <div class="form-group">
+                        <label>Feasibility of Work and Financial Plan</label>
+                        <select id="FFScore" class="form-control custom-select">
+                            <option value="" disabled selected>Select score...</option>
+                            <option value=1>1 [Does not meet expectations]</option>
+                            <option value=2>2 [Does not meet expectations]</option>
+                            <option value=3>3 [Does not meet expectations]</option>
+                            <option value=4>4 [Does not meet expectations]</option>
+                            <option value=5>5 [Meet expectations]</option>
+                            <option value=6>6 [Meet expectations]</option>
+                            <option value=7>7 [Meet expectations]</option>
+                            <option value=8>8 [Exceeds expectations]</option>
+                            <option value=9>9 [Exceeds expectations]</option>
+                            <option value=10>10 [Exceeds expectations]</option>
+                        </select>
+                        <textarea id="FFComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                    </div>
+                    
+                    <br />
+                    <!-- General Comments -->
+                    <h5>General Comments and Suggestions</h5>
+                    <textarea id="GenComment" class="form-control" placeholder="Type here your comments and suggestions" rows="5"></textarea>
+                    <br />
+                    <button type="button" class="submit-btn" id="submitEvalBtn">Submit Evaluation</button>
+                </form>
         </div>
     </div>
 </div>
 
 <!-- Warning Pop-up -->
-<div class="warning_section">
+<div class="warning_section" id="warningPopup" style="display:none;">
     <div class="card3">
         <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i><br />
         <span class="wtitle">Please review all information before submitting.</span>
         <div class="d-grid gap-3 col-14 mx-auto">
             <p class="deets">Changes may not be possible after submission.</p>
         </div>
-        <button class="wsubmit-btn">Submit</button>
-        <button class="wback-btn">Back</button>
+        <button class="wsubmit-btn" id="confirmSubmitBtn">Submit</button>
+        <button class="wback-btn" id="backBtn">Back</button>
     </div>
 </div>
 
-<script>
-    function openFile(evt, fileId) {
-        var tabcontent = document.getElementsByClassName("tabcontent");
-        for (var i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-
-        var tablinks = document.getElementsByClassName("tablinks");
-        for (var i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
-
-        document.getElementById(fileId).style.display = "block";
-        evt.currentTarget.className += " active";
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        var defaultTab = document.getElementsByClassName("tablinks")[0];
-        if (defaultTab) {
-            defaultTab.click();
-        }
-    });
-</script>
-<script>
-    document.querySelector('.submit-btn').addEventListener('click', function () {
-        document.querySelector('.warning_section').style.display = 'flex';
-    });
+    <script>
+        function openFile(evt, fileId) {
+            var tabcontent = document.getElementsByClassName("tabcontent");
+            for (var i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
 
-    document.querySelector('.wback-btn').addEventListener('click', function () {
-        document.querySelector('.warning_section').style.display = 'none';
-    });
-</script>
+            var tablinks = document.getElementsByClassName("tablinks");
+            for (var i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            document.getElementById(fileId).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var defaultTab = document.getElementsByClassName("tablinks")[0];
+            if (defaultTab) {
+                defaultTab.click();
+            }
+        });
+
+        function showDocument(filePath) {
+            const newTab = window.open("/" + filePath, '_blank');
+            newTab.focus();
+        }
+    </script>
+    <script>
+        function validateSelects() {
+            const selects = document.querySelectorAll('select');
+            let allSelectsFilled = true;
+
+            selects.forEach(select => {
+                if (select.value === "") {
+                    allSelectsFilled = false;
+                }
+            });
+
+            return allSelectsFilled;
+        }
+
+        function validateTextareas() {
+            const textAreas = document.querySelectorAll('textarea');
+            let allTextAreasFilled = true;
+
+            textAreas.forEach(textarea => {
+                if (textarea.value.trim() === "") {
+                    allTextAreasFilled = false;
+                }
+            });
+
+            return allTextAreasFilled;
+        }
+
+
+        document.getElementById('submitEvalBtn').addEventListener('click', function () {
+            if (validateSelects()) {
+                if (validateTextareas()) {
+                    document.getElementById('warningPopup').style.display = 'flex';
+
+                    document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
+                        const AQScore = document.getElementById('AQScore').value;
+                        const AQComment = document.getElementById('AQComment').value;
+                        const REScore = document.getElementById('REScore').value;
+                        const REComment = document.getElementById('REComment').value;
+                        const RIScore = document.getElementById('RIScore').value;
+                        const RIComment = document.getElementById('RIComment').value;
+                        const LCScore = document.getElementById('LCScore').value;
+                        const LCComment = document.getElementById('LCComment').value;
+                        const RDScore = document.getElementById('RDScore').value;
+                        const RDComment = document.getElementById('RDComment').value;
+                        const FFScore = document.getElementById('FFScore').value;
+                        const FFComment = document.getElementById('FFComment').value;
+                        const GenComment = document.getElementById('GenComment').value;
+                        const FraId = document.getElementById('fraId').value;
+
+                        $.ajax({
+                            url: '@Url.Action("SubmitEvaluation", "Evaluator")',
+                            type: 'POST',
+                            data: {
+                                aqScore: AQScore,
+                                aqComment: AQComment,
+                                reScore: REScore,
+                                reComment: REComment,
+                                riScore: RIScore,
+                                riComment: RIComment,
+                                lcScore: LCScore,
+                                lcComment: LCComment,
+                                rdScore: RDScore,
+                                rdComment:RDComment,
+                                ffScore: FFScore,
+                                ffComment: FFComment,
+                                genComment: GenComment,
+                                fraId: FraId
+                            },
+                            success: function (response) {
+                                alert('Evaluation submitted successfully!');
+                            },
+                            error: function (xhr, status, error) {
+                                alert('Error submitting evaluation. Please try again.');
+                            }
+                        });
+                    });
+                } else {
+                    alert('Please input all comments before proceed.');
+                }
+            } else {
+                alert('Please select scores in all fields before proceed.');
+            }
+        });
+
+        document.getElementById('backBtn').addEventListener('click', function () {
+            document.getElementById('warningPopup').style.display = 'none';
+        });
+    </script>
+}
