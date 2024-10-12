@@ -15,4 +15,14 @@
         public string Methodology { get; set; }
         public string StudyField {  get; set; }
     }
+
+    public class ViewEvaluationVM
+    {
+        public string fra_Id { get; set; }
+        public string dts_No { get; set; }
+        public string research_Title { get; set; }
+        public string field_of_Study { get; set; }
+        public string application_Status { get; set; }
+        public DateTime? evaluation_deadline { get; set; }
+    }
 }

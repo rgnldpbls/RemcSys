@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FundedResearchApplication>
+﻿@model Tuple<List<FundedResearchApplication>, List<Evaluation>, List<Evaluator>>
 @{
     ViewData["Title"] = "University Funded Research Applications";
     Layout = "_NavChief1";
@@ -32,12 +32,12 @@
             <tr>
                 <th>DTS No.</th>
                 <th>Application Details</th>
-                <th>Application Date</th>
+                <th>Assign Evaluators</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @foreach(var app in Model)
+            @foreach (var app in Model.Item1)
             {
                 <tr>
                     <td>
@@ -48,10 +48,29 @@
                         <b>Field of Study:</b> @app.field_of_Study
                     </td>
                     <td>
-                        @app.submission_Date.ToString("MMMM d, yyyy")
+                        @{
+                            //Filter the evaluations list by the current application ID (fra_Id)
+                            var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id &&
+                            e.evaluation_Status == "Pending").ToList();
+                        }
+                        @if (assignedEvaluators.Count > 0)
+                        {
+                            foreach (var eval in assignedEvaluators)
+                            {
+                                <button class="assign wevaluator"
+                                        data-evaluation-id="@eval.evaluation_Id">
+                                    @eval.evaluator_Name
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <span class="assign noevaluator">No Evaluator yet</span>
+                        }
                     </td>
                     <td>
-                        <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
+                        <button class="manageevaluator-btn"><i class="bi bi-people-fill"></i></button>
+                        <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@app.fra_Id" class="edit-btn">
                             <i class="bi bi-pencil-square"></i>
                         </a>
                     </td>
@@ -62,7 +81,7 @@
 </div>
 
 
-@* <!--modal evaluator-->
+<!--modal evaluator-->
 <div class="evaluators-modal" style="display:none;">
     <div class="header">
         <h1>LIST OF EVALUATORS</h1>
@@ -70,17 +89,17 @@
     </div>
 
     <div class="evaluator-list">
-        @foreach(var eval in Model.Item3)
+        @foreach (var eval in Model.Item3)
         {
-            @foreach(var app in Model.Item1)
+            @foreach (var app in Model.Item1)
             {
                 bool isApplicant = eval.evaluator_Name == app.applicant_Name;
                 bool isTeamMember = app.team_Members.Contains(eval.evaluator_Name);
-                
+
                 var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
-                
+
                 int pendingCount = Model.Item2.Count(e => e.evaluator_Name == eval.evaluator_Name &&
-                    e.evaluation_Status == "Pending");
+                e.evaluation_Status == "Pending");
 
                 int assignedCount = assignedEvaluators.Count;
 
@@ -99,17 +118,19 @@
                     }
                     else
                     {
-                        <button class="assign-btn" 
-                            data-evaluator-id="@eval.evaluator_Id"
-                            data-fra-id="@app.fra_Id">ASSIGN</button>
+                        <button class="assign-btn"
+                                data-evaluator-id="@eval.evaluator_Id"
+                                data-fra-id="@app.fra_Id">
+                            ASSIGN
+                        </button>
                     }
                 </div>
             }
         }
     </div>
-</div> *@
+</div>
 
-@* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     document.querySelectorAll('.manageevaluator-btn').forEach(button => {
         button.addEventListener('click', function () {
@@ -187,4 +208,4 @@
             }
         });
     });
-</script> *@
+</script>

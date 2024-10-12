@@ -54,17 +54,15 @@ namespace RemcSys.Controllers
                 appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
             }
 
-            var researchAppList = await appQuery.OrderByDescending(f => f.submission_Date).ToListAsync();
-            var evaluatorList = _context.Evaluations
-                .Where(e => researchAppList.Select(r => r.fra_Id).Contains(e.fra_Id))
-                .ToList();
+            if(appQuery != null)
+            {
+                var researchAppList = await appQuery.Where(f => f.application_Status == "Submitted")
+                .OrderByDescending(f => f.submission_Date).ToListAsync();
 
-            var eligibleEvaluators = _context.Evaluator
-                .Where(e => e.field_of_Interest.Any(f => researchAppList.Select(r => r.field_of_Study).Contains(f)))
-                .OrderBy(f => f.evaluator_Name).ToList();
-            var model = new Tuple<List<FundedResearchApplication>, List<Evaluation>, List<Evaluator>>(researchAppList, evaluatorList, eligibleEvaluators);
+                return View(researchAppList);
+            }
 
-            return View(model); 
+            return View(new List<FundedResearchApplication>());
         }
 
         [Authorize(Roles = "Chief")]
@@ -81,7 +79,8 @@ namespace RemcSys.Controllers
 
             if(application != null)
             {
-                var researchApp = await application.ToListAsync();
+                var researchApp = await application.Where(f => f.application_Status == "Submitted")
+                    .OrderByDescending(f => f.submission_Date).ToListAsync();
                 return View(researchApp);
             }
 
@@ -101,7 +100,8 @@ namespace RemcSys.Controllers
             }
             if(application != null)
             {
-                var researchApp = await application.ToListAsync();
+                var researchApp = await application.Where(f => f.application_Status == "Submitted")
+                    .OrderByDescending(f => f.submission_Date).ToListAsync();
                 return View(researchApp);
             }
 
@@ -117,6 +117,10 @@ namespace RemcSys.Controllers
             }
 
             var fra = await _context.FundedResearchApplication.FindAsync(id);
+            if(fra == null)
+            {
+                return NotFound();
+            }
             ViewBag.FraId = fra.fra_Id;
             ViewBag.DTSNo = fra.dts_No;
             ViewBag.Research = fra.research_Title;
@@ -125,7 +129,7 @@ namespace RemcSys.Controllers
             ViewBag.Member = fra.team_Members;
             ViewBag.Type = fra.fra_Type;
 
-            var fileRequirement = await _context.FileRequirement.Where(f => f.fra_Id == id)
+            var fileRequirement = await _context.FileRequirement.Where(f => f.fra_Id == id && f.file_Type == ".pdf")
                 .OrderBy(fr => fr.file_Name)
                 .ToListAsync();
             if (fileRequirement == null)
@@ -419,6 +423,31 @@ namespace RemcSys.Controllers
             {
                 throw new Exception($"Error occurred while sending email: {ex.Message}");
             }
+        }
+
+        [Authorize(Roles = "Chief")]
+        public async Task<IActionResult> UEResearchApp(string searchString)
+        {
+            ViewData["currentFilter"] = searchString;
+            var appQuery = _context.FundedResearchApplication
+                .Where(f => f.fra_Type == "University Funded Research");
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
+            }
+
+            var researchAppList = await appQuery.Where(f => f.application_Status == "UnderEvaluation").OrderByDescending(f => f.submission_Date).ToListAsync();
+            var evaluatorList = _context.Evaluations
+                .Where(e => researchAppList.Select(r => r.fra_Id).Contains(e.fra_Id))
+                .ToList();
+
+            var eligibleEvaluators = _context.Evaluator
+                .Where(e => e.field_of_Interest.Any(f => researchAppList.Select(r => r.field_of_Study).Contains(f)))
+                .OrderBy(f => f.evaluator_Name).ToList();
+            var model = new Tuple<List<FundedResearchApplication>, List<Evaluation>, List<Evaluator>>(researchAppList, evaluatorList, eligibleEvaluators);
+
+            return View(model);
         }
 
 

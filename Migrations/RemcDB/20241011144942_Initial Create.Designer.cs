@@ -12,7 +12,7 @@ using RemcSys.Data;
 namespace RemcSys.Migrations.RemcDB
 {
     [DbContext(typeof(RemcDBContext))]
-    [Migration("20241009144124_Initial Create")]
+    [Migration("20241011144942_Initial Create")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace RemcSys.Migrations.RemcDB
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -72,8 +72,11 @@ namespace RemcSys.Migrations.RemcDB
                     b.Property<DateTime?>("evaluation_Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("evaluation_Grade")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("evaluation_Deadline")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("evaluation_Grade")
+                        .HasColumnType("float");
 
                     b.Property<string>("evaluation_Status")
                         .IsRequired()

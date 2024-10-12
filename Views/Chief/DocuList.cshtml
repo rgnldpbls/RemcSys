@@ -19,10 +19,13 @@
     <h3><b>RESEARCH TITLE:</b> @ViewBag.Research</h3>
     <p><b>Field of Study:</b> @ViewBag.Field</p>
     <p><b>Proponents:</b><br />  @ViewBag.Lead 
-        @foreach (var member in ViewBag.Member)
+        @if (!ViewBag.Member.Contains("N/A"))
         {
-            <br />
-            @member
+            @foreach (var member in ViewBag.Member)
+            {
+                <br />
+                @member
+            }
         }
     </p>
     <table class="document-table">

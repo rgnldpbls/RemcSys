@@ -36,9 +36,27 @@ namespace RemcSys.Controllers
             return View(logs);
         }
 
+        public async Task CheckMissedEvaluations()
+        {
+            var today = DateTime.Today;
+
+            var missedEvaluations = await _context.Evaluations
+                .Where(e => e.evaluation_Status == "Pending" && e.evaluation_Deadline <= today)
+                .ToListAsync();
+
+            foreach(var evaluation in missedEvaluations)
+            {
+                evaluation.evaluation_Status = "Missed";
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         [Authorize(Roles ="Evaluator")]
         public async Task<IActionResult> EvaluatorPending()
         {
+            await CheckMissedEvaluations();
+
             var user = await _userManager.GetUserAsync(User);
             var evaluator = _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefault();
 
@@ -46,16 +64,23 @@ namespace RemcSys.Controllers
             {
                 var pendingEvaluations = await _context.Evaluations
                     .Where(e => e.evaluator_Id == evaluator.evaluator_Id && e.evaluation_Status == "Pending")
-                    .Select(e => e.fra_Id)
+                    .Join(_context.FundedResearchApplication,
+                        evaluation => evaluation.fra_Id,
+                        researchApp => researchApp.fra_Id,
+                        (evaluation, researchApp) => new ViewEvaluationVM
+                        {
+                            dts_No = researchApp.dts_No,
+                            research_Title = researchApp.research_Title,
+                            field_of_Study = researchApp.field_of_Study,
+                            application_Status =  researchApp.application_Status,
+                            evaluation_deadline =  evaluation.evaluation_Deadline,
+                            fra_Id =  researchApp.fra_Id
+                        })
                     .ToListAsync();
 
-                var fraList = await _context.FundedResearchApplication
-                    .Where(f => pendingEvaluations.Contains(f.fra_Id))
-                    .ToListAsync();
-
-                return View(fraList);
+                return View(pendingEvaluations);
             }
-            return View(new List<FundedResearchApplication>());
+            return View(new List<ViewEvaluationVM>());
         }
 
         [Authorize(Roles = "Evaluator")]
@@ -68,16 +93,23 @@ namespace RemcSys.Controllers
             {
                 var missedEvaluations = await _context.Evaluations
                     .Where(e => e.evaluator_Id == evaluator.evaluator_Id && e.evaluation_Status == "Missed")
-                    .Select(e => e.fra_Id)
+                    .Join(_context.FundedResearchApplication,
+                        evaluation => evaluation.fra_Id,
+                        researchApp => researchApp.fra_Id,
+                        (evaluation, researchApp) => new ViewEvaluationVM
+                        {
+                            dts_No = researchApp.dts_No,
+                            research_Title = researchApp.research_Title,
+                            field_of_Study = researchApp.field_of_Study,
+                            application_Status = researchApp.application_Status,
+                            evaluation_deadline = evaluation.evaluation_Deadline,
+                            fra_Id = researchApp.fra_Id
+                        })
                     .ToListAsync();
 
-                var fraList = await _context.FundedResearchApplication
-                    .Where(f => missedEvaluations.Contains(f.fra_Id))
-                    .ToListAsync();
-
-                return View(fraList);
+                return View(missedEvaluations);
             }
-            return View(new List<FundedResearchApplication>());
+            return View(new List<ViewEvaluationVM>());
         }
 
         [Authorize(Roles = "Evaluator")]
@@ -90,16 +122,23 @@ namespace RemcSys.Controllers
             {
                 var doneEvaluations = await _context.Evaluations
                     .Where(e => e.evaluator_Id == evaluator.evaluator_Id && e.evaluation_Status == "Evaluated")
-                    .Select(e => e.fra_Id)
+                    .Join(_context.FundedResearchApplication,
+                        evaluation => evaluation.fra_Id,
+                        researchApp => researchApp.fra_Id,
+                        (evaluation, researchApp) => new ViewEvaluationVM
+                        {
+                            dts_No = researchApp.dts_No,
+                            research_Title = researchApp.research_Title,
+                            field_of_Study = researchApp.field_of_Study,
+                            application_Status = researchApp.application_Status,
+                            evaluation_deadline = evaluation.evaluation_Date,
+                            fra_Id = researchApp.fra_Id
+                        })
                     .ToListAsync();
 
-                var fraList = await _context.FundedResearchApplication
-                    .Where(f => doneEvaluations.Contains(f.fra_Id))
-                    .ToListAsync();
-
-                return View(fraList);
+                return View(doneEvaluations);
             }
-            return View(new List<FundedResearchApplication>());
+            return View(new List<ViewEvaluationVM>());
         }
 
         [Authorize(Roles = "Evaluator")]
@@ -109,12 +148,12 @@ namespace RemcSys.Controllers
             //IR Form Preview
             string folderPath = Path.Combine(_hostingEnvironment.WebRootPath, "evals");
             string extension = "*.pdf";
-            List<Document> files = new List<Document>();
+            List<InternalDocument> files = new List<InternalDocument>();
 
             foreach (var file in Directory.GetFiles(folderPath, extension, SearchOption.AllDirectories))
             {
                 string fileExtension = Path.GetExtension(file).ToLower();
-                files.Add(new Document
+                files.Add(new InternalDocument
                 {
                     FileName = Path.GetFileName(file),
                     FilePath = Path.GetRelativePath(_hostingEnvironment.WebRootPath, file).Replace('\\', '/'),
@@ -136,66 +175,110 @@ namespace RemcSys.Controllers
             double lcScore, string lcComment, double rdScore, string rdComment, double ffScore, string ffComment, string genComment, string fraId)
         {
             var user = await _userManager.GetUserAsync(User);
+            var evaluator = await _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefaultAsync();
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
-            if(fra != null)
+            
+            double tot1 = aqScore + reScore;
+            double d1 = tot1 / 20;
+            double p1 = d1 * 10;
+
+            double tot2 = riScore + lcScore + rdScore;
+            double d2 = tot2 / 30;
+            double p2 = d2 * 60;
+
+            double d3 = ffScore / 10;
+            double p3 = d3 * 30;
+
+            double g1 = p1 + p2 + p3;
+
+            string[] templates = { "IR-Eval-Form-1.docx", "IR-Eval-Form-2.docx" };
+            string filledFolder = Path.Combine(_hostingEnvironment.WebRootPath, "content", "filled");
+            Directory.CreateDirectory(filledFolder);
+
+            foreach (var template in templates)
             {
-                double tot1 = aqScore + reScore;
-                double d1 = tot1 / 20;
-                double p1 = d1 * 10;
+                string evalsPath = Path.Combine(_hostingEnvironment.WebRootPath, "content", "evals", template);
+                string filledDocumentPath = Path.Combine(filledFolder, $"{user.Name}_{template}");
+                string pdfPath = Path.ChangeExtension(filledDocumentPath, ".pdf");
 
-                double tot2 = riScore + lcScore + rdScore;
-                double d2 = tot2 / 30;
-                double p2 = d2 * 60;
-
-                double d3 = ffScore / 10;
-                double p3 =  d3 * 30;
-
-                double g1 = p1 + p2 + p3;
-
-                string[] templates = { "IR-Eval-Form-1.docx", "IR-Eval-Form-2.docx" };
-                string filledFolder = Path.Combine(_hostingEnvironment.WebRootPath, "content", "filled");
-                Directory.CreateDirectory(filledFolder);
-
-                foreach (var template in templates)
+                using (DocX doc = DocX.Load(evalsPath))
                 {
-                    string evalsPath = Path.Combine(_hostingEnvironment.WebRootPath, "content", "evals", template);
-                    string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{template}");
+                    doc.ReplaceText("{{Title}}", fra.research_Title);
+                    doc.ReplaceText("{{Lead}}", fra.applicant_Name);
+                    doc.ReplaceText("{{Staff}}", string.Join(Environment.NewLine, fra.team_Members));
+                    doc.ReplaceText("{{College}}", fra.college);
+                    doc.ReplaceText("{{Branch}}", fra.branch);
+                    doc.ReplaceText("{{AQComment}}", aqComment);
+                    doc.ReplaceText("{{REComment}}", reComment);
+                    doc.ReplaceText("{{RIComment}}", riComment);
+                    doc.ReplaceText("{{LCComment}}", lcComment);
+                    doc.ReplaceText("{{RDComment}}", rdComment);
+                    doc.ReplaceText("{{FFComment}}", ffComment);
+                    doc.ReplaceText("{{GenComment}}", genComment);
+                    doc.ReplaceText("{{EvaluatorName}}", evaluator.evaluator_Name.ToUpper());
+                    doc.ReplaceText("{{Date}}", DateTime.Now.ToString("MMMM d, yyyy"));
+                    doc.ReplaceText("{{S1}}", aqScore.ToString());
+                    doc.ReplaceText("{{S2}}", reScore.ToString());
+                    doc.ReplaceText("{{T1}}", tot1.ToString());
+                    doc.ReplaceText("{{P1}}", p1.ToString());
+                    doc.ReplaceText("{{S3}}", riScore.ToString());
+                    doc.ReplaceText("{{S4}}", lcScore.ToString());
+                    doc.ReplaceText("{{S5}}", rdScore.ToString());
+                    doc.ReplaceText("{{T2}}", tot2.ToString());
+                    doc.ReplaceText("{{P2}}", p2.ToString());
+                    doc.ReplaceText("{{S6}}", ffScore.ToString());
+                    doc.ReplaceText("{{P3}}", p3.ToString());
+                    doc.ReplaceText("{{G1}}", g1.ToString());
 
-                    using (DocX doc = DocX.Load(evalsPath))
-                    {
-                        doc.ReplaceText("{{Title}}", fra.research_Title);
-                        doc.ReplaceText("{{Lead}}", fra.applicant_Name);
-                        doc.ReplaceText("{{Staff}}", string.Join(Environment.NewLine, fra.team_Members));
-                        doc.ReplaceText("{{College}}", fra.college);
-                        doc.ReplaceText("{{Branch}}", fra.branch);
-                        doc.ReplaceText("{{AQComment}}", aqComment);
-                        doc.ReplaceText("{{REComment}}", reComment);
-                        doc.ReplaceText("{{RIComment}}", riComment);
-                        doc.ReplaceText("{{LCComment}}", lcComment);
-                        doc.ReplaceText("{{RDComment}}", rdComment);
-                        doc.ReplaceText("{{FFComment}}", ffComment);
-                        doc.ReplaceText("{{GenComment}}", genComment);
-                        doc.ReplaceText("{{EvaluatorName}}", user.Name.ToUpper());
-                        doc.ReplaceText("{{Date}}", DateTime.Now.ToString("MMMM d, yyyy"));
-                        doc.ReplaceText("{{S1}}", aqScore.ToString());
-                        doc.ReplaceText("{{S2}}", reScore.ToString());
-                        doc.ReplaceText("{{T1}}", tot1.ToString());
-                        doc.ReplaceText("{{P1}}", p1.ToString());
-                        doc.ReplaceText("{{S3}}", riScore.ToString());
-                        doc.ReplaceText("{{S4}}", lcScore.ToString());
-                        doc.ReplaceText("{{S5}}", rdScore.ToString());
-                        doc.ReplaceText("{{T2}}", tot2.ToString());
-                        doc.ReplaceText("{{P2}}", p2.ToString());
-                        doc.ReplaceText("{{S6}}", ffScore.ToString());
-                        doc.ReplaceText("{{P3}}", p3.ToString());
-                        doc.ReplaceText("{{G1}}", g1.ToString());
-
-                        doc.SaveAs(filledDocumentPath);
-                    }
+                    doc.SaveAs(filledDocumentPath);
                 }
-                return RedirectToAction("EvaluatorEvaluated");
+
+                byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
+
+                var fileReq = new FileRequirement
+                {
+                    fr_Id = Guid.NewGuid().ToString(),
+                    file_Name = $"{user.Name}_{template}",
+                    file_Type = ".docx",
+                    data = fileBytes,
+                    file_Status = "Evaluated",
+                    document_Type = "EvaluationForms",
+                    file_Feedback = null,
+                    file_Uploaded = DateTime.Now,
+                    fra_Id = fraId
+                };
+
+                _context.FileRequirement.Add(fileReq);
             }
-            return Json(new { success = false, message = "Validation failed." });
+            var evals = _context.Evaluations.Where(e => e.fra_Id == fraId && e.evaluator_Id == evaluator.evaluator_Id).FirstOrDefault();
+            evals.evaluation_Grade = g1;
+            evals.evaluation_Status = "Evaluated";
+            evals.evaluation_Date = DateTime.Now;
+            await _context.SaveChangesAsync();
+            Directory.Delete(filledFolder, true);
+
+            return RedirectToAction("EvaluatorEvaluated");
+        }
+
+        [Authorize(Roles = "Evaluator")]
+        public async Task<IActionResult> GenerateEvalsForm()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var evaluator = await _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefaultAsync();
+            var evaluations = await _context.Evaluations.Where(e => e.evaluator_Id == evaluator.evaluator_Id).FirstOrDefaultAsync();
+            var fr = await _context.FileRequirement.Where(f => f.fra_Id == evaluations.fra_Id && f.document_Type == "EvaluationForms").ToListAsync();
+            return View(fr);
+        }
+
+        public async Task<IActionResult> Download(string id)
+        {
+            var document = await _context.FileRequirement.FindAsync(id);
+
+            if (document == null)
+            {
+                return NotFound();
+            }
+            return File(document.data, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", document.file_Name);
         }
 
         public IActionResult PreviewFile(string id)

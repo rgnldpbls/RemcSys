@@ -271,7 +271,7 @@ namespace RemcSys.Controllers
                 _context.GeneratedForms.Add(doc);
             }
             await _context.SaveChangesAsync();
-            Directory.Delete(filledFolder, true );
+            Directory.Delete(filledFolder, true);
             return RedirectToAction("GenerateInfo");
         }
 
@@ -285,7 +285,15 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> GeneratedDocuments()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
             var fra = await _context.FundedResearchApplication.Where(f => f.UserId == user.Id).FirstOrDefaultAsync();
+            if (fra == null)
+            {
+                return NotFound();
+            }
             var documents = await _context.GeneratedForms.Where(e => e.fra_Id == fra.fra_Id).OrderBy(f => f.FileName).ToListAsync();
             return View(documents);
         }
@@ -322,11 +330,8 @@ namespace RemcSys.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Pending" && s.UserId == user.Id)
-                .FirstOrDefaultAsync();
-            ViewBag.Title = fra.research_Title;
-            ViewBag.TeamLead = fra.applicant_Name;
-            ViewBag.TeamMembers = fra.team_Members;
-            return View();
+                .ToListAsync();
+            return View(fra);
         }
 
         [HttpPost]
@@ -336,16 +341,16 @@ namespace RemcSys.Controllers
             var user = await _userManager.GetUserAsync(User);
             var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Pending" && s.UserId == user.Id)
                 .FirstOrDefaultAsync();
-            
-            if(fra == null)
+
+            if (fra == null)
             {
                 return NotFound();
             }
 
             var manuscriptFile = files.Files["manuscript"];
-            if(manuscriptFile != null && manuscriptFile.Length > 0)
+            if (manuscriptFile != null && manuscriptFile.Length > 0)
             {
-                using(var ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
                     await manuscriptFile.CopyToAsync(ms);
                     var manuscriptReq = new FileRequirement
@@ -365,9 +370,9 @@ namespace RemcSys.Controllers
                 }
             }
 
-            foreach(var file in files.Files)
+            foreach (var file in files.Files)
             {
-                if(file.Name != "manuscript" && file.Length > 0)
+                if (file.Name != "manuscript" && file.Length > 0)
                 {
                     using (var ms = new MemoryStream())
                     {
@@ -406,20 +411,28 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> ApplicationTracker()
         {
             var user = await _userManager.GetUserAsync(User);
-            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" || s.application_Status == "UnderEvaluation" && s.UserId == user.Id)
-                .FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var fraList = await _context.FundedResearchApplication
+                .Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
+                .ToListAsync();
+
+            if (fraList == null || !fraList.Any())
+            {
+                return NotFound();
+            }
+
+            var fraId = fraList.Select(s => s.fra_Id).ToList();
+
             var logs = await _context.ActionLogs
-                .Where(f => f.FraId == fra.fra_Id)
-                .OrderByDescending(log => log.Timestamp).ToListAsync();
-            ViewBag.FraId = fra.fra_Id;
-            ViewBag.ProjTitle = fra.research_Title;
-            ViewBag.TeamLead = fra.applicant_Name;
-            ViewBag.TeamMembers = fra.team_Members;
-            ViewBag.Field = fra.field_of_Study;
-            ViewBag.Date = fra.submission_Date.ToString("MM-dd-yyyy");
-            ViewBag.DateFormat = fra.submission_Date.ToString("MM-dd-yyyy HH:mm:ss");
-            ViewBag.DTS = fra.dts_No;
-            return View(logs);
+                .Where(f => fraId.Contains(f.FraId))
+                .OrderByDescending(log => log.Timestamp)
+                .ToListAsync();
+
+            var model = new Tuple<IEnumerable<FundedResearchApplication>, IEnumerable<ActionLog>>(fraList, logs);
+            return View(model);
         }
 
         [HttpPost]
@@ -441,38 +454,45 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Faculty")]
-        public async Task<IActionResult> ApplicationStatus()
+        public async Task<IActionResult> ApplicationStatus(string id)
         {
-            var user = await _userManager.GetUserAsync(User);
-            var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Submitted" || s.application_Status == "UnderEvaluation" && s.UserId == user.Id)
-                .FirstOrDefaultAsync();
+            if(id == null)
+            {
+                return NotFound();
+            }
+            var fra = await _context.FundedResearchApplication.FindAsync(id);
+            if(fra == null)
+            {
+                return NotFound();
+            }
             ViewBag.FraId = fra.fra_Id;
             ViewBag.ProjTitle = fra.research_Title;
             ViewBag.TeamLead = fra.applicant_Name;
             ViewBag.TeamMembers = fra.team_Members;
             ViewBag.Field = fra.field_of_Study;
             var fileRequirements = await _context.FileRequirement
-                .Where(fr => fr.fra_Id == fra.fra_Id)
+                .Where(fr => fr.fra_Id == id && fr.file_Type == ".pdf")
                 .OrderBy(fr => fr.file_Name)
                 .ToListAsync();
+
             return View(fileRequirements);
         }
 
         [HttpPost]
-        public async Task<IActionResult> GoToEthics(FundedResearchEthics fundedResearchEthics)
+        public async Task<IActionResult> GoToEthics(FundedResearchEthics fundedResearchEthics, string id)
         {
-            var user = await _userManager.GetUserAsync(User);
-            var fra = await _context.FundedResearchApplication
-                .Where(s => s.application_Status == "Submitted" || s.application_Status == "UnderEvaluation" && s.UserId == user.Id)
-                .FirstOrDefaultAsync();
-
+            if(id == null)
+            {
+                return NotFound();
+            }
+            var fra = await _context.FundedResearchApplication.FindAsync(id);
             if(fra == null)
             {
                 return NotFound("No submitted application found for this user.");
             }
 
             var existingEthics = await _context.FundedResearchEthics
-                .FirstOrDefaultAsync(e => e.fra_Id == fra.fra_Id);
+                .FirstOrDefaultAsync(e => e.fra_Id == id);
 
             if(existingEthics == null)
             {
@@ -531,7 +551,7 @@ namespace RemcSys.Controllers
 
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction("ApplicationStatus");
+            return RedirectToAction("ApplicationTracker");
         }
 
         public IActionResult EvaluationResult()

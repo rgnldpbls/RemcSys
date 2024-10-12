@@ -1,17 +1,24 @@
-﻿@{
+﻿@model IEnumerable<FundedResearchApplication>
+@{
     Layout = "_NavTeamLeader3";
 }
 <div class="application-requirements">
     <h1>Application Requirements</h1>
 
-    <div class="research-info">
-        <h2><b>Research Title:</b> @ViewBag.Title</h2>
-        <h6><b>Proponents:</b><br>@ViewBag.TeamLead <br> 
-            @foreach(var member in @ViewBag.TeamMembers){
-                @member <br>
-            }
-       </h6>
-    </div>
+    @foreach(var item in Model){
+        <div class="research-info">
+            <h2><b>Research Title:</b> @item.research_Title</h2>
+            <h6>
+                <b>Proponent/s:</b><br>@item.applicant_Name <br>
+                @if(!item.team_Members.Contains("N/A")){
+                    @foreach (var member in item.team_Members)
+                    {
+                        @member <br>
+                    }
+                }
+            </h6>
+        </div>
+    }
     <div class="upload-container">
         <!-- Your Attachments -->
         <div class="upload-section">

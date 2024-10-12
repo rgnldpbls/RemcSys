@@ -1,0 +1,24 @@
+﻿@model IEnumerable<FileRequirement>
+@{
+    ViewData["Title"] = "Generated Evaluation Forms";
+    Layout = "_NavEvaluator1";
+}
+<div class="container">
+    <!-- List of Generated Forms -->
+    <div class="document-section">
+        <h5>Generated Evaluation Forms</h5><hr />
+        <p>Click the forms below to download it.</p>
+        <ul class="doc-list">
+            @foreach (var doc in Model)
+            {
+                <li>
+                    <a class="btn" href="@Url.Action("Download", "Evaluator", new { id = doc.fr_Id })">
+                        @doc.file_Name
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+<a class="proceed-btn" href="@Url.Action("EvaluatorEvaluated", "Evaluator")">Back</a>

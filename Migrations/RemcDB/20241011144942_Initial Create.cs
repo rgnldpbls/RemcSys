@@ -83,8 +83,9 @@ namespace RemcSys.Migrations.RemcDB
                     evaluation_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     evaluation_Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     evaluator_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    evaluation_Grade = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    evaluation_Grade = table.Column<double>(type: "float", nullable: true),
                     assigned_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    evaluation_Deadline = table.Column<DateTime>(type: "datetime2", nullable: false),
                     evaluation_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     evaluator_Id = table.Column<int>(type: "int", nullable: false),
                     fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)

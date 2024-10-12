@@ -1,4 +1,4 @@
-﻿@model IEnumerable<RemcSys.Models.FileRequirement>
+﻿@model IEnumerable<FileRequirement>
 @{
     ViewData["Title"] = "Application Status";
     Layout = "_NavTeamLeader2";
@@ -7,15 +7,19 @@
 <div class="document-management-container">
     <h3><b>RESEARCH TITLE:</b> @ViewBag.ProjTitle</h3>
     <p><b>Field of Study:</b> @ViewBag.Field</p>
-    <p><b>Proponents:</b><br /> @ViewBag.TeamLead
-        @foreach(var member in ViewBag.TeamMembers)
+    <p>
+        <b>Proponents:</b><br /> @ViewBag.TeamLead
+        @if (!ViewBag.TeamMembers.Contains("N/A"))
         {
-            <br />
-            @member
+            @foreach (var member in ViewBag.TeamMembers)
+            {
+                <br />
+                @member
+            }
         }
     </p>
     <form id="withdrawForm" method="post" asp-action="Reset">
-        <input type="hidden" name="fraId" value="@ViewBag.FraId"/>
+        <input type="hidden" name="fraId" value="@ViewBag.FraId" />
         <button type="button" class="withdraw-btn" id="withdrawBtn">Withdraw Application</button>
     </form>
     <table class="document-table">

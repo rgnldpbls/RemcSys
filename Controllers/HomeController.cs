@@ -54,6 +54,10 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> Faculty()
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return  NotFound();
+            }
             var pendingResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Pending" && f.UserId == user.Id);
             var submittedResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Submitted" && f.UserId == user.Id);
             var evalResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "UnderEvaluation" && f.UserId == user.Id);
@@ -69,12 +73,12 @@ namespace RemcSys.Controllers
         {
             string folderPath = Path.Combine(_hostingEnvironment.WebRootPath, "forms");
             string extension = "*.pdf";
-            List<Document> files = new List<Document>();
+            List<InternalDocument> files = new List<InternalDocument>();
 
             foreach (var file in Directory.GetFiles(folderPath, extension, SearchOption.AllDirectories))
             {
                 string fileExtension = Path.GetExtension(file).ToLower();
-                files.Add(new Document
+                files.Add(new InternalDocument
                 {
                     FileName = Path.GetFileName(file),
                     FilePath = Path.GetRelativePath(_hostingEnvironment.WebRootPath, file).Replace('\\', '/'),
@@ -103,6 +107,10 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> Evaluator()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
             var haveEvaluator = await _context.Evaluator.AnyAsync(e => e.UserId == user.Id);
             if (!haveEvaluator)
             {
@@ -110,7 +118,8 @@ namespace RemcSys.Controllers
                 {
                     evaluator_Name = user.Name,
                     evaluator_Email = user.Email,
-                    field_of_Interest = ["Science","Engineering, Architecture, Design, and Built Environment"],
+                    field_of_Interest = ["Science","Engineering, Architecture, Design, and Built Environment", 
+                        "Computer Science and Information System Technology"],
                     UserId = user.Id,
                     UserType = null,
                     center = ["REMC"]

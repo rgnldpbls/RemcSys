@@ -1,4 +1,4 @@
-﻿@model IEnumerable<RemcSys.Models.FundedResearchApplication>
+﻿@model IEnumerable<ViewEvaluationVM>
 @{
     ViewData["Title"] = "Evaluator Missed Evaluations";
     Layout = "_NavEvaluator1";
@@ -40,7 +40,7 @@
                             <b>Field of Study:</b> @item.field_of_Study
                         </td>
                         <td>
-                            @item.submission_Date.ToString("MMMM d, yyyy")
+                            @item.evaluation_deadline?.ToString("MMMM d, yyyy")
                         </td>
                         <td>
                             <span class="status underevaluation">

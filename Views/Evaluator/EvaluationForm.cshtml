@@ -249,56 +249,56 @@
             if (validateSelects()) {
                 if (validateTextareas()) {
                     document.getElementById('warningPopup').style.display = 'flex';
-
-                    document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
-                        const AQScore = document.getElementById('AQScore').value;
-                        const AQComment = document.getElementById('AQComment').value;
-                        const REScore = document.getElementById('REScore').value;
-                        const REComment = document.getElementById('REComment').value;
-                        const RIScore = document.getElementById('RIScore').value;
-                        const RIComment = document.getElementById('RIComment').value;
-                        const LCScore = document.getElementById('LCScore').value;
-                        const LCComment = document.getElementById('LCComment').value;
-                        const RDScore = document.getElementById('RDScore').value;
-                        const RDComment = document.getElementById('RDComment').value;
-                        const FFScore = document.getElementById('FFScore').value;
-                        const FFComment = document.getElementById('FFComment').value;
-                        const GenComment = document.getElementById('GenComment').value;
-                        const FraId = document.getElementById('fraId').value;
-
-                        $.ajax({
-                            url: '@Url.Action("SubmitEvaluation", "Evaluator")',
-                            type: 'POST',
-                            data: {
-                                aqScore: AQScore,
-                                aqComment: AQComment,
-                                reScore: REScore,
-                                reComment: REComment,
-                                riScore: RIScore,
-                                riComment: RIComment,
-                                lcScore: LCScore,
-                                lcComment: LCComment,
-                                rdScore: RDScore,
-                                rdComment:RDComment,
-                                ffScore: FFScore,
-                                ffComment: FFComment,
-                                genComment: GenComment,
-                                fraId: FraId
-                            },
-                            success: function (response) {
-                                alert('Evaluation submitted successfully!');
-                            },
-                            error: function (xhr, status, error) {
-                                alert('Error submitting evaluation. Please try again.');
-                            }
-                        });
-                    });
                 } else {
                     alert('Please input all comments before proceed.');
                 }
             } else {
                 alert('Please select scores in all fields before proceed.');
             }
+        });
+
+        document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
+            const AQScore = document.getElementById('AQScore').value;
+            const AQComment = document.getElementById('AQComment').value;
+            const REScore = document.getElementById('REScore').value;
+            const REComment = document.getElementById('REComment').value;
+            const RIScore = document.getElementById('RIScore').value;
+            const RIComment = document.getElementById('RIComment').value;
+            const LCScore = document.getElementById('LCScore').value;
+            const LCComment = document.getElementById('LCComment').value;
+            const RDScore = document.getElementById('RDScore').value;
+            const RDComment = document.getElementById('RDComment').value;
+            const FFScore = document.getElementById('FFScore').value;
+            const FFComment = document.getElementById('FFComment').value;
+            const GenComment = document.getElementById('GenComment').value;
+            const FraId = document.getElementById('fraId').value;
+
+            $.ajax({
+                url: '@Url.Action("SubmitEvaluation", "Evaluator")',
+                type: 'POST',
+                data: {
+                    aqScore: AQScore,
+                    aqComment: AQComment,
+                    reScore: REScore,
+                    reComment: REComment,
+                    riScore: RIScore,
+                    riComment: RIComment,
+                    lcScore: LCScore,
+                    lcComment: LCComment,
+                    rdScore: RDScore,
+                    rdComment: RDComment,
+                    ffScore: FFScore,
+                    ffComment: FFComment,
+                    genComment: GenComment,
+                    fraId: FraId
+                },
+                success: function (response) {
+                    alert('Evaluation submitted successfully!');
+                },
+                error: function (xhr, status, error) {
+                    alert('Error submitting evaluation. Please try again.');
+                }
+            });
         });
 
         document.getElementById('backBtn').addEventListener('click', function () {

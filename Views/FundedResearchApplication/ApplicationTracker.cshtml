@@ -1,4 +1,4 @@
-﻿@model IEnumerable<RemcSys.Models.ActionLog>
+﻿@model Tuple<IEnumerable<FundedResearchApplication>, IEnumerable<ActionLog>>
 @{
     ViewData["Title"] = "Application Tracker";
     Layout = "_NavTeamLeader2";
@@ -6,102 +6,109 @@
 
 <div class="container">
     <h1 class="my-4">Application Tracker</h1>
-
-    <form asp-action="SetDTS" method="post">
-        <div class="dts-container mb-4">
-            <label for="dtsNumber">DTS No.:</label>
-            <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..." value="@ViewBag.DTS" />
-            <button type="submit" class="dts-check-button" aria-label="Check"><i class="bi bi-check-circle-fill" ;></i></button>
-            <input type="hidden" name="fraId" value="@ViewBag.FraId" />
-        </div>
-    </form>
-
-    <!-- Progress Steps -->
-    <div class="step-container">
-        <div class="step">
-            <div class="step-icon complete">
-                <i class="bi bi-file-earmark-text-fill" style="font-size: 35px"></i>
-                <span class="progress_line"></span>
+    @foreach(var item in Model.Item1)
+    {
+        <form asp-action="SetDTS" method="post">
+            <div class="dts-container mb-4">
+                <label for="dtsNumber">DTS No.:</label>
+                <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..." value="@item.dts_No" />
+                <button type="submit" class="dts-check-button" aria-label="Check"><i class="bi bi-check-circle-fill" ;></i></button>
+                <input type="hidden" name="fraId" value="@item.fra_Id" />
             </div>
-            <strong>Application Submitted</strong>
-        </div>
-        <div class="step">
-            <div class="step-icon complete">
-                <span class="still-progress_line"></span>
-                <i class="bi bi-list-check" style="font-size: 35px"></i>
+        </form>
+
+        <!-- Progress Steps -->
+        <div class="step-container">
+            <div class="step">
+                <div class="step-icon complete">
+                    <i class="bi bi-file-earmark-text-fill" style="font-size: 35px"></i>
+                    <span class="progress_line"></span>
+                </div>
+                <strong>Application Submitted</strong>
             </div>
-            <strong>Document Under Review</strong>
-            <a class="view-btn" href="/FundedResearchApplication/ApplicationStatus" style="font-size:12px; margin-left: 5px;">View</a>
-        </div>
-        <form asp-action="GoToEthics" method="post">
+            <div class="step">
+                <div class="step-icon complete">
+                    <span class="still-progress_line"></span>
+                    <i class="bi bi-list-check" style="font-size: 35px"></i>
+                </div>
+                <strong>Document Under Review</strong>
+                <a class="view-btn" asp-action="ApplicationStatus" asp-controller="FundedResearchApplication" 
+                    asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">View</a>
+            </div>
+            <form asp-action="GoToEthics" asp-route-id="@item.fra_Id" method="post">
+                <div class="step">
+                    <div class="step-icon">
+                        <span class="still-progress_line"></span>
+                        <i class="bi bi-file-earmark-lock-fill" style="font-size: 35px"></i>
+                    </div>
+                    <strong>Ethics Clearance Secured</strong>
+                    <button class="view-btn" type="submit" style="font-size:12px; margin-left: 5px;">Apply</button>
+                </div>
+            </form>
             <div class="step">
                 <div class="step-icon">
                     <span class="still-progress_line"></span>
-                    <i class="bi bi-file-earmark-lock-fill" style="font-size: 35px"></i>
+                    <i class="bi bi-ui-checks" style="font-size: 35px"></i>
                 </div>
-                <strong>Ethics Clearance Secured</strong>
-                <button class="view-btn" type="submit" style="font-size:12px; margin-left: 5px;">Apply</button>
+                <strong>Reviewed by Evaluator</strong>
+                <i class="bi bi-lock" style="color: #850000"></i>
             </div>
-        </form>
-        <div class="step">
-            <div class="step-icon">
+            <div class="step">
+                <div class="step-icon">
+                    <span class="still-progress_line"></span>
+                    <i class="bi bi-file-earmark-check-fill" style="font-size: 35px"></i>
+                </div>
+                <strong>Application Approved</strong>
                 <span class="still-progress_line"></span>
-                <i class="bi bi-ui-checks" style="font-size: 35px"></i>
+                <i class="bi bi-lock" style="color: #850000"></i>
             </div>
-            <strong>Reviewed by Evaluator</strong>
-            <i class="bi bi-lock" style="color: #850000"></i>
-        </div>
-        <div class="step">
-            <div class="step-icon">
-                <span class="still-progress_line"></span>
-                <i class="bi bi-file-earmark-check-fill" style="font-size: 35px"></i>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="bi bi-check2-circle" style="font-size: 35px"></i>
+                </div>
+                <strong>Notice To Proceed</strong>
+                <i class="bi bi-lock" style="color: #850000"></i>
             </div>
-            <strong>Application Approved</strong>
-            <span class="still-progress_line"></span>
-            <i class="bi bi-lock" style="color: #850000"></i>
         </div>
-        <div class="step">
-            <div class="step-icon">
-                <i class="bi bi-check2-circle" style="font-size: 35px"></i>
-            </div>
-            <strong>Notice To Proceed</strong>
-            <i class="bi bi-lock" style="color: #850000"></i>
-        </div>
-    </div>
 
-    <!-- Research Details -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="research-details">
-                <p><strong>Research Title: </strong>@ViewBag.ProjTitle</p>
-                <p><strong>Proponents: </strong>@ViewBag.TeamLead
-                    @foreach(var member in ViewBag.TeamMembers)
+        <!-- Research Details -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="research-details">
+                    <p><strong>Research Title: </strong>@item.research_Title</p>
+                    <p>
+                        <strong>Proponent/s: </strong>@item.applicant_Name
+                        @if (!item.team_Members.Contains("N/A"))
+                        {
+                            @foreach (var member in item.team_Members)
+                            {
+                                @: , @member
+                            }
+                        }
+                    </p>
+                    <p><strong>Field of Study: </strong>@item.field_of_Study</p>
+                </div>
+            </div>
+
+            <!-- Document History -->
+            <div class="col-md-6">
+                <div class="document-history">
+                    <h5><strong>Document History</strong></h5>
+                    @foreach (var log in Model.Item2)
                     {
-                        @: , @member
-                    }
-                </p>
-                <p><strong>Field of Study: </strong>@ViewBag.Field</p>
-            </div>
-        </div>
-
-        <!-- Document History -->
-        <div class="col-md-6">
-            <div class="document-history">
-                <h5><strong>Document History</strong></h5>
-                @foreach(var log in Model)
-                {
-                    <div class="document-history-item">
-                        <div class="history-item-content">
-                            <div class="check-icon">
-                                <span class="track_line"></span>
-                                <i class="bi bi-check-circle" style="font-size: 20px;"></i>
+                        <div class="document-history-item">
+                            <div class="history-item-content">
+                                <div class="check-icon">
+                                    <span class="track_line"></span>
+                                    <i class="bi bi-check-circle" style="font-size: 20px;"></i>
+                                </div>
+                                <span>@log.Description - @ActionLog.GetTimeAgo(log.Timestamp)</span>
                             </div>
-                            <span>@log.Description - @ActionLog.GetTimeAgo(log.Timestamp)</span>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
-        </div>
 
-    </div>
+        </div>
+    }
 </div>
