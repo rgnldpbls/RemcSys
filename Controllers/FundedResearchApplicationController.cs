@@ -470,6 +470,7 @@ namespace RemcSys.Controllers
             ViewBag.TeamLead = fra.applicant_Name;
             ViewBag.TeamMembers = fra.team_Members;
             ViewBag.Field = fra.field_of_Study;
+            ViewBag.FraType = fra.fra_Type;
             var fileRequirements = await _context.FileRequirement
                 .Where(fr => fr.fra_Id == id && fr.file_Type == ".pdf")
                 .OrderBy(fr => fr.file_Name)
@@ -555,7 +556,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Faculty")]
-        public async Task<IActionResult> ApprovedTracker()
+        public async Task<IActionResult> ApplicationTrackerII()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -580,11 +581,6 @@ namespace RemcSys.Controllers
 
             var model = new Tuple<IEnumerable<FundedResearchApplication>, IEnumerable<ActionLog>>(fraList, logs);
             return View(model);
-        }
-
-        public IActionResult EvaluationResult()
-        {
-            return View();
         }
     }
 }

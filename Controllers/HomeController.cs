@@ -58,17 +58,38 @@ namespace RemcSys.Controllers
             {
                 return  NotFound();
             }
-            var pendingResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Pending" && f.UserId == user.Id);
-            var submittedResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Submitted" && f.UserId == user.Id);
-            var evalResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "UnderEvaluation" && f.UserId == user.Id);
-            var approvedResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Approved" && f.UserId == user.Id);
-            var rejectedResearchApp = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Rejected" && f.UserId == user.Id);
 
-            ViewBag.Pending = pendingResearchApp;
-            ViewBag.Submitted = submittedResearchApp;
-            ViewBag.Evals = evalResearchApp;
-            ViewBag.Approved = approvedResearchApp;
-            ViewBag.Rejected = rejectedResearchApp;
+            var pendingApp = await _context.FundedResearchApplication
+                .AnyAsync(f => f.application_Status == "Pending" && f.UserId == user.Id);
+
+            ViewBag.PendingApp = pendingApp;
+
+            var submittedUFR = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Submitted" && 
+                f.UserId == user.Id && f.fra_Type == "University Funded Research");
+            var evalUFR = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "UnderEvaluation" && 
+                f.UserId == user.Id && f.fra_Type == "University Funded Research");
+            var approvedUFR = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Approved" &&
+                f.UserId == user.Id && f.fra_Type == "University Funded Research");
+            var rejectedUFR = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Rejected" &&
+                f.UserId == user.Id && f.fra_Type == "University Funded Research");
+            var proceedUFR = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Proceed" && 
+                f.UserId == user.Id && f.fra_Type == "University Funded Research");
+
+            ViewBag.SubmittedUFR = submittedUFR;
+            ViewBag.EvalsUFR = evalUFR;
+            ViewBag.ApprovedUFR = approvedUFR;
+            ViewBag.RejectedUFR = rejectedUFR;
+            ViewBag.ProceedUFR = proceedUFR;
+
+            var submitted = await _context.FundedResearchApplication.AnyAsync(f => f.application_Status == "Submitted" &&
+                f.UserId == user.Id && f.fra_Type != "University Funded Research");
+
+            ViewBag.Submitted = submitted;
+
+
+
+
+
             return View();
         }
 

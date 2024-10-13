@@ -109,7 +109,14 @@
             }
         </tbody>
     </table>
-    <a class="back-btn" href="/FundedResearchApplication/ApplicationTracker">Back</a>
+    @if(ViewBag.FraType == "University Funded Research")
+    {
+        <a class="back-btn" href="/FundedResearchApplication/ApplicationTracker">Back</a>
+    }
+    else
+    {
+        <a class="back-btn" href="/FundedResearchApplication/ApplicationTrackerII">Back</a>
+    }
 </div>
 
 <!--status-tag pop-up-->

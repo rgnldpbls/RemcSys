@@ -51,24 +51,61 @@
                     <i class="bi bi-ui-checks" style="font-size: 35px"></i>
                 </div>
                 <strong>Reviewed by Evaluator</strong>
-                <i class="bi bi-lock" style="color: #850000"></i>
+                @if(new[] {"Approved", "Rejected", "Proceed"}.Contains(item.application_Status))
+                {
+                    <a class="view-btn" asp-action="UnderMaintenance" asp-controller="Home"
+                        asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">View</a>
+                }
+                else
+                {
+                    <i class="bi bi-lock" style="color: #850000"></i>
+                }
             </div>
-            <div class="step">
-                <div class="step-icon">
-                    <span class="still-progress_line"></span>
-                    <i class="bi bi-file-earmark-check-fill" style="font-size: 35px"></i>
+            @if(new[] {"Submitted", "UnderEvaluation", "Approved", "Proceed"}.Contains(item.application_Status))
+            {
+                <div class="step">
+                    <div class="step-icon">
+                        <span class="still-progress_line"></span>
+                        <i class="bi bi-check2-circle" style="font-size: 35px"></i>
+                    </div>
+                    <strong>Notice To Proceed</strong>
+                    @if (item.application_Status == "Proceed")
+                    {
+                        <a class="view-btn" asp-action="UnderMaintenance" asp-controller="Home"
+                           asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">Download</a>
+                    }
+                    else
+                    {
+                        <i class="bi bi-lock" style="color: #850000"></i>
+                    }
                 </div>
-                <strong>Application Approved</strong>
-                <span class="still-progress_line"></span>
-                <i class="bi bi-lock" style="color: #850000"></i>
-            </div>
-            <div class="step">
-                <div class="step-icon">
-                    <i class="bi bi-check2-circle" style="font-size: 35px"></i>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="bi bi-flag" style="font-size: 35px"></i>
+                    </div>
+                    <strong>Progress Report Tracker</strong>
+                    @if (item.application_Status == "Proceed")
+                    {
+                        <a class="view-btn" asp-action="UnderMaintenance" asp-controller="Home"
+                           asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">Go to</a>
+                    }
+                    else
+                    {
+                        <i class="bi bi-lock" style="color: #850000"></i>
+                    }
                 </div>
-                <strong>Notice To Proceed</strong>
-                <i class="bi bi-lock" style="color: #850000"></i>
-            </div>
+            }
+            else if(item.application_Status == "Rejected")
+            {
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="bi bi-arrow-repeat" style="font-size: 35px"></i>
+                    </div>
+                    <strong>Re-Apply</strong>
+                    <a class="view-btn" asp-action="UnderMaintenance" asp-controller="Home"
+                       asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">Re-apply</a>
+                </div>
+            }
         </div>
 
         <!-- Research Details -->

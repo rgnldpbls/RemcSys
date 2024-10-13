@@ -12,7 +12,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="ResearchType">Funded Research Type:</label>
-                <input asp-for="ResearchType" type="text" class="form-control" placeholder="Research Type..." value="@ViewBag.Type" />
+                <input asp-for="ResearchType" type="text" class="form-control" placeholder="Research Type..." value="@ViewBag.Type" disabled/>
                 <span asp-validation-for="ResearchType" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -22,7 +22,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="ProjectLeader">Program/Project Proponent: </label>
-                <input asp-for="ProjectLeader" type="text" class="form-control" placeholder="Project Leader..." value="@ViewBag.Name" />
+                <input asp-for="ProjectLeader" type="text" class="form-control" placeholder="Project Leader..." value="@ViewBag.Name" disabled/>
                 <span asp-validation-for="ProjectLeader" class="text-danger"></span>
             </div>
             <div class="form-group">
