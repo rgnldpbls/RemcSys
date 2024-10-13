@@ -411,12 +411,12 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> ApplicationTracker()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            if(user == null)
             {
                 return NotFound();
             }
             var fraList = await _context.FundedResearchApplication
-                .Where(s => s.application_Status == "Submitted" && s.UserId == user.Id)
+                .Where(s => s.UserId == user.Id)
                 .ToListAsync();
 
             if (fraList == null || !fraList.Any())
@@ -552,6 +552,34 @@ namespace RemcSys.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("ApplicationTracker");
+        }
+
+        [Authorize(Roles = "Faculty")]
+        public async Task<IActionResult> UnderEvaluationTracker()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var fraList = await _context.FundedResearchApplication
+                .Where(s => s.UserId == user.Id)
+                .ToListAsync();
+
+            if (fraList == null || !fraList.Any())
+            {
+                return NotFound();
+            }
+
+            var fraId = fraList.Select(s => s.fra_Id).ToList();
+
+            var logs = await _context.ActionLogs
+                .Where(f => fraId.Contains(f.FraId))
+                .OrderByDescending(log => log.Timestamp)
+                .ToListAsync();
+
+            var model = new Tuple<IEnumerable<FundedResearchApplication>, IEnumerable<ActionLog>>(fraList, logs);
+            return View(model);
         }
 
         public IActionResult EvaluationResult()

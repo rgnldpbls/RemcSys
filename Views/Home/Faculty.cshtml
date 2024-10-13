@@ -24,9 +24,13 @@
         {
             <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="GeneratedDocuments">PROCEED</a>
         }
-        else if(ViewBag.Submitted == true || ViewBag.Evals == true)
+        else if(ViewBag.Submitted == true)
         {
             <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="ApplicationTracker">PROCEED</a>
+        }
+        else if(ViewBag.Evals == true)
+        {
+            <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="UnderEvaluationTracker">PROCEED</a>
         }
         else
         {

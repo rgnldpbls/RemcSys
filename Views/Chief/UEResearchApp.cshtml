@@ -5,18 +5,6 @@
 }
 <div class="funded-research-container">
     <h2 class="title">UNIVERSITY FUNDED RESEARCH APPLICATIONS</h2>
-
-    <div class="research-categories">
-        <div class="research-category university-funded">
-            <a asp-action="UFResearchApp"><h3>University Funded Research</h3></a>
-        </div>
-        <div class="research-category externally-funded">
-            <a asp-action="EFResearchApp"><h3>Externally Funded Research</h3></a>
-        </div>
-        <div class="research-category research-load">
-            <a asp-action="UFRLApp"><h3>University Funded Research Load</h3></a>
-        </div>
-    </div>
     <hr />
 
     <div class="search-section">
@@ -52,6 +40,10 @@
                             //Filter the evaluations list by the current application ID (fra_Id)
                             var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id &&
                             e.evaluation_Status == "Pending").ToList();
+                                                    @foreach (var eval in Model.Item3.DistinctBy(e => e.evaluator_Id))
+                            {
+                                bool isApplicant = Model.Item1.Any(app => eval.evaluator_Name == app.applicant_Name);
+                            }
                         }
                         @if (assignedEvaluators.Count > 0)
                         {
@@ -69,7 +61,9 @@
                         }
                     </td>
                     <td>
-                        <button class="manageevaluator-btn"><i class="bi bi-people-fill"></i></button>
+                        <button class="manageevaluator-btn"
+                            data-fra-id="@app.fra_Id"
+                            data-field-of-study="@app.field_of_Study"><i class="bi bi-people-fill"></i></button>
                         <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@app.fra_Id" class="edit-btn">
                             <i class="bi bi-pencil-square"></i>
                         </a>
@@ -89,60 +83,107 @@
     </div>
 
     <div class="evaluator-list">
-        @foreach (var eval in Model.Item3)
-        {
-            @foreach (var app in Model.Item1)
-            {
-                bool isApplicant = eval.evaluator_Name == app.applicant_Name;
-                bool isTeamMember = app.team_Members.Contains(eval.evaluator_Name);
-
-                var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
-
-                int pendingCount = Model.Item2.Count(e => e.evaluator_Name == eval.evaluator_Name &&
-                e.evaluation_Status == "Pending");
-
-                int assignedCount = assignedEvaluators.Count;
-
-                bool isAlrAssigned = assignedEvaluators.Any(e => e.evaluator_Name == eval.evaluator_Name);
-
-                <div class="evaluator-item">
-                    <i class="bi bi-person-circle" style="color: #000; font-size: 50px; margin-left: 10px;"></i>
-                    <div class="evaluator-details">
-                        <h5 class="evaluator-name"><b>@eval.evaluator_Name</b></h5>
-                        <p>Fields of Interest: @string.Join("; ", eval.field_of_Interest)</p>
-                        <p>Pending: @pendingCount</p>
-                    </div>
-                    @if (isApplicant || isTeamMember || isAlrAssigned || assignedCount >= 5)
-                    {
-                        <button class="primary-btn" disabled>CANNOT BE ASSIGNED</button>
-                    }
-                    else
-                    {
-                        <button class="assign-btn"
-                                data-evaluator-id="@eval.evaluator_Id"
-                                data-fra-id="@app.fra_Id">
-                            ASSIGN
-                        </button>
-                    }
-                </div>
-            }
-        }
+        
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    document.querySelectorAll('.manageevaluator-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            document.querySelector('.evaluators-modal').style.display = 'block';
-        });
-    });
-
-    document.querySelector('.close-btn').addEventListener('click', function () {
-        document.querySelector('.evaluators-modal').style.display = 'none';
-    });
-
     $(document).ready(function () {
+        // Handle the click event for 'Manage Evaluator' buttons
+        $('.manageevaluator-btn').click(function () {
+            var fraId = $(this).data('fra-id');
+            var fieldOfStudy = $(this).data('field-of-study');
+            
+            $.ajax({
+                url: '@Url.Action("GetEvaluatorsForResearch", "Chief")',
+                type: 'GET',
+                data: { fraId: fraId, fieldOfStudy: fieldOfStudy },
+                success: function (data) {
+                    $('.evaluator-list').empty(); // Clear the current list
+
+                    $.each(data, function (i, evaluator) {
+                        // Create a new evaluator item
+                        var evaluatorItem = $('<div>').addClass('evaluator-item')
+                            .css({
+                                'display': 'flex',
+                                'align-items': 'center',
+                                'justify-content': 'space-between',
+                                'background-color': 'white',
+                                'border-radius': '5px',
+                                'padding': '1px',
+                                'margin': '10px 0',
+                                'border': '1px solid #7C0000'
+                            });
+
+                        var icon = $('<i>').addClass('bi bi-person-circle')
+                            .css({
+                                'color': '#000',
+                                'font-size': '50px',
+                                'margin-left': '10px'
+                            });
+
+                        var details = $('<div>').addClass('evaluator-details')
+                            .css({
+                                'flex-grow': '1',
+                                'padding-left': '20px',
+                                'color': 'black',
+                                'line-height': '0.25',
+                                'font-size': '12px'
+                            });
+
+                        var name = $('<h5>').addClass('evaluator-name')
+                            .html('<b>' + evaluator.evaluator_Name + '</b>');
+
+                        var fieldsOfInterest = $('<p>').text('Fields of Interest: ' + evaluator.field_of_Interest.join(', ')); // Assuming it's an array
+
+                        var pendingCount = $('<p>').text('Pending: ' + evaluator.pendingCount);
+
+                        details.append(name, fieldsOfInterest, pendingCount);
+
+                        var button = $('<button>')
+                            .addClass('assign-btn')
+                            .css({
+                                'background-color': '#FFDB89',
+                                'border': 'none',
+                                'padding': '10px',
+                                'font-weight': 'bold',
+                                'cursor': 'pointer',
+                                'border-radius': '5px',
+                                'color': '#850000',
+                                'margin-right': '20px'
+                            })
+                            .text('ASSIGN')
+                            .data('evaluator-id', evaluator.evaluator_Id)
+                            .data('fra-id', fraId);
+
+                        var button2 = $('<p>')
+                            .text('CANNOT BE ASSIGNED');
+
+                        // Append icon, details, and button to the evaluator item
+                        if (evaluator.isDisabled) {
+                            evaluatorItem.append(icon, details, button2);
+                        } else {
+                            evaluatorItem.append(icon, details, button);
+                        }
+                        
+
+                        // Add the evaluator item to the list
+                        $('.evaluator-list').append(evaluatorItem);
+                    });
+
+                    $('.evaluators-modal').show(); // Show the modal with updated content
+                }
+
+            });
+        });
+
+        // Close the modal when the close button is clicked
+        $('.close-btn').click(function () {
+            $('.evaluators-modal').hide();
+        });
+
+        // Handle the assignment of evaluators
         $(document).on('click', '.assign-btn', function () {
             var evaluatorId = $(this).data('evaluator-id');
             var fraId = $(this).data('fra-id');
@@ -151,9 +192,9 @@
             var confirmAssign = confirm("Are you sure you want to assign this evaluator?");
 
             if (confirmAssign) {
-                // User clicked "Yes", proceed with assignment
+                // Proceed with assignment
                 $.ajax({
-                    url: '@Url.Action("AssignEvaluator", "Chief")', // Update with your actual controller name
+                    url: '@Url.Action("AssignEvaluator", "Chief")',
                     type: 'POST',
                     data: {
                         evaluatorId: evaluatorId,
@@ -172,8 +213,6 @@
                         alert('An error occurred.');
                     }
                 });
-            } else {
-                alert("Assignment canceled.");
             }
         });
     });
