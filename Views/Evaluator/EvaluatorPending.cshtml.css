@@ -86,7 +86,7 @@
 
     .status.underevaluation {
         background-color: #DBBF1B;
-        width: 80%;
+        width: 100%;
         color: #FFF;
     }
 
@@ -97,7 +97,6 @@
     }
 
 .action-buttons {
-    display: flex;
     flex-direction: column;
     gap: 10px;
     justify-content: center;

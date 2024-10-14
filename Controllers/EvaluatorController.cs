@@ -121,7 +121,7 @@ namespace RemcSys.Controllers
             if (evaluator != null)
             {
                 var doneEvaluations = await _context.Evaluations
-                    .Where(e => e.evaluator_Id == evaluator.evaluator_Id && e.evaluation_Status == "Evaluated")
+                    .Where(e => e.evaluator_Id == evaluator.evaluator_Id && (e.evaluation_Status == "Approved" || e.evaluation_Status == "Rejected"))
                     .Join(_context.FundedResearchApplication,
                         evaluation => evaluation.fra_Id,
                         researchApp => researchApp.fra_Id,
@@ -130,7 +130,7 @@ namespace RemcSys.Controllers
                             dts_No = researchApp.dts_No,
                             research_Title = researchApp.research_Title,
                             field_of_Study = researchApp.field_of_Study,
-                            application_Status = researchApp.application_Status,
+                            application_Status = evaluation.evaluation_Status,
                             evaluation_deadline = evaluation.evaluation_Date,
                             fra_Id = researchApp.fra_Id
                         })
@@ -177,7 +177,7 @@ namespace RemcSys.Controllers
             var user = await _userManager.GetUserAsync(User);
             var evaluator = await _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefaultAsync();
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
-            
+
             double tot1 = aqScore + reScore;
             double d1 = tot1 / 20;
             double p1 = d1 * 10;
@@ -252,21 +252,33 @@ namespace RemcSys.Controllers
             }
             var evals = _context.Evaluations.Where(e => e.fra_Id == fraId && e.evaluator_Id == evaluator.evaluator_Id).FirstOrDefault();
             evals.evaluation_Grade = g1;
-            evals.evaluation_Status = "Evaluated";
+            if (evals.evaluation_Grade >= 70)
+            {
+                evals.evaluation_Status = "Approved";
+            } else
+            {
+                evals.evaluation_Status = "Rejected";
+            }
             evals.evaluation_Date = DateTime.Now;
             await _context.SaveChangesAsync();
             Directory.Delete(filledFolder, true);
 
-            return RedirectToAction("EvaluatorEvaluated");
+            return RedirectToAction("EvaluatorEvaluated", "Evaluator");
         }
 
         [Authorize(Roles = "Evaluator")]
-        public async Task<IActionResult> GenerateEvalsForm()
+        public async Task<IActionResult> GenerateEvalsForm(string id)
         {
             var user = await _userManager.GetUserAsync(User);
             var evaluator = await _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefaultAsync();
-            var evaluations = await _context.Evaluations.Where(e => e.evaluator_Id == evaluator.evaluator_Id).FirstOrDefaultAsync();
-            var fr = await _context.FileRequirement.Where(f => f.fra_Id == evaluations.fra_Id && f.document_Type == "EvaluationForms").ToListAsync();
+            var evaluations = await _context.Evaluations.Where(e => e.fra_Id == id && e.evaluator_Id == evaluator.evaluator_Id)
+                .FirstOrDefaultAsync();
+            var fr = await _context.FileRequirement.Where(f => f.fra_Id == evaluations.fra_Id && f.document_Type == "EvaluationForms"
+                && f.file_Name.Contains(evaluator.evaluator_Name))
+                .OrderBy(f => f.file_Name)
+                .ToListAsync();
+            ViewBag.Grade = evaluations.evaluation_Grade;
+            ViewBag.Remarks = evaluations.evaluation_Status;
             return View(fr);
         }
 

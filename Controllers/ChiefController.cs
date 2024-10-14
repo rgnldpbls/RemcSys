@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MimeKit;
+using MimeKit.Utils;
 using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
 using RemcSys.Models;
@@ -19,14 +20,16 @@ namespace RemcSys.Controllers
         private readonly ActionLoggerService _actionLogger;
         private readonly UserManager<SystemUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public ChiefController(RemcDBContext context, ActionLoggerService actionLogger, UserManager<SystemUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _actionLogger = actionLogger;
             _userManager = userManager;
             _roleManager = roleManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [Authorize(Roles = "Chief")]
@@ -128,6 +131,7 @@ namespace RemcSys.Controllers
             ViewBag.Lead = fra.applicant_Name;
             ViewBag.Member = fra.team_Members;
             ViewBag.Type = fra.fra_Type;
+            ViewBag.Status = fra.application_Status;
 
             var fileRequirement = await _context.FileRequirement.Where(f => f.fra_Id == id && f.file_Type == ".pdf")
                 .OrderBy(fr => fr.file_Name)
@@ -192,7 +196,7 @@ namespace RemcSys.Controllers
             if (allFilesChecked)
             {
                 await AssignEvaluators(fra.fra_Id);
-                return RedirectToAction("UEResearchApp", "Chief");
+                return Json(new { assigned = true });
             }
             return Json(new { success = true });
         }
@@ -315,6 +319,16 @@ namespace RemcSys.Controllers
 
                 var bodyBuilder = new BodyBuilder();
 
+                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
+                if (!System.IO.File.Exists(footerImagePath))
+                {
+                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
+                }
+
+                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
+                image.ContentId = MimeUtils.GenerateMessageId();
+
+
                 var htmlBody = $@"
                 <html>
                     <body style='font-family: Arial, sans-serif;'  font-size: 20px>
@@ -349,6 +363,11 @@ namespace RemcSys.Controllers
                             Your timely feedback is crucial, and we appreciate your effort in completing both evaluations.
                             Should you have any questions or concerns, feel free to contact the Research Management Office (RMO) at [RMO Contact Information].
                         </div>
+                        <footer style='margin-top: 40px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
                     </body>
                 </html>";
 
@@ -372,6 +391,7 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> UEResearchApp(string searchString)
         {
+            await CheckMissedEvaluations();
             ViewData["currentFilter"] = searchString;
             var appQuery = _context.FundedResearchApplication
                 .Where(f => f.fra_Type == "University Funded Research");
@@ -468,18 +488,46 @@ namespace RemcSys.Controllers
                 string recipientName = email.Split('@')[0];
                 message.To.Add(new MailboxAddress(recipientName, email));
 
-                message.Subject = "Assigned for Evaluation";
+                message.Subject = "Approval of Your Request for Evaluator Role Removal in " + researchTitle;
 
                 var bodyBuilder = new BodyBuilder();
 
+                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
+                if (!System.IO.File.Exists(footerImagePath))
+                {
+                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
+                }
+
+                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
+                image.ContentId = MimeUtils.GenerateMessageId();
+
                 var htmlBody = $@"
                 <html>
-                    <body style='font-family: Arial, sans-serif;'>
-                        <div style='margin-bottom: 20px;'>
-                            Greetings, {name}! <br> You have been removed to evaluate the research titled: <strong>{researchTitle}</strong>.
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                        <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+                            We hope this message finds you well.<br><br>
+                            In response to your recent request, we are pleased to inform you that the Chief of the Research Evaluation Management Center (REMC)
+                            has <strong>approved your removal from the evaluator role </strong> for the research titled <strong>{researchTitle}</strong>.                    
                         </div>
+
+                        <div style='margin-bottom: 22px;'>
+                            We understand your need for this request and are grateful for the time and effort you’ve already contributed to the evaluation process. 
+                            Should you wish to engage in future evaluations or have any other concerns, please don't hesitate to reach out to the 
+                            Research Management Office (RMO). <br><br>   
+
+                            Thank you once again for your valuable contributions.
+                        </div>
+               
+                        <footer style='margin-top: 40px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
                     </body>
                 </html>";
+
 
                 bodyBuilder.HtmlBody = htmlBody;
                 message.Body = bodyBuilder.ToMessageBody();
@@ -512,7 +560,7 @@ namespace RemcSys.Controllers
                 return Json(new { success = false, message = "Evaluator is already assigned to this application." });
             }
 
-            int existingEvals = await _context.Evaluations.CountAsync(e => e.fra_Id == fraId);
+            int existingEvals = await _context.Evaluations.CountAsync(e => e.fra_Id == fraId && e.evaluation_Status == "Pending");
             if(existingEvals > 5)
             {
                 return Json(new { success = false, message = "Maximum 5 evaluators can be assigned." });
@@ -541,7 +589,260 @@ namespace RemcSys.Controllers
 
             return Json(new { success = true });
         }
+        
+        public async Task CheckMissedEvaluations()
+        {
+            var today = DateTime.Today;
 
+            var missedEvaluations = await _context.Evaluations
+                .Where(e => e.evaluation_Status == "Pending" && e.evaluation_Deadline <= today)
+                .ToListAsync();
+
+            foreach (var evaluation in missedEvaluations)
+            {
+                evaluation.evaluation_Status = "Missed";
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        [Authorize(Roles = "Chief")]
+        public async Task<IActionResult> ChiefResearchEvaluation(string id)
+        {
+            var fra = await _context.FundedResearchApplication.FindAsync(id);
+            if (fra == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Id = fra.fra_Id;
+            ViewBag.DTSNo = fra.dts_No;
+            ViewBag.Research = fra.research_Title;
+            ViewBag.Field = fra.field_of_Study;
+            ViewBag.Lead = fra.applicant_Name;
+            ViewBag.Member = fra.team_Members;
+
+            var evaluationsList = await _context.Evaluations
+                .Where(e => e.fra_Id == id && e.evaluation_Status != "Decline")
+                .Join(_context.Evaluator,
+                    evaluation => evaluation.evaluator_Id,
+                    evaluator => evaluator.evaluator_Id,
+                    (evaluation, evaluator) => new ViewChiefEvaluationVM
+                    {
+                        evaluator_Name = evaluation.evaluator_Name,
+                        field_of_Interest = evaluator.field_of_Interest,
+                        evaluation_Grade = evaluation.evaluation_Grade,
+                        remarks = evaluation.evaluation_Status
+                    })
+                .ToListAsync();
+
+            var evalFormList = await _context.FileRequirement
+                .Where(e => e.fra_Id == id)
+                .ToListAsync();
+
+            var ethics = await _context.FundedResearchEthics
+                .FirstOrDefaultAsync(e => e.fra_Id == id);
+
+            if(ethics == null)
+            {
+                return NotFound("Funded Research Application didn't apply for Ethics Clearance");
+            }
+            ViewBag.hasUrec = ethics.urec_No == null;
+            ViewBag.hasEthicClearance = ethics.ethicClearance_Id == null;
+            ViewBag.hasCertificate = ethics.completionCertificate_Id == null;
+
+            var model = new Tuple<List<ViewChiefEvaluationVM>, List<FileRequirement>>
+                (evaluationsList, evalFormList);
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Download(string id)
+        {
+            var document = await _context.FileRequirement.FindAsync(id);
+
+            if (document == null)
+            {
+                return NotFound();
+            }
+            return File(document.data, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", document.file_Name);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendResult(string appStatus, string addComment, string fraId)
+        {
+            var fra = await _context.FundedResearchApplication.FirstOrDefaultAsync(f => f.fra_Id == fraId);
+            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
+            if (appStatus == "Approved")
+            {
+                fra.application_Status = appStatus;
+                await _context.SaveChangesAsync();
+                await SendApproveEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);
+                await _actionLogger.LogActionAsync(user.Id, fraId, null, fra.applicant_Name, fra.research_Title + " is Approved.", null);
+            } 
+            else if (appStatus == "Rejected")
+            {
+                fra.application_Status = appStatus;
+                await _context.SaveChangesAsync();
+                await SendRejectEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);
+                await _actionLogger.LogActionAsync(user.Id, fraId, null, fra.applicant_Name, fra.research_Title + " is Rejected.", null);
+            }
+            return RedirectToAction("UEResearchApp", "Chief");
+        }
+
+        public async Task SendApproveEmail(string email, string researchTitle, string name, string comment)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
+
+                string recipientName = email.Split('@')[0];
+                message.To.Add(new MailboxAddress(recipientName, email));
+
+                message.Subject = "Research Technical Evaluation Results - " + researchTitle;
+
+                var bodyBuilder = new BodyBuilder();
+
+                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
+                if (!System.IO.File.Exists(footerImagePath))
+                {
+                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
+                }
+
+                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
+                image.ContentId = MimeUtils.GenerateMessageId();
+
+                var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                        <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+                            We are pleased to inform you that after a strict evaluation process, your research titled <strong>{researchTitle}</strong> 
+                            has <strong>successfully passed the technical evaluations </strong>of the Research Evaluation Management Center (REMC).                    
+                        </div>
+
+                        <div style='margin-bottom: 22px;'>
+                            <strong>Next Steps:</strong>
+                            <ol>
+                                <li><strong>Await Further Approval</strong> – Your research will now proceed to the final phase of approval, 
+                                    which includes the approval of both the University Research Ethics Committee (UREC) and the Executive Committee (EXECOMM).</li>
+                                <li><strong>Await Notice to Proceed</strong> – Once all final approvals are completed, you will receive a 
+                                    formal notice to proceed with the next steps of your research or implementation, if applicable.</li>
+                            </ol>
+                        </div>
+
+                        <div style='margin - bottom: 22px;'>
+                            Please note that <strong> this process may take some time</strong>, and we encourage you to monitor updates via the REMC system or contact
+                            the Research Management Office (RMO) if necessary. You may also check the university’s website for any general announcements.<br><br>
+                            We congratulate you once again on this significant milestone and wish you continued success in your research journey.
+                            <br><br>
+                            Additional Chief Comments and Suggestions: <br>{comment}
+                        </div>
+                
+                        <hr>
+	
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
+                    </body>
+                </html>";
+
+
+                bodyBuilder.HtmlBody = htmlBody;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error occurred while sending email: {ex.Message}");
+            }
+        }
+
+        public async Task SendRejectEmail(string email, string researchTitle, string name, string comment)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
+
+                string recipientName = email.Split('@')[0];
+                message.To.Add(new MailboxAddress(recipientName, email));
+
+                message.Subject = "Research Technical Evaluation Results - " + researchTitle;
+
+                var bodyBuilder = new BodyBuilder();
+
+                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
+                if (!System.IO.File.Exists(footerImagePath))
+                {
+                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
+                }
+
+                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
+                image.ContentId = MimeUtils.GenerateMessageId();
+
+                var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                        <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+                            We regret to inform you that after a strict evaluation process, your research titled <strong>{researchTitle}</strong> 
+                            has not met the required standards of the Research Evaluation and Monitoring Center (REMC), and <strong> has been rejected for funding </strong> at this time. <br><br>
+                            We understand that this news may be disappointing, and we appreciate the time and effort you put into your submission. Please know that this decision was not made lightly.
+                            We encourage you to review the feedback provided on our website for more specific guidance on how to strengthen your future proposals.
+                        </div>
+
+                        <div style='margin-bottom: 22px;'>
+                            <strong>What You Can Do:</strong>
+                            <ol>
+                                <li><strong>Revisions and Resubmission</strong> –  If you wish to continue pursuing this research, we encourage you to carefully review the evaluators' 
+                                    feedback and consider revising your work. You may reapply in the next evaluation cycle after making the necessary improvements.</li>
+                                <li><strong>Contact the Chief</strong> – Should you require clarification regarding the evaluation results, 
+                                    or if you believe there were errors in the process, you may contact the Research Management Office (RMO) for assistance.</li>
+                            </ol><br>
+
+                             We encourage you to persevere and continue refining your research, as each step in this process brings valuable learning opportunities.
+                            <br><br>
+                            Additional Chief Comments and Suggestions: <br> {comment}
+                        </div>
+                    
+                         <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
+                    </body>
+                </html>";
+
+                bodyBuilder.HtmlBody = htmlBody;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error occurred while sending email: {ex.Message}");
+            }
+        }
 
         [Authorize(Roles ="Chief")]
         public IActionResult GawadTuklas()

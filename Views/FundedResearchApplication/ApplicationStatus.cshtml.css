@@ -192,7 +192,18 @@ button {
         font-size: 20px;
     }
 
-.withdraw-btn, .back-btn {
+.back-btn {
+    background-color: #850000;
+    color: #FFF;
+    padding: 10px 20px;
+    margin-top: 20px;
+    display: inline-block;
+    text-align: center;
+    float: right;
+    margin-bottom: 50px;
+}
+
+.withdraw-btn {
     background-color: #800000;
     color: white;
     padding: 10px 20px;

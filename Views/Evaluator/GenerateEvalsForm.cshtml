@@ -6,7 +6,7 @@
 <div class="container">
     <!-- List of Generated Forms -->
     <div class="document-section">
-        <h5>Generated Evaluation Forms</h5><hr />
+        <h5>Filled Evaluation Forms</h5><hr />
         <p>Click the forms below to download it.</p>
         <ul class="doc-list">
             @foreach (var doc in Model)
@@ -18,6 +18,8 @@
                 </li>
             }
         </ul>
+        <p>Final Grade: @ViewBag.Grade</p>
+        <p>Remarks: @ViewBag.Remarks</p>
     </div>
 </div>
 

@@ -424,10 +424,10 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
 
-            var fraId = fraList.Select(s => s.fra_Id).ToList();
+            var fraId = fraList.Select(s => s.fra_Id).FirstOrDefault();
 
             var logs = await _context.ActionLogs
-                .Where(f => fraId.Contains(f.FraId))
+                .Where(f => f.FraId == fraId && (f.ProjLead == null || f.ProjLead == user.Name))
                 .OrderByDescending(log => log.Timestamp)
                 .ToListAsync();
 
@@ -555,7 +555,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Faculty")]
-        public async Task<IActionResult> UnderEvaluationTracker()
+        public async Task<IActionResult> ApprovedTracker()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -571,10 +571,10 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
 
-            var fraId = fraList.Select(s => s.fra_Id).ToList();
+            var fraId = fraList.Select(s => s.fra_Id).FirstOrDefault();
 
             var logs = await _context.ActionLogs
-                .Where(f => fraId.Contains(f.FraId))
+                .Where(f => f.FraId == fraId && (f.ProjLead == null || f.ProjLead == user.Name))
                 .OrderByDescending(log => log.Timestamp)
                 .ToListAsync();
 

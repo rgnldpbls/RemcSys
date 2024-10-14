@@ -25,4 +25,12 @@
         public string application_Status { get; set; }
         public DateTime? evaluation_deadline { get; set; }
     }
+
+    public class ViewChiefEvaluationVM
+    {
+        public string evaluator_Name { get; set; }
+        public List<string> field_of_Interest { get; set; }
+        public double? evaluation_Grade { get; set; }
+        public string remarks { get; set; }
+    }
 }

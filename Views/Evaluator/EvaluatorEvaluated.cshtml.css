@@ -87,18 +87,17 @@
 
     .status.approved {
         background-color: #0D6B4A;
-        width: 80%;
+        width: 100%;
         color: #FFF;
     }
 
     .status.rejected {
         background-color: #850000;
-        width: 80%;
+        width: 100%;
         color: #FFF;
     }
 
 .action-buttons {
-    display: flex;
     flex-direction: column;
     gap: 10px;
     justify-content: center;

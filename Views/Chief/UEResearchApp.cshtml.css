@@ -136,6 +136,28 @@
         color: #FFF;
     }
 
+.approved {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    background-color: #0D6B4A;
+    width: 50%;
+    color: #FFF;
+}
+
+.rejected {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    background-color: #850000;
+    width: 50%;
+    color: #FFF;
+}
+
 button {
     font-size: 14px;
     border: none;

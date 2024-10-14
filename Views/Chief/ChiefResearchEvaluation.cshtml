@@ -1,0 +1,166 @@
+﻿@model Tuple<List<ViewChiefEvaluationVM>, List<FileRequirement>>
+@{
+    ViewData["Title"] = "Research Evaluation Result";
+    Layout = "_NavChief1";
+
+    bool isGradeNull = Model.Item1.Count(e => e.evaluation_Grade == null) >= 1;
+    bool isDtsNull = ViewBag.DTSNo == null;
+    bool disableForm = isGradeNull || isDtsNull || ViewBag.hasUrec || ViewBag.hasEthicClearance || ViewBag.hasCertificate;
+}
+    <div class="research-evaluation-container">
+    <p>
+        <b>DTS No.:</b> @(ViewBag.DTSNo != null ? ViewBag.DTSNo: "-")
+    </p>
+    <h3><b>RESEARCH TITLE:</b> @ViewBag.Research</h3>
+    <p><b>Field of Study:</b> @ViewBag.Field</p>
+    <p><b>Proponents:</b><br />  @ViewBag.Lead
+        @if (!ViewBag.Member.Contains("N/A"))
+        {
+            @foreach (var member in ViewBag.Member)
+            {
+                <br />
+                @member
+            }
+        }
+    </p>
+
+    <div class="evaluator-container">
+        @foreach(var item in Model.Item1)
+        {
+            <div class="evaluator-card">
+                <div class="evaluator-header">
+                    <h2><span class="evaluator-name">@item.evaluator_Name</span></h2>
+                    <p class="specialization">Specialization: 
+                        <b>
+                            @foreach(var field in item.field_of_Interest)
+                            {
+                                @field@:;
+                            }
+                        </b>
+                    </p>
+                    <p class="specialization">Final Grade: <b> @(item.evaluation_Grade != null ? item.evaluation_Grade : "-") </b></p>
+                    <p class="specialization">Remarks: <b> @item.remarks</b></p>
+                </div>
+
+                <table class="evaluation-table">
+                    <thead>
+                        <tr>
+                            <th>Evaluation Sheet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var evalForms = Model.Item2.Where(f => f.file_Name.Contains(item.evaluator_Name))
+                                .OrderBy(f => f.file_Name).ToList();
+                        }
+                        @if(evalForms.Count > 0)
+                        {
+                            @foreach (var forms in evalForms)
+                            {
+                                <tr>
+                                    <td>
+                                        @forms.file_Name
+                                        <a class="primary-btn" href="@Url.Action("Download", "Chief", new {id = forms.fr_Id})">
+                                            [Download]
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>
+                                    No forms yet.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        <div class="decision-card">
+            <div class="decision-header">
+                <h2>Decision:</h2>
+            </div>
+
+            <hr />
+            <form id="resultForm">
+                <input type="hidden" id="fraId" value="@ViewBag.Id" />
+                <div class="category-dropdown">
+                    <label>Result: </label>
+                    <select id="appStatus" class="category-select" @(disableForm ? "disabled" : "")>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <textarea id="addComment" class="card2" rows="4" placeholder="Additional comments and suggestions..." @(disableForm ? "disabled" : "")></textarea>
+                <button type="button" class="send-btn" id="submitBtn" @(disableForm ? "disabled" : "")>Send</button>
+            </form>
+            <input type="hidden" id="remarks-data" value="@string.Join(",", Model.Item1.Select(e => e.remarks))" />
+        </div>
+    </div>
+</div>
+
+<!-- Warning Pop-up -->
+<div class="warning_section" id="warningPopup" style="display:none;">
+    <div class="card">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="wtitle">Are you sure you want to save changes?</span>
+        <div class="d-grid gap-3 col-14 mx-auto">
+            <p class="deets">An email notification will be sent to Project Leaders informing them of the approval or rejection status. Continue?</p>
+        </div>
+        <button class="wsubmit-btn" id="confirmSubmitBtn">Yes</button>
+        <button class="wback-btn" id="backBtn">Cancel</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('submitBtn').addEventListener('click', function () {
+        document.getElementById('warningPopup').style.display = 'flex';
+    });
+
+    document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
+        const AppStatus = document.getElementById('appStatus').value;
+        const AddComment = document.getElementById('addComment').value;
+        const FraId = document.getElementById('fraId').value;
+
+        $.ajax({
+            url: '@Url.Action("SendResult", "Chief")',
+            type: 'POST',
+            data: {
+                appStatus: AppStatus,
+                addComment: AddComment,
+                fraId: FraId
+            },
+            success: function (response) {
+                alert('Send result successfully!');
+                window.location.href = '/Chief/UEResearchApp';
+            },
+            error: function (xhr, status, error) {
+                alert('Error sending result. Please try again.');
+            }
+        });
+    });
+
+    document.getElementById('backBtn').addEventListener('click', function () {
+        document.getElementById('warningPopup').style.display = 'none';
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Get the remarks data from the hidden input
+        var remarks = document.getElementById("remarks-data").value.split(',');
+
+        // Check if all remarks are "Approve" or if any are "Rejected"
+        var allApproved = remarks.every(function (remark) { return remark.trim() === "Approve"; });
+        var anyRejected = remarks.some(function (remark) { return remark.trim() === "Rejected"; });
+
+        // Pre-select the dropdown option based on the remarks
+        var selectElement = document.getElementById("specialization");
+        if (anyRejected) {
+            selectElement.value = "Rejected";
+        } else if (allApproved) {
+            selectElement.value = "Approved";
+        }
+    });
+</script>

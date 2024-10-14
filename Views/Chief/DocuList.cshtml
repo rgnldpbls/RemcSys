@@ -75,7 +75,14 @@
     </table>
     @if(ViewBag.Type == "University Funded Research")
     {
-        <a class="back-btn" href="/Chief/UFResearchApp">Back</a>
+        if(ViewBag.Status == "Submitted")
+        {
+            <a class="back-btn" href="/Chief/UFResearchApp">Back</a>
+        }
+        else
+        {
+            <a class="back-btn" href="/Chief/UEResearchApp">Back</a>
+        }
     }
     @if(ViewBag.Type == "Externally Funded Research")
     {
@@ -275,7 +282,12 @@
                 newStatus: selectedStatus
             },
             success: function (response) {
-                alert('Status updated successfully!');
+                if (response.success) {
+                    alert('Status updated successfully!');
+                } else if (response.assigned) {
+                    alert('Evaluators assigned successfully!');
+                    window.location.href = '/Chief/UEResearchApp';
+                }
             },
             error: function (xhr, status, error) {
                 alert('Error updating status: ' + error);

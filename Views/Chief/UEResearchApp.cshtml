@@ -38,21 +38,31 @@
                     <td>
                         @{
                             //Filter the evaluations list by the current application ID (fra_Id)
-                            var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id &&
-                            e.evaluation_Status == "Pending").ToList();
-                                                    @foreach (var eval in Model.Item3.DistinctBy(e => e.evaluator_Id))
-                            {
-                                bool isApplicant = Model.Item1.Any(app => eval.evaluator_Name == app.applicant_Name);
-                            }
+                            var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
                         }
                         @if (assignedEvaluators.Count > 0)
                         {
                             foreach (var eval in assignedEvaluators)
                             {
-                                <button class="assign wevaluator"
-                                        data-evaluation-id="@eval.evaluation_Id">
-                                    @eval.evaluator_Name
-                                </button>
+                                if(eval.evaluation_Status == "Pending")
+                                {
+                                    <button class="assign wevaluator"
+                                            data-evaluation-id="@eval.evaluation_Id">
+                                        @eval.evaluator_Name
+                                    </button>
+                                }
+                                else if(eval.evaluation_Status == "Approved")
+                                {
+                                    <button class="approved">
+                                        @eval.evaluator_Name
+                                    </button>
+                                }
+                                else if(eval.evaluation_Status == "Rejected")
+                                {
+                                    <button class="rejected">
+                                        @eval.evaluator_Name
+                                    </button>
+                                }
                             }
                         }
                         else
@@ -64,7 +74,10 @@
                         <button class="manageevaluator-btn"
                             data-fra-id="@app.fra_Id"
                             data-field-of-study="@app.field_of_Study"><i class="bi bi-people-fill"></i></button>
-                        <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@app.fra_Id" class="edit-btn">
+                        <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
+                            <i class="bi bi-file-pdf"></i>
+                        </a>
+                        <a asp-action="ChiefResearchEvaluation" asp-controller="Chief" asp-route-id="@app.fra_Id" class="edit-btn">
                             <i class="bi bi-pencil-square"></i>
                         </a>
                     </td>

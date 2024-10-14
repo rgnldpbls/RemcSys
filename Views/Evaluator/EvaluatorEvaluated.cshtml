@@ -54,7 +54,9 @@
                             }
                         </td>
                         <td class="action-buttons">
-                            <a href="/Evaluator/GenerateEvalsForm" class="fillup-btn"><i class="bi bi-eye-fill"></i></a>
+                            <a asp-action="GenerateEvalsForm" asp-route-id="@item.fra_Id" class="fillup-btn">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
                         </td>
                     </tr>
                 }
