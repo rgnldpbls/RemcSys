@@ -86,10 +86,6 @@ namespace RemcSys.Controllers
 
             ViewBag.Submitted = submitted;
 
-
-
-
-
             return View();
         }
 

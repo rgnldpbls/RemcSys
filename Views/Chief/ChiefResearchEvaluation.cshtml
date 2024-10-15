@@ -6,6 +6,9 @@
     bool isGradeNull = Model.Item1.Count(e => e.evaluation_Grade == null) >= 1;
     bool isDtsNull = ViewBag.DTSNo == null;
     bool disableForm = isGradeNull || isDtsNull || ViewBag.hasUrec || ViewBag.hasEthicClearance || ViewBag.hasCertificate;
+
+    bool allApproved = Model.Item1.All(e => e.evaluation_Grade >= 70 && e.remarks == "Approved");
+    bool anyRejected = Model.Item1.Any(e => e.evaluation_Grade < 70 && e.remarks == "Rejected");
 }
     <div class="research-evaluation-container">
     <p>
@@ -90,14 +93,21 @@
                 <div class="category-dropdown">
                     <label>Result: </label>
                     <select id="appStatus" class="category-select" @(disableForm ? "disabled" : "")>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
+                        @if(allApproved)
+                        {
+                            <option value="Approved" selected>Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        }
+                        else if(anyRejected) 
+                        {
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected" selected>Rejected</option>
+                        }
                     </select>
                 </div>
                 <textarea id="addComment" class="card2" rows="4" placeholder="Additional comments and suggestions..." @(disableForm ? "disabled" : "")></textarea>
                 <button type="button" class="send-btn" id="submitBtn" @(disableForm ? "disabled" : "")>Send</button>
             </form>
-            <input type="hidden" id="remarks-data" value="@string.Join(",", Model.Item1.Select(e => e.remarks))" />
         </div>
     </div>
 </div>
@@ -145,22 +155,5 @@
 
     document.getElementById('backBtn').addEventListener('click', function () {
         document.getElementById('warningPopup').style.display = 'none';
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-        // Get the remarks data from the hidden input
-        var remarks = document.getElementById("remarks-data").value.split(',');
-
-        // Check if all remarks are "Approve" or if any are "Rejected"
-        var allApproved = remarks.every(function (remark) { return remark.trim() === "Approve"; });
-        var anyRejected = remarks.some(function (remark) { return remark.trim() === "Rejected"; });
-
-        // Pre-select the dropdown option based on the remarks
-        var selectElement = document.getElementById("specialization");
-        if (anyRejected) {
-            selectElement.value = "Rejected";
-        } else if (allApproved) {
-            selectElement.value = "Approved";
-        }
     });
 </script>

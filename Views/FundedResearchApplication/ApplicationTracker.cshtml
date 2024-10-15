@@ -53,7 +53,7 @@
                 <strong>Reviewed by Evaluator</strong>
                 @if(new[] {"Approved", "Rejected", "Proceed"}.Contains(item.application_Status))
                 {
-                    <a class="view-btn" asp-action="UnderMaintenance" asp-controller="Home"
+                    <a class="view-btn" asp-action="EvaluationResult" asp-controller="FundedResearchApplication"
                         asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">View</a>
                 }
                 else

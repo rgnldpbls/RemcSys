@@ -23,5 +23,6 @@ namespace RemcSys.Models
         public ICollection<ActionLog> ActionLogs { get; set; }
         public FundedResearchEthics FundedResearchEthics { get; set; }
         public string UserId { get; set; }
+        public bool isArchive { get; set; }
     }
 }

@@ -226,6 +226,7 @@ namespace RemcSys.Controllers
             fundedResearchApp.submission_Date = DateTime.Now;
             fundedResearchApp.dts_No = null;
             fundedResearchApp.UserId = user.Id;
+            fundedResearchApp.isArchive = false;
             _context.FundedResearchApplication.Add(fundedResearchApp);
             _context.SaveChanges();
 
@@ -580,6 +581,45 @@ namespace RemcSys.Controllers
                 .ToListAsync();
 
             var model = new Tuple<IEnumerable<FundedResearchApplication>, IEnumerable<ActionLog>>(fraList, logs);
+            return View(model);
+        }
+
+        [Authorize (Roles = "Faculty")]
+        public async Task<IActionResult> EvaluationResult(string id)
+        {
+            var fra = await _context.FundedResearchApplication.FindAsync(id);
+            if (fra == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Id = fra.fra_Id;
+            ViewBag.DTSNo = fra.dts_No;
+            ViewBag.Research = fra.research_Title;
+            ViewBag.Field = fra.field_of_Study;
+            ViewBag.Lead = fra.applicant_Name;
+            ViewBag.Member = fra.team_Members;
+
+            var evaluationsList = await _context.Evaluations
+                .Where(e => e.fra_Id == id && e.evaluation_Status != "Decline")
+                .Join(_context.Evaluator,
+                    evaluation => evaluation.evaluator_Id,
+                    evaluator => evaluator.evaluator_Id,
+                    (evaluation, evaluator) => new ViewChiefEvaluationVM
+                    {
+                        evaluator_Name = evaluation.evaluator_Name,
+                        field_of_Interest = evaluator.field_of_Interest,
+                        evaluation_Grade = evaluation.evaluation_Grade,
+                        remarks = evaluation.evaluation_Status
+                    })
+                .ToListAsync();
+
+            var evalFormList = await _context.FileRequirement
+                .Where(e => e.fra_Id == id)
+                .ToListAsync();
+
+            var model = new Tuple<List<ViewChiefEvaluationVM>, List<FileRequirement>>
+                (evaluationsList, evalFormList);
+
             return View(model);
         }
     }
