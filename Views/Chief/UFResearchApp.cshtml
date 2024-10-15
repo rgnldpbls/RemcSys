@@ -4,19 +4,24 @@
     Layout = "_NavChief1";
 }
 <div class="funded-research-container">
-    <h2 class="title">UNIVERSITY FUNDED RESEARCH APPLICATIONS</h2>
-
     <div class="research-categories">
-        <div class="research-category university-funded">
+        <div class="research-category active">
             <a asp-action="UFResearchApp"><h3>University Funded Research</h3></a>
         </div>
-        <div class="research-category externally-funded">
+        <div class="research-category inactive">
             <a asp-action="EFResearchApp"><h3>Externally Funded Research</h3></a>
         </div>
-        <div class="research-category research-load">
+        <div class="research-category inactive">
             <a asp-action="UFRLApp"><h3>University Funded Research Load</h3></a>
         </div>
+        <div class="research-category inactive">
+            <a asp-action="UEResearchApp"><h3>UFR - Evaluation</h3></a>
+        </div>
+        <div class="research-category inactive">
+            <a asp-action="UploadNTP"><h3>Funded Research - Upload NTP</h3></a>
+        </div>
     </div>
+    <h2 class="title">UNIVERSITY FUNDED RESEARCH APPLICATIONS</h2>
     <hr />
 
     <div class="search-section">

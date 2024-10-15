@@ -14,14 +14,14 @@
         <div class="research-category inactive">
             <a asp-action="UFRLApp"><h3>University Funded Research Load</h3></a>
         </div>
-        <div class="research-category active">
+        <div class="research-category inactive">
             <a asp-action="UEResearchApp"><h3>UFR - Evaluation</h3></a>
         </div>
-        <div class="research-category inactive">
+        <div class="research-category active">
             <a asp-action="UploadNTP"><h3>Funded Research - Upload NTP</h3></a>
         </div>
     </div>
-    <h2 class="title">UNIVERSITY FUNDED RESEARCH APPLICATIONS - EVALUATION</h2>
+    <h2 class="title">FUNDED RESEARCH APPLICATIONS - NOTICE TO PROCEED SUBMISSION</h2>
     <hr />
 
     <div class="search-section">
@@ -61,20 +61,20 @@
                         {
                             foreach (var eval in assignedEvaluators)
                             {
-                                if(eval.evaluation_Status == "Pending")
+                                if (eval.evaluation_Status == "Pending")
                                 {
                                     <button class="assign wevaluator"
                                             data-evaluation-id="@eval.evaluation_Id">
                                         @eval.evaluator_Name
                                     </button>
                                 }
-                                else if(eval.evaluation_Status == "Approved")
+                                else if (eval.evaluation_Status == "Approved")
                                 {
                                     <button class="approved">
                                         @eval.evaluator_Name
                                     </button>
                                 }
-                                else if(eval.evaluation_Status == "Rejected")
+                                else if (eval.evaluation_Status == "Rejected")
                                 {
                                     <button class="rejected">
                                         @eval.evaluator_Name
@@ -89,8 +89,10 @@
                     </td>
                     <td>
                         <button class="manageevaluator-btn"
-                            data-fra-id="@app.fra_Id"
-                            data-field-of-study="@app.field_of_Study"><i class="bi bi-people-fill"></i></button>
+                                data-fra-id="@app.fra_Id"
+                                data-field-of-study="@app.field_of_Study">
+                            <i class="bi bi-people-fill"></i>
+                        </button>
                         <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
                             <i class="bi bi-file-pdf"></i>
                         </a>
@@ -113,7 +115,6 @@
     </div>
 
     <div class="evaluator-list">
-        
     </div>
 </div>
 
@@ -124,7 +125,7 @@
         $('.manageevaluator-btn').click(function () {
             var fraId = $(this).data('fra-id');
             var fieldOfStudy = $(this).data('field-of-study');
-            
+
             $.ajax({
                 url: '@Url.Action("GetEvaluatorsForResearch", "Chief")',
                 type: 'GET',
@@ -196,7 +197,7 @@
                         } else {
                             evaluatorItem.append(icon, details, button);
                         }
-                        
+
 
                         // Add the evaluator item to the list
                         $('.evaluator-list').append(evaluatorItem);

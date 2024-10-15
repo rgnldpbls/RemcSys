@@ -14,7 +14,7 @@
     display: flex;
     gap: 15px;
     margin-bottom: 20px;
-    width: 80%;
+    width: 100%;
     transition: background-color 0.3s ease;
 }
 
@@ -33,24 +33,18 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.university-funded {
-    background-color: #f5f5f5;
+.active {
+    background-color: #8b0a0a;
     color: white;
 }
 
-.externally-funded {
-    background-color: #8b0a0a;
-    color: #333;
-    border: 1px solid #ccc;
-}
-
-.research-load {
+.inactive {
     background-color: #f5f5f5;
-    color: #000;
+    color: #333;
 }
 
 .research-category h3 {
-    font-size: 18px;
+    font-size: 14px;
     margin-bottom: 10px;
 }
 

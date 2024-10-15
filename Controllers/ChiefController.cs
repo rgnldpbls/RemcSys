@@ -844,6 +844,37 @@ namespace RemcSys.Controllers
             }
         }
 
+        [Authorize (Roles = "Chief")]
+        public async Task<IActionResult> UploadNTP(string searchString)
+        {
+            await CheckMissedEvaluations();
+            ViewData["currentFilter"] = searchString;
+            var appQuery = _context.FundedResearchApplication
+                .Where(f => f.fra_Type == "University Funded Research");
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
+            }
+
+            var researchAppList = await appQuery
+                .Where(f => f.application_Status == "Approved")
+                .OrderByDescending(f => f.submission_Date)
+                .ToListAsync();
+
+            var evaluatorList = _context.Evaluations
+                .Where(e => researchAppList.Select(r => r.fra_Id).Contains(e.fra_Id))
+                .ToList();
+
+            var allEvaluators = await _context.Evaluator
+                .OrderBy(f => f.evaluator_Name)
+                .ToListAsync();
+
+            var model = new Tuple<List<FundedResearchApplication>, List<Evaluation>, List<Evaluator>>(researchAppList, evaluatorList, allEvaluators);
+
+            return View(model);
+        }
+
         [Authorize(Roles ="Chief")]
         public IActionResult GawadTuklas()
         {
