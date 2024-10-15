@@ -1,0 +1,92 @@
+﻿@model Tuple<List<ViewChiefEvaluationVM>, List<FileRequirement>>
+@{
+    ViewData["Title"] = "Research Evaluation Result";
+    Layout = "_NavChief1";
+
+    bool allApproved = Model.Item1.All(item => item.evaluation_Grade >= 70 && item.remarks == "Approved");
+    bool anyRejected = Model.Item1.Any(item => item.evaluation_Grade < 70 && item.remarks == "Rejected");
+    string decisionResult = allApproved ? "Approved" : (anyRejected ? "Rejected" : "Pending Decision");
+}
+<div class="research-evaluation-container">
+    <p>
+        <b>DTS No.:</b> @(ViewBag.DTSNo != null ? ViewBag.DTSNo : "-")
+    </p>
+    <h3><b>RESEARCH TITLE:</b> @ViewBag.Research</h3>
+    <p><b>Field of Study:</b> @ViewBag.Field</p>
+    <p>
+        <b>Proponents:</b><br />  @ViewBag.Lead
+        @if (!ViewBag.Member.Contains("N/A"))
+        {
+            @foreach (var member in ViewBag.Member)
+            {
+                <br />
+                @member
+            }
+        }
+    </p>
+
+    <div class="evaluator-container">
+        <div class="decision-card">
+            <div class="decision-header">
+                <h2>Decision: <b>@decisionResult</b></h2>
+            </div>
+        </div>
+        @foreach (var item in Model.Item1)
+        {
+            <div class="evaluator-card">
+                <div class="evaluator-header">
+                    <h2><span class="evaluator-name">@item.evaluator_Name</span></h2>
+                    <p class="specialization">
+                        Specialization:
+                        <b>
+                            @foreach (var field in item.field_of_Interest)
+                            {
+                                @field
+
+                                @:;
+                            }
+                        </b>
+                    </p>
+                    <p class="specialization">Final Grade: <b> @(item.evaluation_Grade != null ? item.evaluation_Grade : "-") </b></p>
+                    <p class="specialization">Remarks: <b> @item.remarks</b></p>
+                </div>
+
+                <table class="evaluation-table">
+                    <thead>
+                        <tr>
+                            <th>Evaluation Sheet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var evalForms = Model.Item2.Where(f => f.file_Name.Contains(item.evaluator_Name))
+                            .OrderBy(f => f.file_Name).ToList();
+                        }
+                        @if (evalForms.Count > 0)
+                        {
+                            @foreach (var forms in evalForms)
+                            {
+                                <tr>
+                                    <td>
+                                        @forms.file_Name
+                                        <a class="primary-btn" href="@Url.Action("Download", "Chief", new {id = forms.fr_Id})">
+                                            [Download]
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>
+                                    No forms yet.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

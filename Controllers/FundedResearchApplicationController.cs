@@ -4,16 +4,20 @@ using System.Linq;
 using System.Runtime.Intrinsics.X86;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using MimeKit.Utils;
+using MimeKit;
 using Newtonsoft.Json;
 using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
 using RemcSys.Models;
 using Xceed.Words.NET;
+using MailKit.Net.Smtp;
 
 namespace RemcSys.Controllers
 {
@@ -33,12 +37,14 @@ namespace RemcSys.Controllers
             _actionLogger = actionLogger;
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: FundedResearchApplication
         public async Task<IActionResult> Index()
         {
             return View(await _context.FundedResearchApplication.ToListAsync());
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: FundedResearchApplication/Details/5
         public async Task<IActionResult> Details(string id)
         {
@@ -57,6 +63,7 @@ namespace RemcSys.Controllers
             return View(fundedResearchApplication);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: FundedResearchApplication/Create
         public IActionResult Create()
         {
@@ -79,6 +86,7 @@ namespace RemcSys.Controllers
             return View(fundedResearchApplication);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: FundedResearchApplication/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
@@ -130,6 +138,7 @@ namespace RemcSys.Controllers
             return View(fundedResearchApplication);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: FundedResearchApplication/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
@@ -398,8 +407,147 @@ namespace RemcSys.Controllers
             fra.application_Status = "Submitted";
             await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, fra.applicant_Name, fra.fra_Type, "Application was submitted.", "submitted application.");
             await _context.SaveChangesAsync();
+            if(fra.fra_Type == "University Funded Research")
+            {
+                await SendUFREmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
+            }
+            else if(fra.fra_Type != "University Funded Research")
+            {
+                await SendSubmitEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
+            }
 
             return RedirectToAction("ApplicationSuccess", "FundedResearchApplication");
+        }
+
+        public async Task SendUFREmail(string email, string researchTitle, string name)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
+
+                string recipientName = email.Split('@')[0];
+                message.To.Add(new MailboxAddress(recipientName, email));
+
+                message.Subject = "Application Successfully Submitted - " + researchTitle;
+                var bodyBuilder = new BodyBuilder();
+
+                string footerImagePath = Path.Combine(_environment.WebRootPath, "images", "Footer.png");
+                if (!System.IO.File.Exists(footerImagePath))
+                {
+                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
+                }
+
+                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
+                image.ContentId = MimeUtils.GenerateMessageId();
+
+                var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                        <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+
+                            We are pleased to inform you that your <strong> application has been successfully received </strong> by the Research Evaluation and Monitoring Center (REMC).
+                            Your submission is<strong> currently under review </strong>by the Chief, who will assess its completeness before proceeding to the technical evaluation phase.
+                        
+                        </div>
+
+                        <div style='margin-bottom: 22px;'>
+                            <strong>Next Steps:</strong>
+                            <ol>
+                                <li>Your application will undergo a preliminary review by the Chief.</li>
+                                <li>Upon approval, it will proceed to the technical evaluation stage, where it will be carefully assessed by our panel of experts.</li>
+                                <li>For the meantime, you may<strong> start applying for Ethics Clearance </strong> through the system, or upload if you have already obtained one.</li>
+                            </ol><br>
+
+                            For real-time updates on the status of your application, we recommend checking the REMC website at {{websiteLink}}. Thank you for your submission, and we look forward to working with you throughout this process.
+
+                        </div>
+                    
+                    </body>
+                </html>";
+
+                bodyBuilder.HtmlBody = htmlBody;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error occurred while sending email: {ex.Message}");
+            }
+        }
+
+        public async Task SendSubmitEmail(string email, string researchTitle, string name)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
+
+                string recipientName = email.Split('@')[0];
+                message.To.Add(new MailboxAddress(recipientName, email));
+
+                message.Subject = "Application Successfully Submitted - " + researchTitle;
+                var bodyBuilder = new BodyBuilder();
+
+                string footerImagePath = Path.Combine(_environment.WebRootPath, "images", "Footer.png");
+                if (!System.IO.File.Exists(footerImagePath))
+                {
+                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
+                }
+
+                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
+                image.ContentId = MimeUtils.GenerateMessageId();
+
+                var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                        <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+
+                            We are pleased to inform you that your <strong> application has been successfully received </strong> by the Research Evaluation and Monitoring Center (REMC).
+                            Your submission is<strong> currently under review </strong>by the Chief, who will assess its completeness.
+                        
+                        </div>
+
+                        <div style='margin-bottom: 22px;'>
+                            <strong>Next Steps:</strong>
+                            <ol>
+                                <li>Your application will undergo a preliminary review by the Chief.</li>
+                                <li> For the meantime, you may<strong> start applying for Ethics Clearance </strong> through the system, or upload if you have already obtained one.</li>
+                            </ol><br>
+
+                            For real-time updates on the status of your application, we recommend checking the REMC website at {{websiteLink}}. Thank you for your submission, and we look forward to working with you throughout this process.
+
+                        </div>
+                    
+                    </body>
+                </html>";
+
+                bodyBuilder.HtmlBody = htmlBody;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error occurred while sending email: {ex.Message}");
+            }
         }
 
         [Authorize(Roles = "Faculty")]
@@ -417,7 +565,7 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
             var fraList = await _context.FundedResearchApplication
-                .Where(s => s.UserId == user.Id)
+                .Where(s => s.UserId == user.Id && s.isArchive == false)
                 .ToListAsync();
 
             if (fraList == null || !fraList.Any())
@@ -565,7 +713,7 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
             var fraList = await _context.FundedResearchApplication
-                .Where(s => s.UserId == user.Id)
+                .Where(s => s.UserId == user.Id && s.isArchive == false)
                 .ToListAsync();
 
             if (fraList == null || !fraList.Any())
@@ -621,6 +769,30 @@ namespace RemcSys.Controllers
                 (evaluationsList, evalFormList);
 
             return View(model);
+        }
+
+        public async Task<IActionResult> PdfDownload(string id)
+        {
+            var file = await _context.FileRequirement.FirstOrDefaultAsync(f => f.fra_Id == id && f.document_Type == "Notice to Proceed");
+            if(file == null)
+            {
+                return NotFound();
+            }
+            return File(file.data, "application/pdf", file.file_Name);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReApply(string fraId)
+        {
+            var fra = await _context.FundedResearchApplication.FindAsync(fraId);
+            if(fra == null)
+            {
+                return NotFound("No Funded Research Application found.");
+            }
+
+            fra.isArchive = true;
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Forms", "Home");
         }
     }
 }

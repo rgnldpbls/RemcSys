@@ -1,9 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Apply for Funded Research";
-    @if (ViewBag.PendingApp == true || ViewBag.SubmittedUFR == true || ViewBag.EvalsUFR == true || ViewBag.ApprovedUFR == true || 
-            ViewBag.RejectedUFR == true || ViewBag.ProceedUFR == true || ViewBag.Submitted == true)
+    @if (ViewBag.PendingApp || ViewBag.SubmittedUFR || ViewBag.EvalsUFR || ViewBag.ApprovedUFR || ViewBag.RejectedUFR || 
+            ViewBag.ProceedUFR || ViewBag.Submitted || ViewBag.Approved || ViewBag.Proceed)
     {
-        @if(ViewBag.Pending == true)
+        @if(ViewBag.PendingApp)
         {
             Layout = "_NavFaculty3";
         }
@@ -21,16 +21,15 @@
     <h1>RESEARCH EVALUATION AND MONITORING CENTER</h1>
     <p>The REMC monitors the implementation of the approved internally and externally funded research projects. It also assists in the preparation of programs designed towards the development of national and international relations.</p>
     <div class="apply-button d-grid gap-2 col-6 mx-auto">
-        @if(ViewBag.SubmittedUFR == true || ViewBag.EvalsUFR == true || ViewBag.ApprovedUFR == true || ViewBag.RejectedUFR == true || 
-                ViewBag.ProceedUFR == true)
+        @if(ViewBag.SubmittedUFR || ViewBag.EvalsUFR || ViewBag.ApprovedUFR || ViewBag.RejectedUFR || ViewBag.ProceedUFR)
         {
             <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="ApplicationTracker">PROCEED</a>
         }
-        else if (ViewBag.Submitted)
+        else if (ViewBag.Submitted || ViewBag.Approved || ViewBag.Proceed)
         {
             <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="ApplicationTrackerII">PROCEED</a>
         }
-        else if(ViewBag.PendingApp == true)
+        else if(ViewBag.PendingApp)
         {
             <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="GeneratedDocuments">PROCEED</a>
         }

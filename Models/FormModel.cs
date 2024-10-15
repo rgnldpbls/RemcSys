@@ -33,4 +33,16 @@
         public double? evaluation_Grade { get; set; }
         public string remarks { get; set; }
     }
+
+    public class ViewNTP
+    {
+        public string dts_No { get; set; }
+        public string research_Title { get; set; }
+        public string field_of_Study { get; set; }
+        public string fra_Type {  get; set; }
+        public string fra_Id { get; set; }
+        public string? urec_No { get; set; }
+        public int? ethicClearance_Id { get; set; }
+        public int? completionCertificate_Id { get; set; }
+    }
 }

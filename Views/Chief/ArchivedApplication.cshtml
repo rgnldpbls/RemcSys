@@ -1,0 +1,67 @@
+﻿@model List<FundedResearchApplication>
+@{
+    ViewData["Title"] = "University Funded Research Applications";
+    Layout = "_NavChief1";
+}
+<div class="funded-research-container">
+    <h2 class="title">ARCHIVED FUNDED RESEARCH APPLICATIONS</h2>
+    <hr />
+
+    <div class="search-section">
+        <!-- Search Form -->
+        <form asp-controller="Chief" asp-action="ArchivedApplication" method="get" class="form-inline mb-3">
+            <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
+            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    <table class="document-table">
+        <thead>
+            <tr>
+                <th>DTS No.</th>
+                <th>Application Details</th>
+                <th>Research Type</th>
+                <th>Application Status</th>
+                <th>Files</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var app in Model)
+            {
+                <tr>
+                    <td>
+                        @(app.dts_No != null ? app.dts_No : "-")
+                    </td>
+                    <td class="research-details">
+                        <b>Research Title:</b> @app.research_Title<br />
+                        <b>Field of Study:</b> @app.field_of_Study
+                    </td>
+                    <td>
+                        @app.fra_Type
+                    </td>
+                    <td>
+                        @if(app.application_Status == "Proceed")
+                        {
+                            <p class="approved">@app.application_Status</p>
+                        }
+                        else if(app.application_Status == "Rejected")
+                        {
+                            <p class="rejected">@app.application_Status</p>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
+                            <i class="bi bi-file-pdf"></i>
+                        </a>
+                        @if (app.fra_Type == "University Funded Research")
+                        {
+                            <a asp-action="ChiefEvaluationResult" asp-route-id="@app.fra_Id" class="edit-btn">
+                                <i class="bi bi-file-word"></i>
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

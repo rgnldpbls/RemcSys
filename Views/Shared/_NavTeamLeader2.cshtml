@@ -19,7 +19,14 @@
             </div>
             <nav class="nav nav-pills nav-fill">
                 <a class="nav-link active" href="/Home/Faculty">Home</a>
-                <a class="nav-link active" href="/FundedResearchApplication/ApplicationTracker">Application</a>
+                @if(ViewData["Type"] == "University Funded Research")
+                {
+                    <a class="nav-link active" href="/FundedResearchApplication/ApplicationTracker">Application</a>
+                }
+                else
+                {
+                    <a class="nav-link active" href="/FundedResearchApplication/ApplicationTrackerII">Application</a>
+                }
             </nav>
             <!-- New container for profile -->
             <div class="profile">

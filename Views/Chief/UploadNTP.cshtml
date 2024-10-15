@@ -1,4 +1,4 @@
-﻿@model Tuple<List<FundedResearchApplication>, List<Evaluation>, List<Evaluator>>
+﻿@model List<ViewNTP>
 @{
     ViewData["Title"] = "University Funded Research Applications";
     Layout = "_NavChief1";
@@ -26,7 +26,7 @@
 
     <div class="search-section">
         <!-- Search Form -->
-        <form asp-controller="Chief" asp-action="UFResearchApp" method="get" class="form-inline mb-3">
+        <form asp-controller="Chief" asp-action="UploadNTP" method="get" class="form-inline mb-3">
             <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
             <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
         </form>
@@ -37,12 +37,13 @@
             <tr>
                 <th>DTS No.</th>
                 <th>Application Details</th>
-                <th>Assign Evaluators</th>
-                <th>Actions</th>
+                <th>Research Type</th>
+                <th>Views</th>
+                <th>Upload</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var app in Model.Item1)
+            @foreach (var app in Model)
             {
                 <tr>
                     <td>
@@ -53,52 +54,49 @@
                         <b>Field of Study:</b> @app.field_of_Study
                     </td>
                     <td>
-                        @{
-                            //Filter the evaluations list by the current application ID (fra_Id)
-                            var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
-                        }
-                        @if (assignedEvaluators.Count > 0)
-                        {
-                            foreach (var eval in assignedEvaluators)
-                            {
-                                if (eval.evaluation_Status == "Pending")
-                                {
-                                    <button class="assign wevaluator"
-                                            data-evaluation-id="@eval.evaluation_Id">
-                                        @eval.evaluator_Name
-                                    </button>
-                                }
-                                else if (eval.evaluation_Status == "Approved")
-                                {
-                                    <button class="approved">
-                                        @eval.evaluator_Name
-                                    </button>
-                                }
-                                else if (eval.evaluation_Status == "Rejected")
-                                {
-                                    <button class="rejected">
-                                        @eval.evaluator_Name
-                                    </button>
-                                }
-                            }
-                        }
-                        else
-                        {
-                            <span class="assign noevaluator">No Evaluator yet</span>
-                        }
+                        @app.fra_Type
                     </td>
                     <td>
-                        <button class="manageevaluator-btn"
-                                data-fra-id="@app.fra_Id"
-                                data-field-of-study="@app.field_of_Study">
-                            <i class="bi bi-people-fill"></i>
-                        </button>
                         <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
                             <i class="bi bi-file-pdf"></i>
                         </a>
-                        <a asp-action="ChiefResearchEvaluation" asp-controller="Chief" asp-route-id="@app.fra_Id" class="edit-btn">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
+                        @if(app.fra_Type == "University Funded Research")
+                        {
+                            <a asp-action="ChiefEvaluationResult" asp-route-id="@app.fra_Id" class="edit-btn">
+                                <i class="bi bi-file-word"></i>
+                            </a>
+                        }
+                    </td>
+                    <td>
+                        <div class="file-upload-container">
+                            @if (app.urec_No == null && app.ethicClearance_Id == null && app.completionCertificate_Id == null)
+                            {
+                                <div class="file-input-wrapper">
+                                    <input type="file" id="pdfFileInput_@app.fra_Id" accept=".pdf" required disabled />
+                                </div>
+                                <div class="submit-button-wrapper">
+                                    <button type="button" class="resubmit-btn" id="uploadFileBtn" disabled>
+                                        <i class="bi bi-upload"></i> Upload NTP
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <form asp-action="UploadNotice" asp-controller="Chief" method="post" enctype="multipart/form-data">
+                                    <div class="file-input-wrapper">
+                                        <input type="file" name="file" id="pdfFileInput_@app.fra_Id" accept=".pdf" required />
+                                        <br />
+                                        <a href="#" id="previewLink_@app.fra_Id" target="_blank" style="display:none;">Click to preview</a>
+                                    </div>
+                                    <input type="hidden" name="fraId" value="@app.fra_Id" />
+                                    <div class="submit-button-wrapper">
+                                        <button type="submit" class="resubmit-btn" onclick="validateAndSubmit('@app.fra_Id')">
+                                            <i class="bi bi-upload"></i> Upload NTP
+                                        </button>
+                                    </div>
+                                </form>
+                            }
+                        </div>
                     </td>
                 </tr>
             }
@@ -106,176 +104,57 @@
     </table>
 </div>
 
-
-<!--modal evaluator-->
-<div class="evaluators-modal" style="display:none;">
-    <div class="header">
-        <h1>LIST OF EVALUATORS</h1>
-        <button class="close-btn">&times;</button>
-    </div>
-
-    <div class="evaluator-list">
+<!-- Warning Pop-up -->
+<div class="warning_section" id="warningPopup" style="display: none">
+    <div class="card">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="titleWarning">Please review the file before submitting.</span>
+        <div class="d-grid gap-3 col-14 mx-auto">
+            <p>Changes may not be possible after submission.</p>
+        </div>
+        <button class="wsubmit-btn" id="confirmSubmitBtn">Submit</button>
+        <button class="wback-btn" id="backBtn">Back</button>
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-        // Handle the click event for 'Manage Evaluator' buttons
-        $('.manageevaluator-btn').click(function () {
-            var fraId = $(this).data('fra-id');
-            var fieldOfStudy = $(this).data('field-of-study');
+@section Scripts {
+    <script>
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function () {
+                const fileInput = this;
+                const file = fileInput.files[0];
 
-            $.ajax({
-                url: '@Url.Action("GetEvaluatorsForResearch", "Chief")',
-                type: 'GET',
-                data: { fraId: fraId, fieldOfStudy: fieldOfStudy },
-                success: function (data) {
-                    $('.evaluator-list').empty(); // Clear the current list
+                // Get corresponding preview link
+                const previewLink = document.getElementById(`previewLink_${fileInput.id.split('_')[1]}`);
 
-                    $.each(data, function (i, evaluator) {
-                        // Create a new evaluator item
-                        var evaluatorItem = $('<div>').addClass('evaluator-item')
-                            .css({
-                                'display': 'flex',
-                                'align-items': 'center',
-                                'justify-content': 'space-between',
-                                'background-color': 'white',
-                                'border-radius': '5px',
-                                'padding': '1px',
-                                'margin': '10px 0',
-                                'border': '1px solid #7C0000'
-                            });
+                if (file && file.type === 'application/pdf') {
+                    const fileURL = URL.createObjectURL(file);
 
-                        var icon = $('<i>').addClass('bi bi-person-circle')
-                            .css({
-                                'color': '#000',
-                                'font-size': '50px',
-                                'margin-left': '10px'
-                            });
+                    // Set preview link href and display it
+                    previewLink.href = fileURL;
+                    previewLink.style.display = 'inline';
+                    previewLink.textContent = file.name;
 
-                        var details = $('<div>').addClass('evaluator-details')
-                            .css({
-                                'flex-grow': '1',
-                                'padding-left': '20px',
-                                'color': 'black',
-                                'line-height': '0.25',
-                                'font-size': '12px'
-                            });
-
-                        var name = $('<h5>').addClass('evaluator-name')
-                            .html('<b>' + evaluator.evaluator_Name + '</b>');
-
-                        var fieldsOfInterest = $('<p>').text('Fields of Interest: ' + evaluator.field_of_Interest.join(', ')); // Assuming it's an array
-
-                        var pendingCount = $('<p>').text('Pending: ' + evaluator.pendingCount);
-
-                        details.append(name, fieldsOfInterest, pendingCount);
-
-                        var button = $('<button>')
-                            .addClass('assign-btn')
-                            .css({
-                                'background-color': '#FFDB89',
-                                'border': 'none',
-                                'padding': '10px',
-                                'font-weight': 'bold',
-                                'cursor': 'pointer',
-                                'border-radius': '5px',
-                                'color': '#850000',
-                                'margin-right': '20px'
-                            })
-                            .text('ASSIGN')
-                            .data('evaluator-id', evaluator.evaluator_Id)
-                            .data('fra-id', fraId);
-
-                        var button2 = $('<p>')
-                            .text('CANNOT BE ASSIGNED');
-
-                        // Append icon, details, and button to the evaluator item
-                        if (evaluator.isDisabled) {
-                            evaluatorItem.append(icon, details, button2);
-                        } else {
-                            evaluatorItem.append(icon, details, button);
-                        }
-
-
-                        // Add the evaluator item to the list
-                        $('.evaluator-list').append(evaluatorItem);
+                    // When you preview, release the object URL afterward (optional cleanup)
+                    previewLink.addEventListener('click', () => {
+                        setTimeout(() => URL.revokeObjectURL(fileURL), 1000);
                     });
-
-                    $('.evaluators-modal').show(); // Show the modal with updated content
+                } else {
+                    // Hide the preview link if not a PDF
+                    previewLink.style.display = 'none';
                 }
-
             });
         });
 
-        // Close the modal when the close button is clicked
-        $('.close-btn').click(function () {
-            $('.evaluators-modal').hide();
-        });
+        function validateAndSubmit(fraId) {
+            // Get the file input element
+            const fileInput = document.getElementById('pdfFileInput_' + fraId);
 
-        // Handle the assignment of evaluators
-        $(document).on('click', '.assign-btn', function () {
-            var evaluatorId = $(this).data('evaluator-id');
-            var fraId = $(this).data('fra-id');
-
-            // Show confirmation dialog
-            var confirmAssign = confirm("Are you sure you want to assign this evaluator?");
-
-            if (confirmAssign) {
-                // Proceed with assignment
-                $.ajax({
-                    url: '@Url.Action("AssignEvaluator", "Chief")',
-                    type: 'POST',
-                    data: {
-                        evaluatorId: evaluatorId,
-                        fraId: fraId
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            alert('Evaluator assigned successfully!');
-                            location.reload(); // Reload to update the list and counts
-                        } else {
-                            alert('Failed to assign evaluator. ' + response.message);
-                        }
-                    },
-                    error: function (error) {
-                        console.log(error);
-                        alert('An error occurred.');
-                    }
-                });
+            // Check if a file is selected
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select a PDF file to upload.");
+                return; // Stop form submission
             }
-        });
-    });
-
-    $(document).ready(function () {
-        $(document).on('click', '.assign', function () {
-            var evaluationId = $(this).data('evaluation-id');
-
-            var confirmAssign = confirm("Are you sure you want to remove this evaluator?");
-            if (confirmAssign) {
-                $.ajax({
-                    url: '@Url.Action("DeclineEvaluator", "Chief")', // Update with your actual controller name
-                    type: 'POST',
-                    data: {
-                        evaluationId: evaluationId
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            alert('Evaluator removed successfully!');
-                            location.reload(); // Reload to update the list and counts
-                        } else {
-                            alert('Failed to remove evaluator. ' + response.message);
-                        }
-                    },
-                    error: function (error) {
-                        console.log(error);
-                        alert('An error occurred.');
-                    }
-                });
-            } else {
-                alert('Removed canceled');
-            }
-        });
-    });
-</script>
+        }
+    </script>
+}

@@ -73,25 +73,6 @@
             }
         </tbody>
     </table>
-    @if(ViewBag.Type == "University Funded Research")
-    {
-        if(ViewBag.Status == "Submitted")
-        {
-            <a class="back-btn" href="/Chief/UFResearchApp">Back</a>
-        }
-        else
-        {
-            <a class="back-btn" href="/Chief/UEResearchApp">Back</a>
-        }
-    }
-    @if(ViewBag.Type == "Externally Funded Research")
-    {
-        <a class="back-btn" href="/Chief/EFResearchApp">Back</a>
-    }
-    @if(ViewBag.Type == "University Funded Research Load")
-    {
-        <a class="back-btn" href="/Chief/UFRLApp">Back</a>
-    }
 </div>
 
 <!--feedback pop-up-->
@@ -287,6 +268,9 @@
                 } else if (response.assigned) {
                     alert('Evaluators assigned successfully!');
                     window.location.href = '/Chief/UEResearchApp';
+                } else if (response.approved) {
+                    alert('File requirements approved!');
+                    window.location.href = '/Chief/UploadNTP';
                 }
             },
             error: function (xhr, status, error) {
