@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using RemcSys.Areas.Identity.Data
+
+@inject SignInManager<SystemUser> SignInManager
+@inject UserManager<SystemUser> UserManager
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -20,20 +25,15 @@
                 </div>
                 <nav class="nav nav-pills nav-fill">
                     <a class="nav-link active" href="/Home/Faculty">Home</a>
-                    @if(ViewBag.Type == "University Funded Research")
-                    {
-                        <a class="nav-link active" href="/FundedResearchApplication/ApplicationTracker">Application</a>
-                    }
-                    else
-                    {
-                        <a class="nav-link active" href="/FundedResearchApplication/ApplicationTrackerII">Application</a>
-                    }
+                    <a class="nav-link active disabled" aria-disabled="true">Application</a>
                 </nav>
                 <!-- New container for profile -->
                 <div class="profile">
-                    <a class="btn btn-outline-light" asp-action="Faculty" asp-controller="Home">
-                        Faculty
-                    </a>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var user = await UserManager.GetUserAsync(User);
+                        <span>@user.Name</span>
+                    }
                     <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
                         <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">
                             <i class="bi-person-circle" style="font-size: 35px;"></i>

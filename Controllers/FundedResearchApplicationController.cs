@@ -405,13 +405,13 @@ namespace RemcSys.Controllers
                 }
             }
             fra.application_Status = "Submitted";
-            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + "is submitted.", true, true, false, fra.fra_Id);
+            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " is submitted.", true, true, false, fra.fra_Id);
             await _context.SaveChangesAsync();
-            /*if(fra.fra_Type == "University Funded Research")
+            /*if (fra.fra_Type == "University Funded Research")
             {
                 await SendUFREmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
             }
-            else if(fra.fra_Type != "University Funded Research")
+            else if (fra.fra_Type != "University Funded Research")
             {
                 await SendSubmitEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
             }*/
@@ -469,7 +469,7 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
                     </body>
                 </html>";
@@ -540,7 +540,7 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
                     
                     </body>

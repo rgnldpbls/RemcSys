@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Humanizer;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -382,7 +383,7 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
 
                     </body>
@@ -541,7 +542,7 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
                
                     </body>
@@ -613,17 +614,129 @@ namespace RemcSys.Controllers
         {
             var today = DateTime.Today;
 
-            var missedEvaluations = await _context.Evaluations
-                .Where(e => e.evaluation_Status == "Pending" && e.evaluation_Deadline <= today)
+            var evaluations = await _context.Evaluations
+                .Where(e => e.evaluation_Status == "Pending")
                 .ToListAsync();
 
-            foreach (var evaluation in missedEvaluations)
+            foreach (var evaluation in evaluations)
             {
-                evaluation.evaluation_Status = "Missed";
+                var evaluator = await _context.Evaluator
+                    .Where(e => e.evaluator_Id == evaluation.evaluator_Id)
+                    .FirstOrDefaultAsync();
+
+                var fra = await _context.FundedResearchApplication
+                    .Where(f => f.fra_Id == evaluation.fra_Id)
+                    .FirstOrDefaultAsync();
+
+                var daysLeft = (evaluation.evaluation_Deadline - today).Days;
+                if(daysLeft < 0)
+                {
+                    evaluation.evaluation_Status = "Missed";
+                    await _context.SaveChangesAsync();
+                }
+                else if(daysLeft == 0)
+                {
+                    var content = "This is an urgent reminder that the evaluation for the research titled " + fra.research_Title + " is due today.";
+                    await SendRemindEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, content);
+                    await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "This is an urgent reminder that the evaluation for the research titled "
+                        + fra.research_Title + " is due today.", false, false, true, fra.fra_Id);
+                }
+                else if(daysLeft == 1)
+                {
+                    var content = "This is a reminder that your evaluation for the research titled " + fra.research_Title + 
+                        " is due tomorrow. We kindly request you to submit  the completed Grading and Comments forms before the deadline of " 
+                        + evaluation.evaluation_Deadline.ToString("MMMM d, yyyy") + ".";
+                    await SendRemindEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, content);
+                    await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "This is a reminder that your evaluation for the research titled "
+                        + fra.research_Title + " is due tomorrow.", false, false, true, fra.fra_Id);
+                }
+                else if(daysLeft == 3)
+                {
+                    var content = "This is a gentle reminder that the deadline for submitting your evaluation of the research titled " + 
+                        fra.research_Title + " is approaching, with 3 days remaining until " + 
+                        evaluation.evaluation_Deadline.ToString("MMMM d, yyyy") + ".";
+                    await SendRemindEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, content);
+                    await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "This is a gentle reminder that the deadline for submitting your evaluation of the research titled "
+                        + fra.research_Title + " is approaching, with 3 days remaining until deadline.", false, false, true, fra.fra_Id);
+                }
             }
 
-            await _context.SaveChangesAsync();
         }
+
+        public async Task SendRemindEvaluatorEmail(string email, string researchTitle, string name, string content)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
+
+                string recipientName = email.Split('@')[0];
+                message.To.Add(new MailboxAddress(recipientName, email));
+
+                message.Subject = "Research Evaluation Deadline - " + researchTitle;
+
+                var bodyBuilder = new BodyBuilder();
+
+                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
+                if (!System.IO.File.Exists(footerImagePath))
+                {
+                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
+                }
+
+                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
+                image.ContentId = MimeUtils.GenerateMessageId();
+
+                var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                        <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+                    
+                            Greetings! <br><br>
+                            <strong>{content}</strong>
+
+                        </div>
+
+                        <div style='margin-bottom: 22px;'>
+                            Please log in to the system and complete both evaluation forms:
+                            <ol>
+                                <li><strong>Grading Form</strong>: Includes scoring per criterion and a section for comments and suggestions.</li>
+                                <li><strong>Comments Form</strong>: A form for providing detailed comments and suggestions only.</li>
+                            </ol>
+
+                            Your timely completion is crucial for the continued progress of this research, and we appreciate your attention to this task.
+                            Should you have any concerns or need assistance, please don’t hesitate to reach out to the REMC Chief.
+
+                        </div>
+                    
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
+                    </body>
+                </html>";
+
+                bodyBuilder.HtmlBody = htmlBody;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error occurred while sending email: {ex.Message}");
+            }
+        }
+
 
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> ChiefResearchEvaluation(string id)
@@ -765,7 +878,7 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>                
                     </body>
                 </html>";
@@ -841,7 +954,7 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
                     
                     </body>
@@ -991,7 +1104,7 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>                  
                     </body>
                 </html>";

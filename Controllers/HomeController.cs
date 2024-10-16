@@ -60,7 +60,6 @@ namespace RemcSys.Controllers
             }
 
             var fra = await _context.FundedResearchApplication.FirstOrDefaultAsync(f => f.UserId == user.Id);
-            ViewBag.Type = fra.fra_Type;
 
             var pendingApp = await _context.FundedResearchApplication
                 .AnyAsync(f => f.application_Status == "Pending" && f.UserId == user.Id);
@@ -94,7 +93,6 @@ namespace RemcSys.Controllers
             ViewBag.Submitted = submitted;
             ViewBag.Approved = approved;
             ViewBag.Proceed = proceed;
-
             return View();
         }
 
