@@ -19,7 +19,7 @@
             </div>
             <nav class="nav nav-pills nav-fill">
                 <a class="nav-link active" href="/Home/Faculty">Home</a>
-                @if(ViewData["Type"] == "University Funded Research")
+                @if(ViewBag.Type == "University Funded Research")
                 {
                     <a class="nav-link active" href="/FundedResearchApplication/ApplicationTracker">Application</a>
                 }

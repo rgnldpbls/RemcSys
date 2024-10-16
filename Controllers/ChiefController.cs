@@ -41,7 +41,10 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> ChiefNotif()
         {
-            var logs = await _context.ActionLogs.OrderByDescending(log => log.Timestamp).ToListAsync();
+            var logs = await _context.ActionLogs
+                .Where(f => f.isChief == true)
+                .OrderByDescending(log => log.Timestamp)
+                .ToListAsync();
             return View(logs);
         }
 
@@ -156,7 +159,8 @@ namespace RemcSys.Controllers
                 fileReq.file_Feedback = fileFeedback;
 
                 _context.SaveChanges();
-                await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, null, null, "You need to resubmit " + fileReq.file_Name + ".", null);
+                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, "You need to resubmit this " + fileReq.file_Name + ". " +
+                    "Kindly check the feedback for the changes.", true, false, false, fra.fra_Id);
                 return Json(new { success = true });
             }
             return Json(new { success = false });
@@ -188,7 +192,8 @@ namespace RemcSys.Controllers
 
             file.file_Status = newStatus;
             _context.SaveChanges();
-            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, null, null, file.file_Name + " already checked.", null);
+            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, file.file_Name + " already checked by the Chief.", 
+                true, false, false, fra.fra_Id);
 
             var allFilesChecked = _context.FileRequirement
                    .Where(fr => fr.fra_Id == fra.fra_Id)
@@ -203,7 +208,8 @@ namespace RemcSys.Controllers
             {
                 fra.application_Status = "Approved";
                 await _context.SaveChangesAsync();
-                await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, null, null, fra.research_Title + " all file requirements approved.", null);
+                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " all file requirements approved by the Chief.", 
+                    true, false, false, fra.fra_Id);
                 return Json(new { approved = true });
             }
             return Json(new { success = true });
@@ -285,16 +291,16 @@ namespace RemcSys.Controllers
                 };
 
                 assignedEvaluators.Add(newEvaluation);
-                await _actionLogger.LogActionAsync(user.Id, fraId, evaluator.evaluator_Name, null,
-                    "The chief assign you to evaluate " + fra.research_Title + ".", null);
-                await SendEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, 
-                    DateTime.Now.AddDays(7).ToString("MMMM d, yyyy"));
+                await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "The chief assign you to evaluate the " + fra.research_Title + ".", 
+                    false, false, true, fra.fra_Id);
+                /*await SendEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, DateTime.Now.AddDays(7).ToString("MMMM d, yyyy"));*/
                 evaluatorIndex = (evaluatorIndex + 1) % eligibleEvaluators.Count;
             }
             _context.Evaluations.AddRange(assignedEvaluators);
             fra.application_Status = "UnderEvaluation";
             await _context.SaveChangesAsync();
-            await _actionLogger.LogActionAsync(user.Id, fraId, null, null, fra.research_Title + " already under evaluation.", null);
+            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " already under techical evaluation.", 
+                true, false, false, fra.fra_Id);
         }
 
         public async Task<List<Evaluator>> GetEligibleEvaluators(string fraId)
@@ -371,6 +377,13 @@ namespace RemcSys.Controllers
                             Your timely feedback is crucial, and we appreciate your effort in completing both evaluations.
                             Should you have any questions or concerns, feel free to contact the Research Management Office (RMO) at [RMO Contact Information].
                         </div>
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
 
                     </body>
                 </html>";
@@ -473,9 +486,9 @@ namespace RemcSys.Controllers
             var evaluator = _context.Evaluator.Where(e => e.evaluator_Id == evals.evaluator_Id).FirstOrDefault();
             var fra = _context.FundedResearchApplication.Where(f => f.fra_Id == evals.fra_Id).FirstOrDefault();
             var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
-            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, evals.evaluator_Name, null,
-                    "The chief remove you to evaluate " + fra.research_Title + ".", null);
-            await SendRemoveEmail(evaluator.evaluator_Email, fra.research_Title, evals.evaluator_Name);
+            await _actionLogger.LogActionAsync(evals.evaluator_Name, fra.fra_Type, "The chief remove you to evaluate the " + fra.research_Title + ".", 
+                false, false, true, fra.fra_Id);
+            /*await SendRemoveEmail(evaluator.evaluator_Email, fra.research_Title, evals.evaluator_Name);*/
             evals.evaluation_Status = "Decline";
             await _context.SaveChangesAsync();
 
@@ -523,6 +536,13 @@ namespace RemcSys.Controllers
 
                             Thank you once again for your valuable contributions.
                         </div>
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
                
                     </body>
                 </html>";
@@ -565,6 +585,8 @@ namespace RemcSys.Controllers
                 return Json(new { success = false, message = "Maximum 5 evaluators can be assigned." });
             }
 
+            var evaluators = _context.Evaluator.Find(evaluatorId);
+
             var evaluation = new Evaluation
             {
                 evaluation_Id = Guid.NewGuid().ToString(),
@@ -578,11 +600,9 @@ namespace RemcSys.Controllers
                 fra_Id = fraId
             };
 
-            await _actionLogger.LogActionAsync(user.Id, fraId, _context.Evaluator.Find(evaluatorId).evaluator_Name, null,
-                    "The chief assign you to evaluate " + fra.research_Title + ".", null);
-            await SendEvaluatorEmail(_context.Evaluator.Find(evaluatorId).evaluator_Email,
-                _context.FundedResearchApplication.Find(fraId).research_Title, _context.Evaluator.Find(evaluatorId).evaluator_Name,
-                DateTime.Now.AddDays(7).ToString("MMMM d, yyyy"));
+            await _actionLogger.LogActionAsync(evaluators.evaluator_Name, fra.fra_Type, "The chief assign you to evaluate the " + fra.research_Title + ".", 
+                false, false, true, fra.fra_Id);
+            /*await SendEvaluatorEmail(evaluators.evaluator_Email, fra.research_Title, evaluators.evaluator_Name, DateTime.Now.AddDays(7).ToString("MMMM d, yyyy"));*/
             _context.Evaluations.Add(evaluation);
             await _context.SaveChangesAsync();
 
@@ -675,15 +695,17 @@ namespace RemcSys.Controllers
             {
                 fra.application_Status = appStatus;
                 await _context.SaveChangesAsync();
-                await SendApproveEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);
-                await _actionLogger.LogActionAsync(user.Id, fraId, fra.applicant_Name, null, fra.research_Title + " is Approved.", null);
+                /*await SendApproveEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);*/
+                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " is approved in technical evaluation.", 
+                    true, false, false, fra.fra_Id);
             } 
             else if (appStatus == "Rejected")
             {
                 fra.application_Status = appStatus;
                 await _context.SaveChangesAsync();
-                await SendRejectEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);
-                await _actionLogger.LogActionAsync(user.Id, fraId, fra.applicant_Name, null, fra.research_Title + " is Rejected.", null);
+                /*await SendRejectEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);*/
+                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " is rejected in technical evaluation.", 
+                    true, false, false, fra.fra_Id);
             }
             return RedirectToAction("UEResearchApp", "Chief");
         }
@@ -738,7 +760,13 @@ namespace RemcSys.Controllers
                             <br><br>
                             Additional Chief Comments and Suggestions: <br>{comment}
                         </div>
-                
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>                
                     </body>
                 </html>";
 
@@ -808,6 +836,13 @@ namespace RemcSys.Controllers
                             <br><br>
                             Additional Chief Comments and Suggestions: <br> {comment}
                         </div>
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
                     
                     </body>
                 </html>";
@@ -898,8 +933,9 @@ namespace RemcSys.Controllers
             }
             fra.application_Status = "Proceed";
             await _context.SaveChangesAsync();
-            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, fra.applicant_Name, null, fra.research_Title + "'s Notice to proceed already uploaded.", null);
-            await SendProceedEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
+            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + "'s Notice to proceed already uploaded.", 
+                true, false, false, fra.fra_Id);
+            /*await SendProceedEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);*/
 
             return RedirectToAction("UploadNTP", "Chief");
         }
@@ -950,7 +986,13 @@ namespace RemcSys.Controllers
                             Should there be any need for modification of the approved research project, kindly note that it must be submitted for approval by the UREC, especially if the NTP has already been released.
 
                         </div>
-                   
+                         <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>                  
                     </body>
                 </html>";
 
@@ -1029,8 +1071,6 @@ namespace RemcSys.Controllers
 
             return View(researchAppList);
         }
-
-
 
         [Authorize(Roles ="Chief")]
         public IActionResult GawadTuklas()

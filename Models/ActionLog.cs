@@ -7,14 +7,15 @@ namespace RemcSys.Models
     {
         [Key]
         public string LogId { get; set; }
-        public string UserId { get; set; }
-        public string FraId { get; set; }
-        public string? ProjLead {  get; set; } //EvaluatorNotif
-        public string? FraType {  get; set; } // ChiefNotif
-        public FundedResearchApplication fundedResearchApplication { get; set; }
-        public string Description { get; set; }
+        public string? Name {  get; set; }
+        public string? ResearchType {  get; set; }
         public string? Action {  get; set; }
+        public bool isTeamLeader {  get; set; }
+        public bool isChief { get; set; }
+        public bool isEvaluator {  get; set; }
         public DateTime Timestamp { get; set; }
+        public string FraId { get; set; }
+        public FundedResearchApplication fundedResearchApplication { get; set; }
 
         public ActionLog()
         {
@@ -56,16 +57,17 @@ namespace RemcSys.Models
             _context = context;
         }
 
-        public async Task LogActionAsync(string userId, string fraId, string projLead, string fraType, string description, string action)
+        public async Task LogActionAsync(string name, string fraType, string action, bool isTeamLeader, bool isChief, bool isEvaluator, string fraId)
         {
             var logEntry = new ActionLog
             {
-                UserId = userId,
-                FraId = fraId,
-                ProjLead = projLead,
-                FraType = fraType,
-                Description = description,
-                Action = action
+                Name = name,
+                ResearchType = fraType,
+                Action = action,
+                isTeamLeader = isTeamLeader,
+                isChief = isChief,
+                isEvaluator = isEvaluator,
+                FraId = fraId
             };
 
             _context.ActionLogs.Add(logEntry);

@@ -7,5 +7,5 @@
 <h1>Notifications</h1>
 @foreach (var log in Model)
 {
-    <p>@log.Description | @ActionLog.GetTimeAgo(log.Timestamp)</p>
+    <p>@log.Action | @ActionLog.GetTimeAgo(log.Timestamp)</p>
 }

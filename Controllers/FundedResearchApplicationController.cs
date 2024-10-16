@@ -405,16 +405,16 @@ namespace RemcSys.Controllers
                 }
             }
             fra.application_Status = "Submitted";
-            await _actionLogger.LogActionAsync(user.Id, fra.fra_Id, fra.applicant_Name, fra.fra_Type, "Application was submitted.", "submitted application.");
+            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + "is submitted.", true, true, false, fra.fra_Id);
             await _context.SaveChangesAsync();
-            if(fra.fra_Type == "University Funded Research")
+            /*if(fra.fra_Type == "University Funded Research")
             {
                 await SendUFREmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
             }
             else if(fra.fra_Type != "University Funded Research")
             {
                 await SendSubmitEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
-            }
+            }*/
 
             return RedirectToAction("ApplicationSuccess", "FundedResearchApplication");
         }
@@ -464,7 +464,13 @@ namespace RemcSys.Controllers
                             For real-time updates on the status of your application, we recommend checking the REMC website at {{websiteLink}}. Thank you for your submission, and we look forward to working with you throughout this process.
 
                         </div>
-                    
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
                     </body>
                 </html>";
 
@@ -529,6 +535,13 @@ namespace RemcSys.Controllers
                             For real-time updates on the status of your application, we recommend checking the REMC website at {{websiteLink}}. Thank you for your submission, and we look forward to working with you throughout this process.
 
                         </div>
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{image.ContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
                     
                     </body>
                 </html>";
@@ -573,10 +586,10 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
 
-            var fraId = fraList.Select(s => s.fra_Id).FirstOrDefault();
+            var teamLead = fraList.Select(s => s.applicant_Name).FirstOrDefault();
 
             var logs = await _context.ActionLogs
-                .Where(f => f.FraId == fraId && (f.ProjLead == null || f.ProjLead == user.Name))
+                .Where(f => f.Name == teamLead && f.isTeamLeader == true)
                 .OrderByDescending(log => log.Timestamp)
                 .ToListAsync();
 
@@ -619,7 +632,7 @@ namespace RemcSys.Controllers
             ViewBag.TeamLead = fra.applicant_Name;
             ViewBag.TeamMembers = fra.team_Members;
             ViewBag.Field = fra.field_of_Study;
-            ViewBag.FraType = fra.fra_Type;
+            ViewBag.Type = fra.fra_Type;
             var fileRequirements = await _context.FileRequirement
                 .Where(fr => fr.fra_Id == id && fr.file_Type == ".pdf")
                 .OrderBy(fr => fr.file_Name)
@@ -721,10 +734,10 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
 
-            var fraId = fraList.Select(s => s.fra_Id).FirstOrDefault();
+            var teamLead = fraList.Select(s => s.applicant_Name).FirstOrDefault();
 
             var logs = await _context.ActionLogs
-                .Where(f => f.FraId == fraId && (f.ProjLead == null || f.ProjLead == user.Name))
+                .Where(f => f.Name == teamLead && f.isTeamLeader == true)
                 .OrderByDescending(log => log.Timestamp)
                 .ToListAsync();
 
@@ -746,6 +759,7 @@ namespace RemcSys.Controllers
             ViewBag.Field = fra.field_of_Study;
             ViewBag.Lead = fra.applicant_Name;
             ViewBag.Member = fra.team_Members;
+            ViewBag.Type = fra.fra_Type;
 
             var evaluationsList = await _context.Evaluations
                 .Where(e => e.fra_Id == id && e.evaluation_Status != "Decline")

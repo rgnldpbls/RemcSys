@@ -65,13 +65,13 @@
                                 </div>
                             </div>
                         }
-                        @if(fileRequirement.file_Status == "Checked")
+                        @if(fileRequirement.file_Status == "Checked" || fileRequirement.file_Status == "Proceed")
                         {
                             <span class="status approved">Checked by the Chief</span>
                         }
                     </td>
                     <td class="action-buttons">
-                        @if(fileRequirement.file_Status == "Pending" || fileRequirement.file_Status == "Checked")
+                        @if(fileRequirement.file_Status == "Pending" || fileRequirement.file_Status == "Checked" || fileRequirement.file_Status == "Proceed")
                         {
                             @if (fileRequirement.file_Type == ".pdf")
                             {

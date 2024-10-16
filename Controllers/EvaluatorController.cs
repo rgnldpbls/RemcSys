@@ -31,8 +31,9 @@ namespace RemcSys.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             var logs = await _context.ActionLogs
-                .Where(l => l.ProjLead == user.Name)
-                .OrderByDescending(log => log.Timestamp).ToListAsync();
+                .Where(f => f.Name == user.Name && f.isEvaluator == true)
+                .OrderByDescending(log => log.Timestamp)
+                .ToListAsync();
             return View(logs);
         }
 
@@ -262,6 +263,8 @@ namespace RemcSys.Controllers
             evals.evaluation_Date = DateTime.Now;
             await _context.SaveChangesAsync();
             Directory.Delete(filledFolder, true);
+            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, evaluator.evaluator_Name + " already evaluated the " + fra.research_Title + ".", 
+                true, true, false, fra.fra_Id);
 
             return RedirectToAction("EvaluatorEvaluated", "Evaluator");
         }
