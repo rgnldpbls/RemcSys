@@ -1,0 +1,141 @@
+﻿@model IEnumerable<ActionLog>
+@{
+    ViewData["Title"] = "Progress Tracker";
+    Layout = "_NavTeamLeader4";
+}
+
+<div class="container">
+    <h1>Progress Report Tracker</h1>
+    <button class="extend-btn">Request Extension</button><br />
+    <h6><b>NOTE:</b> To upload your report, simply click on the corresponding icon.</h6>
+    <!-- Progress Steps -->
+    <div class="step-container">
+        <div class="step">
+            <div class="step-icon complete">
+                <a asp-action="UploadProgReport1" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">
+                    <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px; color: #850000"></i>
+                </a>
+                <span class="progress_line"></span>
+            </div>
+            <span class="progress_line"></span>
+            <strong>Progress Report 1</strong>
+            <p>@ViewBag.Report1</p>
+        </div>
+        <div class="step">
+            <div class="step-icon complete">
+                <span class="still-progress_line"></span>
+                <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
+            </div>
+            <strong>Progress Report 2</strong>
+            <p>@ViewBag.Report2</p>
+            <i class="bi bi-lock" style="color: #850000"></i>
+            @* <button class="compliance">For Compliance...</button> *@
+        </div>
+        <div class="step">
+            <div class="step-icon">
+                <span class="still-progress_line"></span>
+                <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
+            </div>
+            <strong>Progress Report 3</strong>
+            <p>@ViewBag.Report3</p>
+            <i class="bi bi-lock" style="color: #850000"></i>
+        </div>
+        <div class="step">
+            <div class="step-icon">
+                <span class="still-progress_line"></span>
+                <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
+            </div>
+            <strong>Progress Report 4</strong>
+            <p>@ViewBag.Report4</p>
+            <i class="bi bi-lock" style="color: #850000"></i>
+        </div>
+        <div class="step">
+            <div class="step-icon">
+                <span class="still-progress_line"></span>
+            <i class="bi bi-terminal-fill" style="font-size: 35px"></i>
+            </div>
+            <strong>Terminal Report</strong>
+            <i class="bi bi-lock" style="color: #850000"></i>
+        </div>
+        <div class="step">
+            <div class="step-icon">
+                <span class="still-progress_line"></span>
+            <i class="bi bi-cash-coin" style="font-size: 35px"></i>
+            </div>
+            <strong>Liquidation Report</strong>
+            <i class="bi bi-lock" style="color: #850000"></i>
+        </div>
+
+        <div class="step">
+            <div class="step-icon">
+                <i class="bi bi-check2-circle" style="font-size: 35px"></i>
+            </div>
+            <strong style="font-size: 14px;">Certificate of Completion</strong>
+            <i class="bi bi-lock" style="color: #850000"></i>
+        </div>
+    </div>
+
+    <!-- Research Details -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="research-details">
+                <p><strong>Research Title:</strong> @ViewBag.Research</p>
+                <p><strong>Proponents:</strong> @ViewBag.Lead
+                @if (!ViewBag.Members.Contains("N/A"))
+                {
+                    @foreach (var member in ViewBag.Members)
+                    {
+                        @: , @member
+                    }
+                }
+                </p>
+                <p><strong>Field of Study:</strong> @ViewBag.Field</p>
+            </div>
+        </div>
+
+        <!-- Document History -->
+        <div class="col-md-6">
+            <div class="document-history">
+                <h5><strong>Document History</strong></h5>
+                @foreach(var log in Model)
+                {
+                    <div class="document-history-item">
+                        <div class="history-item-content">
+                            <div class="check-icon">
+                                <span class="track_line"></span>
+                                <i class="bi bi-check-circle" style="font-size: 20px;"></i>
+                            </div>
+                            <span>@log.Action - @ActionLog.GetTimeAgo(log.Timestamp)</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--feedback pop-up-->
+<div class="feedback">
+    <div class="card1">
+        <button type="button" class="fdismiss">×</button>
+        <span class="title">Feedback</span>
+        <div class="card2">
+            <p>
+                Upon reviewing your document, we noticed a few formatting aspects that need adjustments for better readability and consistency
+            </p>
+        </div>
+        <a href="/Home/ReuploadProgress" class="send-btn">Re-submit Report</button></a>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('.compliance').forEach(function (button) {
+        button.addEventListener('click', function () {
+            document.querySelector('.feedback').style.display = 'block';
+        });
+    });
+
+    document.querySelector('.fdismiss').addEventListener('click', function () {
+        document.querySelector('.feedback').style.display = 'none';
+    });
+
+</script>

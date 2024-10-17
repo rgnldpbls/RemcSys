@@ -17,8 +17,8 @@ namespace RemcSys.Models
         public string application_Status { get; set; }
         public DateTime submission_Date { get; set; }
         public string? dts_No { get; set; }
-        public int? project_Duration {  get; set; }
-        public double? total_project_Cost { get; set; }
+        public int project_Duration {  get; set; }
+        public double total_project_Cost { get; set; }
         public ICollection<GeneratedForm> GeneratedForms { get; set; }
         public ICollection<FileRequirement> FileRequirements { get; set; }
         public ICollection<Evaluation> Evaluations { get; set; } 

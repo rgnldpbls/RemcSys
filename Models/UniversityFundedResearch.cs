@@ -16,7 +16,6 @@ namespace RemcSys.Models
         public string research_Status { get; set; }
         public DateTime start_Date { get; set; }
         public DateTime end_Date { get; set; }
-        public int? projectDuration { get; set; }
         public string? dts_No { get; set; }
         public int project_Duration { get; set; }
         public double? total_project_Cost { get; set; }
@@ -24,5 +23,6 @@ namespace RemcSys.Models
         public FundedResearchApplication FundedResearchApplication { get; set; }
         public string UserId { get; set; }
         public bool isArchive { get; set; }
+        public ICollection<ProgressReport> ProgressReports { get; set; }
     }
 }

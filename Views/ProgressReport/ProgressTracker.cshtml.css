@@ -3,6 +3,23 @@
     color: #850000;
 }
 
+h6{
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+.extend-btn {
+    margin-top: 10px;
+    border: none;
+    background-color: #850000;
+    color: #fff;
+    float: right;
+    width: auto;
+    font-weight: 500;
+    padding: 10px 10px;
+    border-radius: 5px;
+}
+
+
 .step-container {
     position: relative;
     display: flex;
@@ -57,14 +74,18 @@
     display: inline;
 }
 
-.step-container a.view-btn {
-    color: #000000;
+.step-container .compliance {
+    display: inline-vlock;
+    padding: 3px 5px;
+    font-weight: bold;
+    border-radius: 10px;
+    background-color: #FFDB89;
+    width: 70%;
+    color: #850000;
     font-size: 12px;
-    margin-left: 5px;
-    display: inline;
-    font-weight: 500;
+    border: 1px solid #FFB100;
+    justify-content: left;
 }
-
 
 .step-icon {
     width: 60px;
@@ -86,9 +107,9 @@
         height: 2px;
         position: absolute;
         top: 25%;
-        left: 59%;
+        left: 62%;
         transform: translateX(5%);
-        z-index: -1;
+        z-index: -3;
     }
 
     .step-icon.complete {
@@ -97,11 +118,11 @@
 
     .step-icon span.still-progress_line {
         background: #757171;
-        width: 75%;
-        height: 2px;
+        width: 73%;
+        height: 1px;
         position: absolute;
         top: 25%;
-        left: 62%;
+        left: 65%;
         transform: translateX(3%);
         z-index: -1;
     }
@@ -148,39 +169,9 @@
     padding: 15px;
 }
 
-.dts-container {
-    display: flex;
-    align-items: center;
-}
 
-.dts-input {
-    margin-left: 10px;
-    width: 200px;
-}
-
-.dts-check-button {
-    background-color: transparent;
-    border: none;
-    color: #850000;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-    .dts-check-button:focus {
-        outline: 2px solid #850000;
-    }
-
-    .dts-check-button:hover {
-        color: #a93a3a;
-    }
-
-/*warning pop-up*/
-.warning_section {
+/*Popup Styles*/
+.feedback {
     display: none;
     position: absolute;
     top: 50%;
@@ -190,57 +181,78 @@
     color: white;
     z-index: 2;
 }
-
-.card5 {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
-    background-color: #ffffff;
-    text-align: left;
-    border: 2px solid #000;
-    border-radius: 1rem;
-    width: 400px;
-    height: 300px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-
-.wtitle {
-    background-color: #ffffff;
-    color: #000;
-    font-size: 20px;
+.title {
+    padding: 1.25rem 1rem 1rem 1rem;
+    color: #fff;
+    font-size: 24px;
     font-weight: bold;
     text-align: center;
 }
-
-.wsubmit-btn {
-    position: absolute;
-    background-color: #FFDB89;
-    color: #850000;
-    bottom: 10px;
-    right: 10px;
-    font-size: 20px;
-    width: 150px;
-    height: 50px;
-    font-weight: 500;
-    border: 1px #FFDB89;
-    border-radius: 5px;
+.card1 {
+    overflow: hidden;
+    position: relative;
+    background-color: #850000;
     text-align: center;
-    margin-top: 10px;
-    line-height: 50px;
+    border-color: #000;
+    border-radius: 1rem;
+    width: 520px;
+    height: 450px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.wback-btn {
+.card2 {
+    overflow: hidden;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #420000;
+    text-align: left;
+    border-color: #000;
+    border-radius: 1rem;
+    width: 470px;
+    height: 320px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+    .card2 p {
+        color: #fff;
+        font-size: 16px;
+        margin: 10px 0;
+    }
+
+.fdismiss {
     position: absolute;
+    right: 10px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
     background-color: #850000;
-    color: #FFF;
-    bottom: 10px;
-    left: 10px;
-    font-size: 20px;
-    width: 150px;
-    height: 50px;
-    font-weight: 500;
-    border: 1px #850000;
+    color: white;
+    border: 2px solid #D1D5DB;
+    font-size: 25px;
+    font-weight: 300;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    transition: .3s ease;
+}
+
+    .fdismiss:hover {
+        background-color: #420000;
+        border: 2px solid #420000;
+        color: #fff;
+    }
+.send-btn {
+    text-decoration: none;
+    text-align: center;
+    padding: 7px 10px;
     border-radius: 5px;
+    font-size: 18px;
+    background-color: #FFDB89;
+    color: #850000;
+    font-weight: bold;
 }

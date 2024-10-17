@@ -69,8 +69,10 @@
                 <strong>Progress Report Tracker</strong>
                 @if(item.application_Status == "Proceed")
                 {
-                    <a class="view-btn" asp-action="UnderMaintenance" asp-controller="Home"
-                        asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">Go to</a>
+                    <form id="progressForm" method="post" asp-action="Progress">
+                        <input type="hidden" name="fraId" value="@item.fra_Id" />
+                        <button class="view-btn" type="button" id="gotoBtn" style="font-size:12px; margin-left: 5px;">Go to</button>
+                    </form>
                 }
                 else
                 {
@@ -120,3 +122,29 @@
         </div>
     }
 </div>
+
+<!-- Warning Pop-up ReApply -->
+<div class="warning_section" id="warningPopup" style="display: none">
+    <div class="card5">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="wtitle">
+            Are you sure you want to go to the Progress Report Tracker?
+        </span>
+    </div>
+    <button class="wsubmit-btn" id="confirmSubmitBtn">Yes</button>
+    <button class="wback-btn" id="backBtn">Cancel</button>
+</div>
+
+<script>
+    document.getElementById('gotoBtn').addEventListener('click', function () {
+        document.getElementById('warningPopup').style.display = 'block';
+    });
+
+    document.getElementById('backBtn').addEventListener('click', function () {
+        document.getElementById('warningPopup').style.display = 'none';
+    });
+
+    document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
+        document.getElementById('progressForm').submit();
+    });
+</script>

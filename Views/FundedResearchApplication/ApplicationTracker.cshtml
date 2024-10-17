@@ -87,8 +87,10 @@
                     <strong>Progress Report Tracker</strong>
                     @if (item.application_Status == "Proceed")
                     {
-                        <a class="view-btn" asp-action="UnderMaintenance" asp-controller="Home"
-                           asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">Go to</a>
+                        <form id="progressForm" method="post" asp-action="Progress">
+                            <input type="hidden" name="fraId" value="@item.fra_Id"/>
+                            <button class="view-btn" type="button" id="gotoBtn" style="font-size:12px; margin-left: 5px;">Go to</button>
+                        </form>
                     }
                     else
                     {
@@ -153,7 +155,7 @@
     }
 </div>
 
-<!-- Warning Pop-up -->
+<!-- Warning Pop-up ReApply -->
 <div class="warning_section" id="warningPopup" style="display: none">
     <div class="card5">
         <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
@@ -163,6 +165,18 @@
     </div>
     <button class="wsubmit-btn" id="confirmSubmitBtn">Yes</button>
     <button class="wback-btn" id="backBtn">Cancel</button>
+</div>
+
+<!-- Warning Pop-up Goto-->
+<div class="warning_section" id="warningPopupII" style="display: none">
+    <div class="card5">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="wtitle">
+            Are you sure you want to go to the Progress Report Tracker?
+        </span>
+    </div>
+    <button class="wsubmit-btn" id="confirmSubmitBtnII">Yes</button>
+    <button class="wback-btn" id="backBtnII">Cancel</button>
 </div>
 
 
@@ -177,5 +191,17 @@
 
     document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
         document.getElementById('reapplyForm').submit();
+    });
+
+    document.getElementById('gotoBtn').addEventListener('click', function () {
+        document.getElementById('warningPopupII').style.display = 'block';
+    });
+
+    document.getElementById('backBtnII').addEventListener('click', function () {
+        document.getElementById('warningPopupII').style.display = 'none';
+    });
+
+    document.getElementById('confirmSubmitBtnII').addEventListener('click', function () {
+        document.getElementById('progressForm').submit();
     });
 </script>

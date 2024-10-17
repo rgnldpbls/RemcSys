@@ -91,6 +91,15 @@ namespace RemcSys.Controllers
             ViewBag.Submitted = submitted;
             ViewBag.Approved = approved;
             ViewBag.Proceed = proceed;
+
+            var ongoingUFR = await _context.UniversityFundedResearches.AnyAsync(f => f.UserId == user.Id);
+            var ongoingEFR = await _context.ExternallyFundedResearches.AnyAsync(f => f.UserId == user.Id);
+            var ongoingUFRL = await _context.UniversityFundedResearchLoads.AnyAsync(f => f.UserId == user.Id);
+
+            ViewBag.OngUFR = ongoingUFR;
+            ViewBag.OngEFR = ongoingEFR;
+            ViewBag.OngUFRL = ongoingUFRL;
+
             return View();
         }
 
