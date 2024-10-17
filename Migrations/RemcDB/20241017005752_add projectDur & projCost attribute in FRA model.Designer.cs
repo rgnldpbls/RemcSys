@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RemcSys.Data;
 
@@ -11,9 +12,11 @@ using RemcSys.Data;
 namespace RemcSys.Migrations.RemcDB
 {
     [DbContext(typeof(RemcDBContext))]
-    partial class RemcDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241017005752_add projectDur & projCost attribute in FRA model")]
+    partial class addprojectDurprojCostattributeinFRAmodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -133,80 +136,6 @@ namespace RemcSys.Migrations.RemcDB
                     b.HasKey("evaluator_Id");
 
                     b.ToTable("Evaluator");
-                });
-
-            modelBuilder.Entity("RemcSys.Models.ExternallyFundedResearch", b =>
-                {
-                    b.Property<string>("efrw_Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("branch")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("college")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("dts_No")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("end_Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("field_of_Study")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fra_Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("isArchive")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("projectDuration")
-                        .HasColumnType("int");
-
-                    b.Property<int>("project_Duration")
-                        .HasColumnType("int");
-
-                    b.Property<string>("research_Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("research_Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("start_Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("teamLead_Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("team_Leader")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("team_Members")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("total_project_Cost")
-                        .HasColumnType("float");
-
-                    b.HasKey("efrw_Id");
-
-                    b.HasIndex("fra_Id")
-                        .IsUnique();
-
-                    b.ToTable("ExternallyFundedResearches");
                 });
 
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
@@ -368,154 +297,6 @@ namespace RemcSys.Migrations.RemcDB
                     b.ToTable("GeneratedForms");
                 });
 
-            modelBuilder.Entity("RemcSys.Models.UniversityFundedResearch", b =>
-                {
-                    b.Property<string>("ufrw_Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("branch")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("college")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("dts_No")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("end_Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("field_of_Study")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fra_Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("isArchive")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("projectDuration")
-                        .HasColumnType("int");
-
-                    b.Property<int>("project_Duration")
-                        .HasColumnType("int");
-
-                    b.Property<string>("research_Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("research_Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("start_Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("teamLead_Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("team_Leader")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("team_Members")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("total_project_Cost")
-                        .HasColumnType("float");
-
-                    b.HasKey("ufrw_Id");
-
-                    b.HasIndex("fra_Id")
-                        .IsUnique();
-
-                    b.ToTable("UniversityFundedResearches");
-                });
-
-            modelBuilder.Entity("RemcSys.Models.UniversityFundedResearchLoad", b =>
-                {
-                    b.Property<string>("ufrl_Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("branch")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("college")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("dts_No")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("end_Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("field_of_Study")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fra_Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("isArchive")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("projectDuration")
-                        .HasColumnType("int");
-
-                    b.Property<int>("project_Duration")
-                        .HasColumnType("int");
-
-                    b.Property<string>("research_Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("research_Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("start_Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("teamLead_Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("team_Leader")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("team_Members")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("total_project_Cost")
-                        .HasColumnType("float");
-
-                    b.HasKey("ufrl_Id");
-
-                    b.HasIndex("fra_Id")
-                        .IsUnique();
-
-                    b.ToTable("UniversityFundedResearchLoads");
-                });
-
             modelBuilder.Entity("RemcSys.Models.ActionLog", b =>
                 {
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")
@@ -544,17 +325,6 @@ namespace RemcSys.Migrations.RemcDB
                     b.Navigation("evaluator");
 
                     b.Navigation("fundedResearchApplication");
-                });
-
-            modelBuilder.Entity("RemcSys.Models.ExternallyFundedResearch", b =>
-                {
-                    b.HasOne("RemcSys.Models.FundedResearchApplication", "FundedResearchApplication")
-                        .WithOne("ExternallyFundedResearch")
-                        .HasForeignKey("RemcSys.Models.ExternallyFundedResearch", "fra_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FundedResearchApplication");
                 });
 
             modelBuilder.Entity("RemcSys.Models.FileRequirement", b =>
@@ -590,28 +360,6 @@ namespace RemcSys.Migrations.RemcDB
                     b.Navigation("FundedResearchApplication");
                 });
 
-            modelBuilder.Entity("RemcSys.Models.UniversityFundedResearch", b =>
-                {
-                    b.HasOne("RemcSys.Models.FundedResearchApplication", "FundedResearchApplication")
-                        .WithOne("UniversityFundedResearch")
-                        .HasForeignKey("RemcSys.Models.UniversityFundedResearch", "fra_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FundedResearchApplication");
-                });
-
-            modelBuilder.Entity("RemcSys.Models.UniversityFundedResearchLoad", b =>
-                {
-                    b.HasOne("RemcSys.Models.FundedResearchApplication", "FundedResearchApplication")
-                        .WithOne("UniversityFundedResearchLoad")
-                        .HasForeignKey("RemcSys.Models.UniversityFundedResearchLoad", "fra_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FundedResearchApplication");
-                });
-
             modelBuilder.Entity("RemcSys.Models.Evaluator", b =>
                 {
                     b.Navigation("Evaluations");
@@ -623,18 +371,12 @@ namespace RemcSys.Migrations.RemcDB
 
                     b.Navigation("Evaluations");
 
-                    b.Navigation("ExternallyFundedResearch");
-
                     b.Navigation("FileRequirements");
 
                     b.Navigation("FundedResearchEthics")
                         .IsRequired();
 
                     b.Navigation("GeneratedForms");
-
-                    b.Navigation("UniversityFundedResearch");
-
-                    b.Navigation("UniversityFundedResearchLoad");
                 });
 #pragma warning restore 612, 618
         }

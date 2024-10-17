@@ -234,6 +234,8 @@ namespace RemcSys.Controllers
             fundedResearchApp.application_Status = "Pending";
             fundedResearchApp.submission_Date = DateTime.Now;
             fundedResearchApp.dts_No = null;
+            fundedResearchApp.project_Duration = Convert.ToInt32(model.ProjectDuration);
+            fundedResearchApp.total_project_Cost = Convert.ToDouble(model.TotalProjectCost);
             fundedResearchApp.UserId = user.Id;
             fundedResearchApp.isArchive = false;
             _context.FundedResearchApplication.Add(fundedResearchApp);
@@ -257,8 +259,8 @@ namespace RemcSys.Controllers
                     document.ReplaceText("{{ProjectStaff}}", string.Join(Environment.NewLine, fundedResearchApp.team_Members));
                     document.ReplaceText("{{ImplementInsti}}", model.ImplementingInstitution);
                     document.ReplaceText("{{CollabInsti}}", model.CollaboratingInstitution);
-                    document.ReplaceText("{{ProjectDur}}", model.ProjectDuration);
-                    document.ReplaceText("{{TotalProjectCost}}", model.TotalProjectCost);
+                    document.ReplaceText("{{ProjectDur}}", model.ProjectDuration + " month/s");
+                    document.ReplaceText("{{TotalProjectCost}}", "₱ " + model.TotalProjectCost);
                     document.ReplaceText("{{Objectives}}", model.Objectives);
                     document.ReplaceText("{{Scope}}", model.Scope);
                     document.ReplaceText("{{Methodology}}", model.Methodology);
@@ -405,6 +407,11 @@ namespace RemcSys.Controllers
                 }
             }
             fra.application_Status = "Submitted";
+            var genForms = await _context.GeneratedForms.Where(f => f.fra_Id == fra.fra_Id).ToListAsync();
+            foreach (var form in genForms)
+            {
+                _context.GeneratedForms.Remove(form);
+            }
             await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " is submitted.", true, true, false, fra.fra_Id);
             await _context.SaveChangesAsync();
             /*if (fra.fra_Type == "University Funded Research")
@@ -633,6 +640,7 @@ namespace RemcSys.Controllers
             ViewBag.TeamMembers = fra.team_Members;
             ViewBag.Field = fra.field_of_Study;
             ViewBag.Type = fra.fra_Type;
+            ViewBag.Status = fra.application_Status;
             var fileRequirements = await _context.FileRequirement
                 .Where(fr => fr.fra_Id == id && fr.file_Type == ".pdf")
                 .OrderBy(fr => fr.file_Name)
@@ -714,7 +722,7 @@ namespace RemcSys.Controllers
 
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction("ApplicationTracker");
+            return RedirectToAction("ApplicationStatus", new {id = fileRequirement.fra_Id});
         }
 
         [Authorize(Roles = "Faculty")]
@@ -808,5 +816,7 @@ namespace RemcSys.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Forms", "Home");
         }
+
+
     }
 }

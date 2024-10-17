@@ -21,7 +21,10 @@ namespace RemcSys.Data
         public DbSet<ActionLog> ActionLogs { get; set; }
         public DbSet<Evaluation> Evaluations { get; set; }
         public DbSet<Evaluator> Evaluator { get; set; }
-
+        public DbSet<UniversityFundedResearch> UniversityFundedResearches { get; set; }
+        public DbSet<ExternallyFundedResearch> ExternallyFundedResearches{ get; set; }
+        public DbSet<UniversityFundedResearchLoad> UniversityFundedResearchLoads { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<FundedResearchApplication>()
@@ -58,6 +61,21 @@ namespace RemcSys.Data
                 .HasMany(e => e.Evaluations)
                 .WithOne(g => g.evaluator)
                 .HasForeignKey(g => g.evaluator_Id);
+
+            modelBuilder.Entity<UniversityFundedResearch>()
+                .HasOne(f => f.FundedResearchApplication)
+                .WithOne(f => f.UniversityFundedResearch)
+                .HasForeignKey<UniversityFundedResearch>(g => g.fra_Id);
+
+            modelBuilder.Entity<ExternallyFundedResearch>()
+                .HasOne(f => f.FundedResearchApplication)
+                .WithOne(f => f.ExternallyFundedResearch)
+                .HasForeignKey<ExternallyFundedResearch>(g => g.fra_Id);
+
+            modelBuilder.Entity<UniversityFundedResearchLoad>()
+                .HasOne(f => f.FundedResearchApplication)
+                .WithOne(f => f.UniversityFundedResearchLoad)
+                .HasForeignKey<UniversityFundedResearchLoad>(g => g.fra_Id);
 
             base .OnModelCreating(modelBuilder);
         }

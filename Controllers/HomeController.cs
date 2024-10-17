@@ -59,8 +59,6 @@ namespace RemcSys.Controllers
                 return  NotFound();
             }
 
-            var fra = await _context.FundedResearchApplication.FirstOrDefaultAsync(f => f.UserId == user.Id);
-
             var pendingApp = await _context.FundedResearchApplication
                 .AnyAsync(f => f.application_Status == "Pending" && f.UserId == user.Id);
 

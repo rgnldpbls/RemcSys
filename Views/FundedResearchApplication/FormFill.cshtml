@@ -63,13 +63,19 @@
                 <span asp-validation-for="CollaboratingInstitution" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ProjectDuration">Project Duration:</label>
-                <input asp-for="ProjectDuration" type="text" class="form-control" placeholder="Project Duration..." />
+                <label asp-for="ProjectDuration">Project Duration: [in months]</label>
+                <div class="input-group">
+                    <input asp-for="ProjectDuration" type="number" class="form-control" placeholder="Project Duration..." max="36"/>
+                    <span class="input-group-text">month/s</span>
+                </div>
                 <span asp-validation-for="ProjectDuration" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="TotalProjectCost">Total Project Cost:</label>
-                <input asp-for="TotalProjectCost" type="text" class="form-control" placeholder="Total Project Cost..." />
+                <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input asp-for="TotalProjectCost" type="text" class="form-control" id="totalProjectCost" placeholder="Total Project Cost..." oninput="formatCurrency(this)" />
+                </div>
                 <span asp-validation-for="TotalProjectCost" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -117,3 +123,18 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
+<script>
+    function formatCurrency(input) {
+        // Remove any non-digit characters (except for commas)
+        let value = input.value.replace(/,/g, '');
+
+        // Check if input is a number
+        if (!isNaN(value) && value) {
+            // Convert the number to a string with commas as thousand separators
+            input.value = parseInt(value).toLocaleString('en-US');
+        } else {
+            input.value = ''; // If input is invalid, clear it
+        }
+    }
+</script>

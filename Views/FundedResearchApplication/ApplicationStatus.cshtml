@@ -18,10 +18,13 @@
             }
         }
     </p>
-    <form id="withdrawForm" method="post" asp-action="Reset">
-        <input type="hidden" name="fraId" value="@ViewBag.FraId" />
-        <button type="button" class="withdraw-btn" id="withdrawBtn">Withdraw Application</button>
-    </form>
+    @if(ViewBag.Status == "Submitted")
+    {
+        <form id="withdrawForm" method="post" asp-action="Reset">
+            <input type="hidden" name="fraId" value="@ViewBag.FraId" />
+            <button type="button" class="withdraw-btn" id="withdrawBtn">Withdraw Application</button>
+        </form>
+    }
     <table class="document-table">
         <thead>
             <tr>

@@ -458,7 +458,7 @@ namespace RemcSys.Controllers
                 .ToListAsync();
 
             var assignedCount = await _context.Evaluations
-                .Where(e => e.fra_Id == fraId && e.evaluation_Status == "Pending")
+                .Where(e => e.fra_Id == fraId && e.evaluation_Status != "Decline")
                 .ToListAsync();
 
             var pendingCount = await _context.Evaluations
@@ -580,7 +580,7 @@ namespace RemcSys.Controllers
                 return Json(new { success = false, message = "Evaluator is already assigned to this application." });
             }
 
-            int existingEvals = await _context.Evaluations.CountAsync(e => e.fra_Id == fraId && e.evaluation_Status == "Pending");
+            int existingEvals = await _context.Evaluations.CountAsync(e => e.fra_Id == fraId && e.evaluation_Status != "Decline");
             if(existingEvals > 5)
             {
                 return Json(new { success = false, message = "Maximum 5 evaluators can be assigned." });
