@@ -9,7 +9,14 @@
             <i class="bi bi-check-circle"></i>
             <p>You have successfully submitted your application. You will receive an email when the status of your application changes. You may also check back here to see the status of you application</p>
             <div class="apply-button d-grid gap-10 col-10 mx-auto">
-                <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="ApplicationTracker">VIEW APPLICATION</a>
+                @if(ViewBag.Type == "University Funded Research")
+                {
+                    <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="ApplicationTracker">VIEW APPLICATION TRACKER</a>
+                }
+                else
+                {
+                    <a class="btn btn-danger btn-lg" asp-controller="FundedResearchApplication" asp-action="ApplicationTrackerII">VIEW APPLICATION TRACKER</a>
+                }
             </div>
         </div>
     </div>

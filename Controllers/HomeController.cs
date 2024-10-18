@@ -92,13 +92,9 @@ namespace RemcSys.Controllers
             ViewBag.Approved = approved;
             ViewBag.Proceed = proceed;
 
-            var ongoingUFR = await _context.UniversityFundedResearches.AnyAsync(f => f.UserId == user.Id);
-            var ongoingEFR = await _context.ExternallyFundedResearches.AnyAsync(f => f.UserId == user.Id);
-            var ongoingUFRL = await _context.UniversityFundedResearchLoads.AnyAsync(f => f.UserId == user.Id);
+            var ongoingFR = await _context.FundedResearches.AnyAsync(f => f.UserId == user.Id);
 
-            ViewBag.OngUFR = ongoingUFR;
-            ViewBag.OngEFR = ongoingEFR;
-            ViewBag.OngUFRL = ongoingUFRL;
+            ViewBag.OngoingFR = ongoingFR;
 
             return View();
         }
@@ -153,8 +149,8 @@ namespace RemcSys.Controllers
                 {
                     evaluator_Name = user.Name,
                     evaluator_Email = user.Email,
-                    field_of_Interest = ["Science","Engineering, Architecture, Design, and Built Environment", 
-                        "Computer Science and Information System Technology"],
+                    field_of_Interest = ["Science",
+                        "Engineering, Architecture, Design, and Built Environment"],
                     UserId = user.Id,
                     UserType = null,
                     center = ["REMC"]

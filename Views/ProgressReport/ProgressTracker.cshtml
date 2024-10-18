@@ -12,9 +12,18 @@
     <div class="step-container">
         <div class="step">
             <div class="step-icon complete">
-                <a asp-action="UploadProgReport1" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">
-                    <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px; color: #850000"></i>
-                </a>
+                @if(ViewBag.Status == "Ongoing")
+                {
+                    <a asp-action="UploadProgReport1" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">
+                        <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px; color: #850000"></i>
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">
+                        <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px; color: #850000"></i>
+                    </a>
+                }
                 <span class="progress_line"></span>
             </div>
             <span class="progress_line"></span>

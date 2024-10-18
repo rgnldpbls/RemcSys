@@ -182,6 +182,10 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> FormFill(string type)
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound();
+            }
 
             ViewBag.Name = user.Name;
             ViewBag.Type = type;
@@ -193,6 +197,10 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> FormFill(FormModel model, FundedResearchApplication fundedResearchApp)
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound();
+            }
 
             // Generate fra_Id with template "FRA" + current date + incremented number
             string currentDate = DateTime.Now.ToString("yyyyMMdd");
@@ -342,6 +350,10 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> UploadFile()
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound();
+            }
             var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Pending" && s.UserId == user.Id)
                 .ToListAsync();
             return View(fra);
@@ -352,6 +364,10 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> UploadFile(IFormCollection files)
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound();
+            }
             var fra = await _context.FundedResearchApplication.Where(s => s.application_Status == "Pending" && s.UserId == user.Id)
                 .FirstOrDefaultAsync();
 
@@ -424,7 +440,7 @@ namespace RemcSys.Controllers
                 await SendSubmitEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
             }*/
 
-            return RedirectToAction("ApplicationSuccess", "FundedResearchApplication");
+            return RedirectToAction("ApplicationSuccess", "FundedResearchApplication", new {id = fra.fra_Id});
         }
 
         public async Task SendUFREmail(string email, string researchTitle, string name)
@@ -572,8 +588,14 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Faculty")]
-        public IActionResult ApplicationSuccess()
+        public IActionResult ApplicationSuccess(string id)
         {
+            var fra = _context.FundedResearchApplication.Find(id);
+            if(fra == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Type = fra.fra_Type;
             return View();
         }
 
@@ -841,268 +863,100 @@ namespace RemcSys.Controllers
 
             fra.isArchive = true;
             await _context.SaveChangesAsync();
-            if (fra.fra_Type == "University Funded Research")
-            {
-                string currentDate = DateTime.Now.ToString("yyyyMMdd");
-                var latestUfrw = await _context.UniversityFundedResearches
-                    .AsNoTracking()
-                    .Where(u => u.ufrw_Id.Contains(currentDate))
-                    .OrderByDescending(u => u.ufrw_Id)
-                    .FirstOrDefaultAsync();
 
-                int nextNum = 1;
-                if (latestUfrw != null)
+            string currentDate = DateTime.Now.ToString("yyyyMMdd");
+            var latestfr = await _context.FundedResearches
+                .AsNoTracking()
+                .Where(f => f.fr_Id.Contains(currentDate))
+                .OrderByDescending(f => f.fr_Id)
+                .FirstOrDefaultAsync();
+
+            int nextNum = 1;
+            if (latestfr != null)
+            {
+                string[] parts = latestfr.fr_Id.Split('-');
+                if (parts.Length == 3 && int.TryParse(parts[2], out int lastNum))
                 {
-                    string[] parts = latestUfrw.ufrw_Id.Split('-');
-                    if (parts.Length == 3 && int.TryParse(parts[2], out int lastNum))
-                    {
-                        nextNum = lastNum + 1;
-                    }
+                    nextNum = lastNum + 1;
+                }
+            }
+
+            var frId = fra.fra_Type switch
+            {
+                "University Funded Research" => $"UFRW-{currentDate}-{nextNum:D3}",
+                "Externally Funded Research" => $"EFRW-{currentDate}-{nextNum:D3}",
+                "University Funded Research Load" => $"UFRL-{currentDate}-{nextNum:D3}",
+                _ => throw new InvalidOperationException("Invalid fra_Type")
+            };
+
+
+            var fr = new FundedResearch
+            {
+                fr_Id = frId,
+                fr_Type = fra.fra_Type,
+                research_Title = fra.research_Title,
+                team_Leader = fra.applicant_Name,
+                teamLead_Email = fra.applicant_Email,
+                team_Members = fra.team_Members,
+                college = fra.college,
+                branch = fra.branch,
+                field_of_Study = fra.field_of_Study,
+                status = "Ongoing",
+                start_Date = DateTime.Now,
+                end_Date = DateTime.Now.AddMonths(fra.project_Duration),
+                dts_No = fra.dts_No,
+                project_Duration = fra.project_Duration,
+                total_project_Cost = fra.total_project_Cost,
+                fra_Id = fraId,
+                UserId = user.Id,
+                isArchive = false,
+            };
+
+            var existingEntry = _context.Entry(fr);
+            if (existingEntry != null)
+            {
+                _context.Entry(fr).State = EntityState.Detached;
+            }
+
+            _context.FundedResearches.Add(fr);
+            _context.SaveChanges();
+
+            string[] progreports = { "REMC-Progress-Report-Template.docx", "Terminal-Report-Template.docx" };
+            string filledFolder = Path.Combine(_environment.WebRootPath, "content", "output");
+            Directory.CreateDirectory(filledFolder);
+
+            foreach (var progreport in progreports)
+            {
+                string templatePath = Path.Combine(_environment.WebRootPath, "content", "progreport", progreport);
+                string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{progreport}");
+
+                using (DocX document = DocX.Load(templatePath))
+                {
+                    document.ReplaceText("{{ResearchWorkNum}}", frId);
+                    document.ReplaceText("{{ResearchWorkTitle}}", fra.research_Title);
+                    document.ReplaceText("{{TeamLeader}}", fra.applicant_Name);
+                    document.ReplaceText("{{TeamMembers}}", string.Join(Environment.NewLine, fra.team_Members));
+                    document.ReplaceText("{{Duration}}", DateTime.Now.ToString("MMMM d, yyyy") + " - " +
+                        DateTime.Now.AddMonths(fra.project_Duration).ToString("MMMM d, yyyy"));
+                    document.ReplaceText("{{TeamLeaderCaps}}", fra.applicant_Name.ToUpper());
+                    document.ReplaceText("{{TeamMembersCaps}}", string.Join(Environment.NewLine, fra.team_Members).ToUpper());
+
+                    document.SaveAs(filledDocumentPath);
                 }
 
-                var ufrwId = $"UFRW-{currentDate}-{nextNum:D3}";
-
-                var ufrw = new UniversityFundedResearch
+                byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
+                var doc = new GeneratedForm
                 {
-                    ufrw_Id = ufrwId,
-                    research_Title = fra.research_Title,
-                    team_Leader = fra.applicant_Name,
-                    teamLead_Email = fra.applicant_Email,
-                    team_Members = fra.team_Members,
-                    college = fra.college,
-                    branch = fra.branch,
-                    field_of_Study = fra.field_of_Study,
-                    research_Status = "Ongoing",
-                    start_Date = DateTime.Now,
-                    end_Date = DateTime.Now.AddMonths(fra.project_Duration),
-                    dts_No = fra.dts_No,
-                    project_Duration = fra.project_Duration,
-                    total_project_Cost = fra.total_project_Cost,
-                    fra_Id = fra.fra_Id,
-                    UserId = user.Id,
-                    isArchive = false
+                    Id = Guid.NewGuid().ToString(),
+                    FileName = $"{progreport}",
+                    FileContent = fileBytes,
+                    GeneratedAt = DateTime.Now,
+                    fra_Id = fra.fra_Id
                 };
 
-                var existingEntry = _context.Entry(ufrw);
-                if (existingEntry != null)
-                {
-                    _context.Entry(ufrw).State = EntityState.Detached;
-                }
-                _context.UniversityFundedResearches.Add(ufrw);
-                _context.SaveChanges();
-
-                string[] progreports = { "REMC-Progress-Report-Template.docx", "Terminal-Report-Template.docx" };
-                string filledFolder = Path.Combine(_environment.WebRootPath, "content", "output");
-                Directory.CreateDirectory(filledFolder);
-
-                foreach (var progreport in progreports)
-                {
-                    string templatePath = Path.Combine(_environment.WebRootPath, "content", "progreport", progreport);
-                    string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{progreport}");
-
-                    using (DocX document = DocX.Load(templatePath))
-                    {
-                        document.ReplaceText("{{ResearchWorkNum}}", ufrwId);
-                        document.ReplaceText("{{ResearchWorkTitle}}", fra.research_Title);
-                        document.ReplaceText("{{TeamLeader}}", fra.applicant_Name);
-                        document.ReplaceText("{{TeamMembers}}", string.Join(Environment.NewLine, fra.team_Members));
-                        document.ReplaceText("{{Duration}}", DateTime.Now.ToString("MMMM d, yyyy") + " - " +
-                            DateTime.Now.AddMonths(fra.project_Duration).ToString("MMMM d, yyyy"));
-                        document.ReplaceText("{{TeamLeaderCaps}}", fra.applicant_Name.ToUpper());
-                        document.ReplaceText("{{TeamMembersCaps}}", string.Join(Environment.NewLine, fra.team_Members).ToUpper());
-
-                        document.SaveAs(filledDocumentPath);
-                    }
-
-                    byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
-                    var doc = new GeneratedForm
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        FileName = $"{progreport}",
-                        FileContent = fileBytes,
-                        GeneratedAt = DateTime.Now,
-                        fra_Id = fra.fra_Id
-                    };
-
-                    _context.GeneratedForms.Add(doc);
-                }
-                Directory.Delete(filledFolder, true);
-
+                _context.GeneratedForms.Add(doc);
             }
-            else if (fra.fra_Type == "Externally Funded Research")
-            {
-                string currentDate = DateTime.Now.ToString("yyyyMMdd");
-                var latestEfrw = await _context.ExternallyFundedResearches
-                    .AsNoTracking()
-                    .Where(e => e.efrw_Id.Contains(currentDate))
-                    .OrderByDescending(e => e.efrw_Id)
-                    .FirstOrDefaultAsync();
-
-                int nextNum = 1;
-                if (latestEfrw != null)
-                {
-                    string[] parts = latestEfrw.efrw_Id.Split('-');
-                    if (parts.Length == 3 && int.TryParse(parts[2], out int lastNum))
-                    {
-                        nextNum = lastNum + 1;
-                    }
-                }
-
-                var efrwId = $"EFRW-{currentDate}-{nextNum:D3}";
-
-                var efrw = new ExternallyFundedResearch
-                {
-                    efrw_Id = efrwId,
-                    research_Title = fra.research_Title,
-                    team_Leader = fra.applicant_Name,
-                    teamLead_Email = fra.applicant_Email,
-                    team_Members = fra.team_Members,
-                    college = fra.college,
-                    branch = fra.branch,
-                    field_of_Study = fra.field_of_Study,
-                    research_Status = "Ongoing",
-                    start_Date = DateTime.Now,
-                    end_Date = DateTime.Now.AddMonths(fra.project_Duration),
-                    dts_No = fra.dts_No,
-                    project_Duration = fra.project_Duration,
-                    total_project_Cost = fra.total_project_Cost,
-                    fra_Id = fra.fra_Id,
-                    UserId = user.Id,
-                    isArchive = false
-                };
-
-                var existingEntry = _context.Entry(efrw);
-                if (existingEntry != null)
-                {
-                    _context.Entry(efrw).State = EntityState.Detached;
-                }
-                _context.ExternallyFundedResearches.Add(efrw);
-                _context.SaveChanges();
-
-                string[] progreports = { "REMC-Progress-Report-Template.docx", "Terminal-Report-Template.docx" };
-                string filledFolder = Path.Combine(_environment.WebRootPath, "content", "output");
-                Directory.CreateDirectory(filledFolder);
-
-                foreach (var progreport in progreports)
-                {
-                    string templatePath = Path.Combine(_environment.WebRootPath, "content", "progreport", progreport);
-                    string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{progreport}");
-
-                    using (DocX document = DocX.Load(templatePath))
-                    {
-                        document.ReplaceText("{{ResearchWorkNum}}", efrwId);
-                        document.ReplaceText("{{ResearchWorkTitle}}", fra.research_Title);
-                        document.ReplaceText("{{TeamLeader}}", fra.applicant_Name);
-                        document.ReplaceText("{{TeamMembers}}", string.Join(Environment.NewLine, fra.team_Members));
-                        document.ReplaceText("{{Duration}}", DateTime.Now.ToString("MMMM d, yyyy") + " - " +
-                            DateTime.Now.AddMonths(fra.project_Duration).ToString("MMMM d, yyyy"));
-                        document.ReplaceText("{{TeamLeaderCaps}}", fra.applicant_Name.ToUpper());
-                        document.ReplaceText("{{TeamMembersCaps}}", string.Join(Environment.NewLine, fra.team_Members).ToUpper());
-
-                        document.SaveAs(filledDocumentPath);
-                    }
-
-                    byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
-                    var doc = new GeneratedForm
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        FileName = $"{progreport}",
-                        FileContent = fileBytes,
-                        GeneratedAt = DateTime.Now,
-                        fra_Id = fra.fra_Id
-                    };
-
-                    _context.GeneratedForms.Add(doc);
-                }
-                Directory.Delete(filledFolder, true);
-            }
-            else if (fra.fra_Type == "University Funded Research Load")
-            {
-                string currentDate = DateTime.Now.ToString("yyyyMMdd");
-                var latestUfrl = await _context.UniversityFundedResearchLoads
-                    .AsNoTracking()
-                    .Where(u => u.ufrl_Id.Contains(currentDate))
-                    .OrderByDescending(u => u.ufrl_Id)
-                    .FirstOrDefaultAsync();
-
-                int nextNum = 1;
-                if (latestUfrl != null)
-                {
-                    string[] parts = latestUfrl.ufrl_Id.Split('-');
-                    if (parts.Length == 3 && int.TryParse(parts[2], out int lastNum))
-                    {
-                        nextNum = lastNum + 1;
-                    }
-                }
-
-                var ufrlId = $"UFRL-{currentDate}-{nextNum:D3}";
-
-                var ufrl = new UniversityFundedResearchLoad
-                {
-                    ufrl_Id = ufrlId,
-                    research_Title = fra.research_Title,
-                    team_Leader = fra.applicant_Name,
-                    teamLead_Email = fra.applicant_Email,
-                    team_Members = fra.team_Members,
-                    college = fra.college,
-                    branch = fra.branch,
-                    field_of_Study = fra.field_of_Study,
-                    research_Status = "Ongoing",
-                    start_Date = DateTime.Now,
-                    end_Date = DateTime.Now.AddMonths(fra.project_Duration),
-                    dts_No = fra.dts_No,
-                    project_Duration = fra.project_Duration,
-                    total_project_Cost = fra.total_project_Cost,
-                    fra_Id = fra.fra_Id,
-                    UserId = user.Id,
-                    isArchive = false
-                };
-
-                var existingEntry = _context.Entry(ufrl);
-                if (existingEntry != null)
-                {
-                    _context.Entry(ufrl).State = EntityState.Detached;
-                }
-                _context.UniversityFundedResearchLoads.Add(ufrl);
-                _context.SaveChanges();
-
-                string[] progreports = { "REMC-Progress-Report-Template.docx", "Terminal-Report-Template.docx" };
-                string filledFolder = Path.Combine(_environment.WebRootPath, "content", "output");
-                Directory.CreateDirectory(filledFolder);
-
-                foreach(var progreport in progreports)
-                {
-                    string templatePath = Path.Combine(_environment.WebRootPath, "content", "progreport", progreport);
-                    string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{progreport}");
-
-                    using (DocX document = DocX.Load(templatePath))
-                    {
-                        document.ReplaceText("{{ResearchWorkNum}}", ufrlId);
-                        document.ReplaceText("{{ResearchWorkTitle}}", fra.research_Title);
-                        document.ReplaceText("{{TeamLeader}}", fra.applicant_Name);
-                        document.ReplaceText("{{TeamMembers}}", string.Join(Environment.NewLine, fra.team_Members));
-                        document.ReplaceText("{{Duration}}", DateTime.Now.ToString("MMMM d, yyyy") + " - " +
-                            DateTime.Now.AddMonths(fra.project_Duration).ToString("MMMM d, yyyy"));
-                        document.ReplaceText("{{TeamLeaderCaps}}", fra.applicant_Name.ToUpper());
-                        document.ReplaceText("{{TeamMembersCaps}}", string.Join(Environment.NewLine, fra.team_Members).ToUpper());
-
-                        document.SaveAs(filledDocumentPath);
-                    }
-
-                    byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
-                    var doc = new GeneratedForm
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        FileName = $"{progreport}",
-                        FileContent = fileBytes,
-                        GeneratedAt = DateTime.Now,
-                        fra_Id = fra.fra_Id
-                    };
-
-                    _context.GeneratedForms.Add(doc);
-                }
-                Directory.Delete(filledFolder, true);
-            }
+            Directory.Delete(filledFolder, true);
             await _context.SaveChangesAsync();
             return RedirectToAction("ProgressTracker", "ProgressReport");
         }

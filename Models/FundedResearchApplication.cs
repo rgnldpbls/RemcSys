@@ -24,9 +24,7 @@ namespace RemcSys.Models
         public ICollection<Evaluation> Evaluations { get; set; } 
         public ICollection<ActionLog> ActionLogs { get; set; }
         public FundedResearchEthics FundedResearchEthics { get; set; }
-        public UniversityFundedResearch? UniversityFundedResearch { get; set; }
-        public ExternallyFundedResearch? ExternallyFundedResearch { get; set; }
-        public UniversityFundedResearchLoad? UniversityFundedResearchLoad { get; set; }
+        public FundedResearch FundedResearch { get; set; }
         public string UserId { get; set; }
         public bool isArchive { get; set; }
     }

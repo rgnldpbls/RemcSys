@@ -6,9 +6,17 @@
 }
 
 <div class="container">
-    <h1 class="my-4">Application Tracker</h1>
     @foreach (var item in Model.Item1)
     {
+        @if(item.fra_Type == "Externally Funded Research")
+        {
+            <h1 class="my-4">Externally Funded Research - Application Tracker</h1>
+        }
+        else if(item.fra_Type == "University Funded Research Load")
+        {
+            <h1 class="my-4">University Funded Research Load - Application Tracker</h1>
+        }
+
         <form asp-action="SetDTS" method="post">
             <div class="dts-container mb-4">
                 <label for="dtsNumber">DTS No.:</label>

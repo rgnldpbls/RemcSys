@@ -14,8 +14,6 @@ namespace RemcSys.Models
         public string? file_Feedback { get; set; }
         public DateTime file_Uploaded { get; set; }
         public string fr_Id { get; set; }
-        public UniversityFundedResearch? UniversityFundedResearch { get; set; }
-        public ExternallyFundedResearch? ExternallyFundedResearch { get; set; }
-        public UniversityFundedResearchLoad? UniversityFundedResearchLoad { get; set; }
+        public FundedResearch FundedResearch { get; set; }
     }
 }

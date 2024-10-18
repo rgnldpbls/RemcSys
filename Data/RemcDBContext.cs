@@ -21,9 +21,7 @@ namespace RemcSys.Data
         public DbSet<ActionLog> ActionLogs { get; set; }
         public DbSet<Evaluation> Evaluations { get; set; }
         public DbSet<Evaluator> Evaluator { get; set; }
-        public DbSet<UniversityFundedResearch> UniversityFundedResearches { get; set; }
-        public DbSet<ExternallyFundedResearch> ExternallyFundedResearches{ get; set; }
-        public DbSet<UniversityFundedResearchLoad> UniversityFundedResearchLoads { get; set; }
+        public DbSet<FundedResearch> FundedResearches { get; set; }
         public DbSet<ProgressReport> ProgressReports { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -63,34 +61,14 @@ namespace RemcSys.Data
                 .WithOne(g => g.evaluator)
                 .HasForeignKey(g => g.evaluator_Id);
 
-            modelBuilder.Entity<UniversityFundedResearch>()
+            modelBuilder.Entity<FundedResearch>()
                 .HasOne(f => f.FundedResearchApplication)
-                .WithOne(f => f.UniversityFundedResearch)
-                .HasForeignKey<UniversityFundedResearch>(g => g.fra_Id);
+                .WithOne(f => f.FundedResearch)
+                .HasForeignKey<FundedResearch>(g => g.fra_Id);
 
-            modelBuilder.Entity<ExternallyFundedResearch>()
-                .HasOne(f => f.FundedResearchApplication)
-                .WithOne(f => f.ExternallyFundedResearch)
-                .HasForeignKey<ExternallyFundedResearch>(g => g.fra_Id);
-
-            modelBuilder.Entity<UniversityFundedResearchLoad>()
-                .HasOne(f => f.FundedResearchApplication)
-                .WithOne(f => f.UniversityFundedResearchLoad)
-                .HasForeignKey<UniversityFundedResearchLoad>(g => g.fra_Id);
-
-            modelBuilder.Entity<UniversityFundedResearch>()
+            modelBuilder.Entity<FundedResearch>()
                 .HasMany(f => f.ProgressReports)
-                .WithOne(f => f.UniversityFundedResearch)
-                .HasForeignKey(g => g.fr_Id);
-
-            modelBuilder.Entity<ExternallyFundedResearch>()
-                .HasMany(f => f.ProgressReports)
-                .WithOne(f => f.ExternallyFundedResearch)
-                .HasForeignKey(g => g.fr_Id);
-
-            modelBuilder.Entity<UniversityFundedResearchLoad>()
-                .HasMany(f => f.ProgressReports)
-                .WithOne(f => f.UniversityFundedResearchLoad)
+                .WithOne(f => f.FundedResearch)
                 .HasForeignKey(g => g.fr_Id);
 
             base .OnModelCreating(modelBuilder);

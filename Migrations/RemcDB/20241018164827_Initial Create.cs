@@ -45,7 +45,10 @@ namespace RemcSys.Migrations.RemcDB
                     application_Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     submission_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     dts_No = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    project_Duration = table.Column<int>(type: "int", nullable: false),
+                    total_project_Cost = table.Column<double>(type: "float", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    isArchive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,13 +60,14 @@ namespace RemcSys.Migrations.RemcDB
                 columns: table => new
                 {
                     LogId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FraId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProjLead = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FraType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ResearchType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Action = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    isTeamLeader = table.Column<bool>(type: "bit", nullable: false),
+                    isChief = table.Column<bool>(type: "bit", nullable: false),
+                    isEvaluator = table.Column<bool>(type: "bit", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FraId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -133,6 +137,40 @@ namespace RemcSys.Migrations.RemcDB
                 });
 
             migrationBuilder.CreateTable(
+                name: "FundedResearches",
+                columns: table => new
+                {
+                    fr_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    fr_Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    research_Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    team_Leader = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    teamLead_Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    team_Members = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    college = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    branch = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    field_of_Study = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    start_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    end_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    dts_No = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    project_Duration = table.Column<int>(type: "int", nullable: false),
+                    total_project_Cost = table.Column<double>(type: "float", nullable: true),
+                    fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    isArchive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FundedResearches", x => x.fr_Id);
+                    table.ForeignKey(
+                        name: "FK_FundedResearches_FundedResearchApplication_fra_Id",
+                        column: x => x.fra_Id,
+                        principalTable: "FundedResearchApplication",
+                        principalColumn: "fra_Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FundedResearchEthics",
                 columns: table => new
                 {
@@ -174,6 +212,31 @@ namespace RemcSys.Migrations.RemcDB
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ProgressReports",
+                columns: table => new
+                {
+                    pr_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    file_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    file_Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    file_Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    document_Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    file_Feedback = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    file_Uploaded = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    fr_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProgressReports", x => x.pr_Id);
+                    table.ForeignKey(
+                        name: "FK_ProgressReports_FundedResearches_fr_Id",
+                        column: x => x.fr_Id,
+                        principalTable: "FundedResearches",
+                        principalColumn: "fr_Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ActionLogs_FraId",
                 table: "ActionLogs",
@@ -195,6 +258,12 @@ namespace RemcSys.Migrations.RemcDB
                 column: "fra_Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FundedResearches_fra_Id",
+                table: "FundedResearches",
+                column: "fra_Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FundedResearchEthics_fra_Id",
                 table: "FundedResearchEthics",
                 column: "fra_Id",
@@ -204,6 +273,11 @@ namespace RemcSys.Migrations.RemcDB
                 name: "IX_GeneratedForms_fra_Id",
                 table: "GeneratedForms",
                 column: "fra_Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProgressReports_fr_Id",
+                table: "ProgressReports",
+                column: "fr_Id");
         }
 
         /// <inheritdoc />
@@ -225,7 +299,13 @@ namespace RemcSys.Migrations.RemcDB
                 name: "GeneratedForms");
 
             migrationBuilder.DropTable(
+                name: "ProgressReports");
+
+            migrationBuilder.DropTable(
                 name: "Evaluator");
+
+            migrationBuilder.DropTable(
+                name: "FundedResearches");
 
             migrationBuilder.DropTable(
                 name: "FundedResearchApplication");

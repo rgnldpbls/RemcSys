@@ -2,10 +2,11 @@
 
 namespace RemcSys.Models
 {
-    public class UniversityFundedResearchLoad
+    public class FundedResearch
     {
         [Key]
-        public string ufrl_Id { get; set; }
+        public string fr_Id { get; set; }
+        public string fr_Type { get; set; }
         public string research_Title { get; set; }
         public string team_Leader { get; set; }
         public string teamLead_Email { get; set; }
@@ -13,10 +14,10 @@ namespace RemcSys.Models
         public string college { get; set; }
         public string branch { get; set; }
         public string field_of_Study { get; set; }
-        public string research_Status { get; set; }
+        public string status { get; set; }
         public DateTime start_Date { get; set; }
         public DateTime end_Date { get; set; }
-        public string? dts_No { get; set; }
+        public string dts_No { get; set; }
         public int project_Duration { get; set; }
         public double? total_project_Cost { get; set; }
         public string fra_Id { get; set; }
