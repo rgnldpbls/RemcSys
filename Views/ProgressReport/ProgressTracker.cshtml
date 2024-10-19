@@ -6,29 +6,30 @@
 
 <div class="container">
     <h1>Progress Report Tracker</h1>
-    <button class="extend-btn">Request Extension</button><br />
-    <h6><b>NOTE:</b> To upload your report, simply click on the corresponding icon.</h6>
+    <button class="extend-btn" id="extendBtn">Request Extension</button><br />
+    <h6><b>NOTE:</b> To upload your report, simply click upload button below.</h6>
     <!-- Progress Steps -->
     <div class="step-container">
         <div class="step">
             <div class="step-icon complete">
-                @if(ViewBag.Status == "Ongoing")
-                {
-                    <a asp-action="UploadProgReport1" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">
-                        <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px; color: #850000"></i>
-                    </a>
-                }
-                else
-                {
-                    <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">
-                        <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px; color: #850000"></i>
-                    </a>
-                }
+                <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px; color: #850000"></i>
                 <span class="progress_line"></span>
             </div>
             <span class="progress_line"></span>
             <strong>Progress Report 1</strong>
-            <p>@ViewBag.Report1</p>
+            <p>@ViewBag.Report1.ToString("MMMM d, yyyy")</p>
+            @if (ViewBag.Status == "Ongoing")
+            {
+                <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
+            }
+            else if(ViewBag.Status == "Submitted Report No.1" || ViewBag.Status == "Checked Report No.1")
+            {
+                <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+            }
+            else
+            {
+                <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+            }
         </div>
         <div class="step">
             <div class="step-icon complete">
@@ -36,9 +37,23 @@
                 <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
             </div>
             <strong>Progress Report 2</strong>
-            <p>@ViewBag.Report2</p>
-            <i class="bi bi-lock" style="color: #850000"></i>
-            @* <button class="compliance">For Compliance...</button> *@
+            <p>@ViewBag.Report2.ToString("MMMM d, yyyy")</p>
+            @if (ViewBag.Status == "Checked Report No.1") // && DateTime.Now >= ViewBag.Report1
+            {
+                <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
+            }
+            else if (ViewBag.Status == "Submitted Report No.2" || ViewBag.Status == "Checked Report No.2")
+            {
+                <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+            }
+            else if (ViewBag.Status == "Ongoing" || ViewBag.Status == "Submitted Report No.1") // || DateTime.Now < ViewBag.Report1
+            {
+                <i class="bi bi-lock" style="color: #850000"></i>
+            }
+            else if(ViewBag.Count >= 2)
+            {
+                <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+            }
         </div>
         <div class="step">
             <div class="step-icon">
@@ -46,8 +61,23 @@
                 <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
             </div>
             <strong>Progress Report 3</strong>
-            <p>@ViewBag.Report3</p>
-            <i class="bi bi-lock" style="color: #850000"></i>
+            <p>@ViewBag.Report3.ToString("MMMM d, yyyy")</p>
+            @if (ViewBag.Status == "Checked Report No.2") // && DateTime.Now >= ViewBag.Report2
+            {
+                <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
+            }
+            else if(ViewBag.Status == "Submitted Report No.3" || ViewBag.Status == "Checked Report No.3")
+            {
+                <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+            }
+            else if (ViewBag.Count < 2 || ViewBag.Status == "Submitted Report No.2") // || DateTime.Now < ViewBag.Report2
+            {
+                <i class="bi bi-lock" style="color: #850000"></i>
+            }
+            else if (ViewBag.Count >= 3)
+            {
+                <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+            }
         </div>
         <div class="step">
             <div class="step-icon">
@@ -55,17 +85,174 @@
                 <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
             </div>
             <strong>Progress Report 4</strong>
-            <p>@ViewBag.Report4</p>
-            <i class="bi bi-lock" style="color: #850000"></i>
+            <p>@ViewBag.Report4.ToString("MMMM d, yyyy")</p>
+            @if (ViewBag.Status == "Checked Report No.3") // && DateTime.Now >= ViewBag.Report3
+            {
+                <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
+            }
+            else if(ViewBag.Status == "Submitted Report No.4" || ViewBag.Status == "Checked Report No.4")
+            {
+                <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+            }
+            else if (ViewBag.Count < 3 || ViewBag.Status == "Submitted Report No.3") // || DateTime.Now < ViewBag.Report3
+            {
+                <i class="bi bi-lock" style="color: #850000"></i>
+            }
+            else if(ViewBag.Count >= 4)
+            {
+                <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+            }
         </div>
-        <div class="step">
-            <div class="step-icon">
-                <span class="still-progress_line"></span>
-            <i class="bi bi-terminal-fill" style="font-size: 35px"></i>
+        @if(ViewBag.Extend1)
+        {
+            <div class="step">
+                <div class="step-icon">
+                    <span class="still-progress_line"></span>
+                    <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
+                </div>
+                <strong>Progress Report 5</strong>
+                <p>@ViewBag.Report5.ToString("MMMM d, yyyy")</p>
+                @if (ViewBag.Status == "Checked Report No.4") // && DateTime.Now >= ViewBag.Report4
+                {
+                    <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
+                }
+                else if(ViewBag.Status == "Submitted Report No.5" || ViewBag.Status == "Checked Report No.5")
+                {
+                    <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+                }
+                else if (ViewBag.Count < 4 || ViewBag.Status == "Submitted Report No.4") // || DateTime.Now < ViewBag.Report4
+                {
+                    <i class="bi bi-lock" style="color: #850000"></i>
+                }
+                else if(ViewBag.Count >= 4)
+                {
+                    <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+                }
             </div>
-            <strong>Terminal Report</strong>
-            <i class="bi bi-lock" style="color: #850000"></i>
-        </div>
+            <div class="step">
+                <div class="step-icon">
+                    <span class="still-progress_line"></span>
+                    <i class="bi bi-terminal-fill" style="font-size: 35px"></i>
+                </div>
+                <strong>Terminal Report</strong>
+                @if (ViewBag.Status == "Checked Report No.5")
+                {
+                    <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@ViewBag.Id">Upload</a>
+                }
+                else if(ViewBag.Status == "Submitted Report No.6" || ViewBag.Status == "Checked Report No.6")
+                {
+                    <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+                }
+                else if (ViewBag.Count < 5 || ViewBag.Status == "Submitted Progress Report No.5")
+                {
+                    <i class="bi bi-lock" style="color: #850000"></i>
+                }
+                else if (ViewBag.Count >= 5)
+                {
+                    <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+                }
+            </div>
+        }
+        else if(ViewBag.Extend2)
+        {
+            <div class="step">
+                <div class="step-icon">
+                    <span class="still-progress_line"></span>
+                    <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
+                </div>
+                <strong>Progress Report 5</strong>
+                <p>@ViewBag.Report5.ToString("MMMM d, yyyy")</p>
+                @if (ViewBag.Status == "Checked Report No.4") // && DateTime.Now >= ViewBag.Report4
+                {
+                    <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
+                }
+                else if(ViewBag.Status == "Submitted Report No.5" || ViewBag.Status == "Checked Report No.5")
+                {
+                    <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+                }
+                else if (ViewBag.Count < 4 ||  ViewBag.Status == "Submitted Report No.4") // || DateTime.Now < ViewBag.Report4
+                {
+                    <i class="bi bi-lock" style="color: #850000"></i>
+                }
+                else if (ViewBag.Count >= 4)
+                {
+                    <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+                }
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <span class="still-progress_line"></span>
+                    <i class="bi bi-file-earmark-bar-graph-fill" style="font-size: 35px"></i>
+                </div>
+                <strong>Progress Report 6</strong>
+                <p>@ViewBag.Report6.ToString("MMMM d, yyyy")</p>
+                @if (ViewBag.Status == "Checked Report No.5") // && DateTime.Now >= ViewBag.Report5
+                {
+                    <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
+                }
+                else if(ViewBag.Status == "Submitted Report No.6" || ViewBag.Status == "Checked Report No.6")
+                {
+                    <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+                }
+                else if (ViewBag.Count < 5 || ViewBag.Status == "Submitted Report No.5") // || DateTime.Now < ViewBag.Report5
+                {
+                    <i class="bi bi-lock" style="color: #850000"></i>
+                }
+                else if (ViewBag.Count >= 5)
+                {
+                    <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+                }
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <span class="still-progress_line"></span>
+                    <i class="bi bi-terminal-fill" style="font-size: 35px"></i>
+                </div>
+                <strong>Terminal Report</strong>
+                @if (ViewBag.Status == "Checked Report No.6")
+                {
+                    <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@ViewBag.Id">Upload</a>
+                }
+                else if(ViewBag.Status || "Submitted Report No.7" || ViewBag.Status == "Checked Report No.7")
+                {
+                    <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+                }
+                else if (ViewBag.Count < 6 || ViewBag.Status == "Submitted Progress Report No.6")
+                {
+                    <i class="bi bi-lock" style="color: #850000"></i>
+                }
+                else if (ViewBag.Count >= 6)
+                {
+                    <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="step">
+                <div class="step-icon">
+                    <span class="still-progress_line"></span>
+                    <i class="bi bi-terminal-fill" style="font-size: 35px"></i>
+                </div>
+                <strong>Terminal Report</strong>
+                @if (ViewBag.Status == "Checked Report No.4")
+                {
+                    <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@ViewBag.Id">Upload</a>
+                }
+                else if (ViewBag.Status == "Submitted Report No.5" || ViewBag.Status == "Checked Report No.5")
+                {
+                    <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+                }
+                else if (ViewBag.Count < 4 || ViewBag.Status == "Submitted Report No.4")
+                {
+                    <i class="bi bi-lock" style="color: #850000"></i>
+                }
+                else if (ViewBag.Count >= 4)
+                {
+                    <i class="bi bi-check-circle-fill" style="color: #850000"></i>
+                }
+            </div>
+        }
         <div class="step">
             <div class="step-icon">
                 <span class="still-progress_line"></span>
@@ -74,7 +261,6 @@
             <strong>Liquidation Report</strong>
             <i class="bi bi-lock" style="color: #850000"></i>
         </div>
-
         <div class="step">
             <div class="step-icon">
                 <i class="bi bi-check2-circle" style="font-size: 35px"></i>
@@ -124,27 +310,24 @@
 </div>
 
 <!--feedback pop-up-->
-<div class="feedback">
+<div class="feedback" id="feedbackPopup" style="display: none;">
     <div class="card1">
-        <button type="button" class="fdismiss">×</button>
-        <span class="title">Feedback</span>
+        <button type="button" class="fdismiss" id="dismissBtn">×</button>
+        <span class="title">Request Extension</span>
         <div class="card2">
             <p>
-                Upon reviewing your document, we noticed a few formatting aspects that need adjustments for better readability and consistency
+                If you wish to request an extension for your funded research. Kindly send an email in sample@gmail.com.
             </p>
         </div>
-        <a href="/Home/ReuploadProgress" class="send-btn">Re-submit Report</button></a>
     </div>
 </div>
 <script>
-    document.querySelectorAll('.compliance').forEach(function (button) {
-        button.addEventListener('click', function () {
-            document.querySelector('.feedback').style.display = 'block';
-        });
+    document.getElementById('extendBtn').addEventListener('click', function () {
+        document.getElementById('feedbackPopup').style.display = 'block';
     });
 
-    document.querySelector('.fdismiss').addEventListener('click', function () {
-        document.querySelector('.feedback').style.display = 'none';
+    document.getElementById('dismissBtn').addEventListener('click', function () {
+        document.getElementById('feedbackPopup').style.display = 'none';
     });
 
 </script>

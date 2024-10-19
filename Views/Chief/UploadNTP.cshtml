@@ -82,7 +82,7 @@
                             }
                             else
                             {
-                                <form asp-action="UploadNotice" asp-controller="Chief" method="post" enctype="multipart/form-data">
+                                <form id="uploadForm" method="post" enctype="multipart/form-data" action="@Url.Action("UploadNotice", "Chief")">
                                     <div class="file-input-wrapper">
                                         <input type="file" name="file" id="pdfFileInput_@app.fra_Id" accept=".pdf" required />
                                         <br />
@@ -90,7 +90,7 @@
                                     </div>
                                     <input type="hidden" name="fraId" value="@app.fra_Id" />
                                     <div class="submit-button-wrapper">
-                                        <button type="submit" class="resubmit-btn" onclick="validateAndSubmit('@app.fra_Id')">
+                                        <button type="submit" class="resubmit-btn" id="submitBtn">
                                             <i class="bi bi-upload"></i> Upload NTP
                                         </button>
                                     </div>
@@ -146,15 +146,17 @@
             });
         });
 
-        function validateAndSubmit(fraId) {
-            // Get the file input element
-            const fileInput = document.getElementById('pdfFileInput_' + fraId);
+        document.getElementById('submitBtn').addEventListener('click', function () {
+            document.getElementById('warningPopup').addEventListener.style.display = 'block';
+        });
 
-            // Check if a file is selected
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert("Please select a PDF file to upload.");
-                return; // Stop form submission
-            }
-        }
+        document.getElementById('backBtn').addEventListener('click', function () {
+            document.getElementById('warningPopup').addEventListener.style.display = 'none';
+        });
+
+        document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
+            document.getElementById('uploadForm').submit();
+        });
+
     </script>
 }

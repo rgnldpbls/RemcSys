@@ -264,7 +264,7 @@ namespace RemcSys.Controllers
             await _context.SaveChangesAsync();
             Directory.Delete(filledFolder, true);
             await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, evaluator.evaluator_Name + " already evaluated the " + fra.research_Title + ".", 
-                true, true, false, fra.fra_Id);
+                false, true, false, fra.fra_Id);
 
             return RedirectToAction("EvaluatorEvaluated", "Evaluator");
         }

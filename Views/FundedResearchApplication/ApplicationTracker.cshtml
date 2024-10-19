@@ -89,7 +89,7 @@
                     {
                         <form id="progressForm" method="post" asp-action="Progress">
                             <input type="hidden" name="fraId" value="@item.fra_Id"/>
-                            <button class="view-btn" type="button" id="gotoBtn" style="font-size:12px; margin-left: 5px;">Go to</button>
+                            <button class="view-btn" type="submit" id="gotoBtn" style="font-size:12px; margin-left: 5px;">Go to</button>
                         </form>
                     }
                     else
@@ -167,18 +167,6 @@
     <button class="wback-btn" id="backBtn">Cancel</button>
 </div>
 
-<!-- Warning Pop-up Goto-->
-<div class="warning_section" id="warningPopupII" style="display: none">
-    <div class="card5">
-        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
-        <span class="wtitle">
-            Are you sure you want to go to the Progress Report Tracker?
-        </span>
-    </div>
-    <button class="wsubmit-btn" id="confirmSubmitBtnII">Yes</button>
-    <button class="wback-btn" id="backBtnII">Cancel</button>
-</div>
-
 
 <script>
     document.getElementById('reAppBtn').addEventListener('click', function () {
@@ -191,17 +179,5 @@
 
     document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
         document.getElementById('reapplyForm').submit();
-    });
-
-    document.getElementById('gotoBtn').addEventListener('click', function () {
-        document.getElementById('warningPopupII').style.display = 'block';
-    });
-
-    document.getElementById('backBtnII').addEventListener('click', function () {
-        document.getElementById('warningPopupII').style.display = 'none';
-    });
-
-    document.getElementById('confirmSubmitBtnII').addEventListener('click', function () {
-        document.getElementById('progressForm').submit();
     });
 </script>

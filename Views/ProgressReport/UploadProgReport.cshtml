@@ -3,7 +3,7 @@
     Layout = "_NavTeamLeader4";
 }
 <div class="application-requirements">
-    <h1>Upload Progress Report #1</h1>
+    <h1>Upload Progress Report</h1>
 
     <div class="research-info">
         <h2><b>Research Title:</b> @ViewBag.Research</h2>
@@ -40,7 +40,7 @@
         <!-- Upload and Submit button -->
         <div class="file-upload-section">
             <h3>Your Uploads</h3><hr />
-            <form id="uploadForm" enctype="multipart/form-data" method="post" action="@Url.Action("SubmitProgressReport1", "ProgressReport")">
+            <form id="uploadForm" enctype="multipart/form-data" method="post" action="@Url.Action("SubmitProgressReport", "ProgressReport")">
                 <label for="fileUpload" class="upload-btn">
                     <span class="upload-icon">+</span> Upload Files
                 </label>

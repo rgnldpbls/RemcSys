@@ -17,7 +17,7 @@
             <h1 class="my-4">University Funded Research Load - Application Tracker</h1>
         }
 
-        <form asp-action="SetDTS" method="post">
+        <form asp-action="SetDTS2" method="post">
             <div class="dts-container mb-4">
                 <label for="dtsNumber">DTS No.:</label>
                 <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..." value="@item.dts_No" />
@@ -79,7 +79,7 @@
                 {
                     <form id="progressForm" method="post" asp-action="Progress">
                         <input type="hidden" name="fraId" value="@item.fra_Id" />
-                        <button class="view-btn" type="button" id="gotoBtn" style="font-size:12px; margin-left: 5px;">Go to</button>
+                        <button class="view-btn" type="submit" id="gotoBtn" style="font-size:12px; margin-left: 5px;">Go to</button>
                     </form>
                 }
                 else
@@ -132,7 +132,7 @@
 </div>
 
 <!-- Warning Pop-up ReApply -->
-<div class="warning_section" id="warningPopup" style="display: none">
+@* <div class="warning_section" id="warningPopup" style="display: none">
     <div class="card5">
         <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
         <span class="wtitle">
@@ -155,4 +155,4 @@
     document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
         document.getElementById('progressForm').submit();
     });
-</script>
+</script> *@

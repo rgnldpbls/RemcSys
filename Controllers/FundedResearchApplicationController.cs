@@ -642,14 +642,25 @@ namespace RemcSys.Controllers
 
             await _context.SaveChangesAsync();
 
-            if(fra.fra_Type != "Univeristy Funded Research")
+            return RedirectToAction("ApplicationTracker", "FundedResearchApplication");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetDTS2(string DTSNo, string fraId)
+        {
+            var fra = await _context.FundedResearchApplication
+                .FirstOrDefaultAsync(f => f.fra_Id == fraId);
+
+            if (fra == null)
             {
-                return RedirectToAction("ApplicationTrackerII");
+                return NotFound();
             }
-            else
-            {
-                return RedirectToAction("ApplicationTracker");
-            }
+
+            fra.dts_No = DTSNo;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("ApplicationTrackerII", "FundedResearchApplication");
         }
 
         [Authorize(Roles = "Faculty")]
@@ -910,6 +921,8 @@ namespace RemcSys.Controllers
                 fra_Id = fraId,
                 UserId = user.Id,
                 isArchive = false,
+                isExtension1 = false,
+                isExtension2 = false,
             };
 
             var existingEntry = _context.Entry(fr);
@@ -930,12 +943,15 @@ namespace RemcSys.Controllers
                 string templatePath = Path.Combine(_environment.WebRootPath, "content", "progreport", progreport);
                 string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{progreport}");
 
+                var teamMembers = fra.team_Members.Contains("N/A")
+                    ? string.Empty : string.Join(Environment.NewLine, fra.team_Members);
+                
                 using (DocX document = DocX.Load(templatePath))
                 {
                     document.ReplaceText("{{ResearchWorkNum}}", frId);
                     document.ReplaceText("{{ResearchWorkTitle}}", fra.research_Title);
                     document.ReplaceText("{{TeamLeader}}", fra.applicant_Name);
-                    document.ReplaceText("{{TeamMembers}}", string.Join(Environment.NewLine, fra.team_Members));
+                    document.ReplaceText("{{TeamMembers}}", teamMembers);
                     document.ReplaceText("{{Duration}}", DateTime.Now.ToString("MMMM d, yyyy") + " - " +
                         DateTime.Now.AddMonths(fra.project_Duration).ToString("MMMM d, yyyy"));
                     document.ReplaceText("{{TeamLeaderCaps}}", fra.applicant_Name.ToUpper());

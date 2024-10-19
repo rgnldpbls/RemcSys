@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Humanizer;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
@@ -65,7 +66,7 @@ namespace RemcSys.Controllers
             if(appQuery != null)
             {
                 var researchAppList = await appQuery.Where(f => f.application_Status == "Submitted")
-                .OrderByDescending(f => f.submission_Date).ToListAsync();
+                .OrderBy(f => f.submission_Date).ToListAsync();
 
                 return View(researchAppList);
             }
@@ -88,7 +89,7 @@ namespace RemcSys.Controllers
             if(application != null)
             {
                 var researchApp = await application.Where(f => f.application_Status == "Submitted")
-                    .OrderByDescending(f => f.submission_Date).ToListAsync();
+                    .OrderBy(f => f.submission_Date).ToListAsync();
                 return View(researchApp);
             }
 
@@ -109,7 +110,7 @@ namespace RemcSys.Controllers
             if(application != null)
             {
                 var researchApp = await application.Where(f => f.application_Status == "Submitted")
-                    .OrderByDescending(f => f.submission_Date).ToListAsync();
+                    .OrderBy(f => f.submission_Date).ToListAsync();
                 return View(researchApp);
             }
 
@@ -153,7 +154,6 @@ namespace RemcSys.Controllers
         {
             var fileReq = _context.FileRequirement.Find(fileId);
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fileReq.fra_Id).FirstOrDefaultAsync();
-            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
             if (fileReq != null)
             {
                 fileReq.file_Status = fileStatus;
@@ -237,14 +237,21 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> PreviewFile(string id)
         {
             var fileRequirement = await _context.FileRequirement.FindAsync(id);
-            if (fileRequirement == null)
+            if (fileRequirement != null)
             {
-                return NotFound();
+                if (fileRequirement.file_Type == ".pdf")
+                {
+                    return File(fileRequirement.data, "application/pdf");
+                }
             }
 
-            if (fileRequirement.file_Type == ".pdf")
+            var progReport = await _context.ProgressReports.FindAsync(id);
+            if(progReport != null)
             {
-                return File(fileRequirement.data, "application/pdf");
+                if(progReport.file_Type == ".pdf")
+                {
+                    return File(progReport.data, "application/pdf");
+                }
             }
 
             return BadRequest("Only PDF files can be previewed.");
@@ -421,7 +428,7 @@ namespace RemcSys.Controllers
 
             var researchAppList = await appQuery
                 .Where(f => f.application_Status == "UnderEvaluation")
-                .OrderByDescending(f => f.submission_Date)
+                .OrderBy(f => f.submission_Date)
                 .ToListAsync();
 
             var evaluatorList = _context.Evaluations
@@ -475,7 +482,7 @@ namespace RemcSys.Controllers
                              research.team_Members.Contains(e.evaluator_Name) ||
                              assignedEvaluators.Contains(e.evaluator_Id) ||
                              assignedCount.Count >= 5
-            });
+            }).OrderBy(f => f.evaluator_Name);
 
             return Json(evaluatorData);
         }
@@ -486,7 +493,6 @@ namespace RemcSys.Controllers
             var evals = _context.Evaluations.Where(e => e.evaluation_Id == evaluationId).FirstOrDefault();
             var evaluator = _context.Evaluator.Where(e => e.evaluator_Id == evals.evaluator_Id).FirstOrDefault();
             var fra = _context.FundedResearchApplication.Where(f => f.fra_Id == evals.fra_Id).FirstOrDefault();
-            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
             await _actionLogger.LogActionAsync(evals.evaluator_Name, fra.fra_Type, "The chief remove you to evaluate the " + fra.research_Title + ".", 
                 false, false, true, fra.fra_Id);
             /*await SendRemoveEmail(evaluator.evaluator_Email, fra.research_Title, evals.evaluator_Name);*/
@@ -991,7 +997,7 @@ namespace RemcSys.Controllers
 
             var researchAppList = await appQuery
                 .Where(f => f.application_Status == "Approved")
-                .OrderByDescending(f => f.submission_Date)
+                .OrderBy(f => f.submission_Date)
                 .Join(_context.FundedResearchEthics,
                     fra => fra.fra_Id,
                     fre => fre.fra_Id,
@@ -1022,7 +1028,7 @@ namespace RemcSys.Controllers
             var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
             if(file == null || file.Length == 0)
             {
-                return NotFound("There is no pdf file.");
+                return NotFound("There is no uploaded file. Please upload the file and try to submit again.");
             }
 
             byte[] pdfData;
@@ -1183,6 +1189,180 @@ namespace RemcSys.Controllers
                 .ToListAsync();
 
             return View(researchAppList);
+        }
+
+        [Authorize(Roles ="Chief")]
+        public async Task<IActionResult> UniversityFundedResearch(string searchString)
+        {
+            ViewData["currentFilter"] = searchString;
+            var appQuery = _context.FundedResearches
+                .Where(f => f.fr_Type == "University Funded Research");
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
+            }
+
+            if(appQuery != null)
+            {
+                var fundedResearch = await appQuery.OrderByDescending(f => f.start_Date).ToListAsync();
+
+                return View(fundedResearch);
+            }
+
+            return View(new List<FundedResearch>());
+        }
+
+        [Authorize(Roles ="Chief")]
+        public async Task<IActionResult> ExternallyFundedResearch(string searchString)
+        {
+            ViewData["currentFilter"] = searchString;
+            var appQuery = _context.FundedResearches
+                .Where(f => f.fr_Type == "Externally Funded Research");
+
+            if(!String.IsNullOrEmpty(searchString))
+            {
+                appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
+            }
+
+            if(appQuery != null)
+            {
+                var fundedResearch = await appQuery.OrderByDescending(f => f.start_Date).ToListAsync();
+
+                return View(fundedResearch);
+            }
+            return View(new List<FundedResearch>());
+        }
+
+        [Authorize(Roles ="Chief")]
+        public async Task<IActionResult> UniversityFundedResearchLoad(string searchString)
+        {
+            ViewData["currentFilter"] = searchString;
+            var appQuery = _context.FundedResearches
+                .Where(f => f.fr_Type == "University Funded Research Load");
+
+            if(!String.IsNullOrEmpty(searchString))
+            {
+                appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
+            }
+
+            if(appQuery != null)
+            {
+                var fundedResearch = await appQuery.OrderByDescending(f => f.start_Date).ToListAsync();
+
+                return View(fundedResearch);
+            }
+            return View(new List<FundedResearch>());
+        }
+
+        [Authorize(Roles ="Chief")]
+        public async Task<IActionResult> ProgressReportList(string id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            var fr = await _context.FundedResearches.FindAsync(id);
+            if(fr == null)
+            {
+                return NotFound("No currently Progress Report/s uploaded.");
+            }
+
+            ViewBag.FrId = fr.fr_Id;
+            ViewBag.Research = fr.research_Title;
+            ViewBag.Field = fr.field_of_Study;
+            ViewBag.Lead = fr.team_Leader;
+            ViewBag.Member = fr.team_Members;
+            ViewBag.Type = fr.fr_Type;
+            ViewBag.Extend1 = fr.isExtension1;
+            ViewBag.Extend2 = fr.isExtension2;
+
+            var progReport = await _context.ProgressReports
+                .Where(pr => pr.fr_Id == id)
+                .OrderBy(pr => pr.file_Uploaded)
+                .ToListAsync();
+            return View(progReport);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveProgressFeedback(string fileId, string fileStatus, string fileFeedback)
+        {
+            var progReport = _context.ProgressReports.Find(fileId);
+            var fr = await _context.FundedResearches.Where(f => f.fr_Id == progReport.fr_Id).FirstOrDefaultAsync();
+            if (progReport != null)
+            {
+                progReport.file_Status = fileStatus;
+                progReport.file_Feedback = fileFeedback;
+
+                _context.SaveChanges();
+                await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, "You need to resubmit this " + progReport.file_Name + ". " +
+                    "Kindly check the feedback for the changes.", true, false, false, fr.fra_Id);
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePRStatus(string pr_Id, string newStatus)
+        {
+            var file = _context.ProgressReports.FirstOrDefault(f => f.pr_Id == pr_Id);
+            if(file == null)
+            {
+                return Json(new { success = false, message = "Progress Report not found" });
+            }
+
+            var fr = await _context.FundedResearches.Where(fr => fr.fr_Id == file.fr_Id).FirstOrDefaultAsync();
+            if(fr == null)
+            {
+                return Json(new { success = false, message = "Funded Research not found" });
+            }
+
+            file.file_Status = newStatus;
+
+            var existingReports = await _context.ProgressReports
+                .Where(pr => pr.fr_Id == file.fr_Id)
+                .ToListAsync();
+
+            int reportNum = existingReports.Count + 0;
+            string docuType = $"Progress Report No.{reportNum}";
+
+            fr.status = $"Checked {docuType}";
+            _context.SaveChanges();
+            await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, file.file_Name + " already checked by the Chief.",
+                true, false, false, fr.fra_Id);
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ExtendForm1(string frId)
+        {
+            var fr = await _context.FundedResearches.FindAsync(frId);
+            if(fr == null)
+            {
+                return NotFound();
+            }
+
+            fr.isExtension1 = true;
+            await _context.SaveChangesAsync();
+            await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, "Your request for extension has been granted.", true, false, false, fr.fra_Id);
+            return RedirectToAction("ProgressReportList", "Chief", new { id = frId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ExtendForm2(string frId)
+        {
+            var fr = await _context.FundedResearches.FindAsync(frId);
+            if(fr == null)
+            {
+                return NotFound();
+            }
+
+            fr.isExtension2 = true;
+            await _context.SaveChangesAsync();
+            await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, "Your request for extension has been granted.", true, false, false, fr.fra_Id);
+            return RedirectToAction("ProgressReportList", "Chief", new {id = frId});
         }
 
         [Authorize(Roles ="Chief")]

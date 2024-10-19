@@ -1,21 +1,10 @@
-﻿@model IEnumerable<RemcSys.Models.FileRequirement>
+﻿@model IEnumerable<ProgressReport>
 @{
-    ViewData["Title"] = "Application Requirements";
+    ViewData["Title"] = "Progress Report List";
     Layout = "_NavChief1";
 }
 
 <div class="document-management-container">
-    <p>
-        <form asp-action="SetDTS" method="post">
-            <div class="dts-container mb-4">
-                <label for="dtsNumber">DTS No.:</label>
-                <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..." 
-                    value="@ViewBag.DTSNo" />
-                <button type="submit" class="dts_edit-button"><i class="bi bi-pencil"></i></button>
-                <input type="hidden" name="fraId" value="@ViewBag.FraId" />
-            </div>
-        </form>
-    </p>
     <h3><b>RESEARCH TITLE:</b> @ViewBag.Research</h3>
     <p><b>Field of Study:</b> @ViewBag.Field</p>
     <p><b>Proponents:</b><br />  @ViewBag.Lead 
@@ -28,6 +17,17 @@
             }
         }
     </p>
+    @if (ViewBag.Extend1 == false && ViewBag.Extend2 == false)
+    {
+        <form id="extendForm1" method="post" asp-action="ExtendForm1">
+            <input type="hidden" name="frId" value="@ViewBag.FrId" />
+            <button type="button" class="withdraw-btn" id="addBtn1">Add 1 to 3 months</button>
+        </form>
+        <form id="extendForm2" method="post" asp-action="ExtendForm2">
+            <input type="hidden" name="frId" value="@ViewBag.FrId" />
+            <button type="button" class="withdraw-btn" id="addBtn2">Add 4 to 6 months</button>
+        </form>
+    }
     <table class="document-table">
         <thead>
             <tr>
@@ -52,7 +52,7 @@
                     </td>
                     <td>
                         <div class="dropdown-container">
-                            <select class="form-control custom-select status-dropdown" data-row-id="@item.fr_Id" onchange="handleStatusChange(this)"
+                            <select class="form-control custom-select status-dropdown" data-row-id="@item.pr_Id" onchange="handleStatusChange(this)"
                             @if (@item.file_Status == "Checked")
                             {
                                 <text>disabled</text>
@@ -66,8 +66,10 @@
                         </div>
                     </td>
                     <td class="action-buttons">
-                        <a href="@Url.Action("PreviewFile", new {id = item.fr_Id})" target="_blank"><i class="bi bi-eye-fill"></i></a>
-                        <button class="comment-btn" id="comment-@item.fr_Id" style="display: none;" data-row-id="@item.fr_Id"><i class="bi bi-chat-left-fill"></i></button>
+                        <a href="@Url.Action("PreviewFile", new {id = item.pr_Id})" target="_blank"><i class="bi bi-eye-fill"></i></a>
+                        <button class="comment-btn" id="comment-@item.pr_Id" style="display: none;" data-row-id="@item.pr_Id">
+                            <i class="bi bi-chat-left-fill"></i>
+                        </button>
                     </td>
                 </tr>
             }
@@ -116,6 +118,26 @@
         <span class="wtitle">Are you sure you already checked the document?</span>
         <button class="wsubmit-btn" onclick="submitChange()">Yes</button>
         <button class="wback-btn" onclick="hideWarning()">Cancel</button>
+    </div>
+</div>
+
+<!-- Warning Pop-up2 -->
+<div class="warning_section" id="warningPopup2" style="display: none;">
+    <div class="card">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="wtitle">Are you sure you want to extend in 1-3 months?</span>
+        <button class="wsubmit-btn" id="confirmBtn">Yes</button>
+        <button class="wback-btn" id="backBtn">Cancel</button>
+    </div>
+</div>
+
+<!-- Warning Pop-up3 -->
+<div class="warning_section" id="warningPopup3" style="display: none;">
+    <div class="card">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="wtitle">Are you sure you want to extend in 4-6 months?</span>
+        <button class="wsubmit-btn" id="confirmBtn2">Yes</button>
+        <button class="wback-btn" id="backBtn2">Cancel</button>
     </div>
 </div>
 <script>
@@ -196,7 +218,7 @@
         function saveFeedback(rowId, feedback) {
             // You can perform an AJAX request to save the feedback and update the file status
             $.ajax({
-                url: '@Url.Action("SaveFeedback", "Chief")',
+                url: '@Url.Action("SaveProgressFeedback", "Chief")',
                 type: 'POST',
                 data: {
                     fileId: rowId,
@@ -211,18 +233,6 @@
                 }
             });
         }
-
-        initialSubmitBtn.addEventListener('click', function () {
-            warningPopup.style.display = 'block';
-        });
-
-        backBtn.addEventListener('click', function () {
-            warningPopup.style.display = 'none';
-        });
-
-        finalSubmitBtn.addEventListener('click', function () { 
-            
-        });
     });
 </script>
 <script>
@@ -252,30 +262,46 @@
 
     function submitChange() {
         document.getElementById("warningPopup").style.display = "none";
-        var frId = selectedRowId;
+        var prId = selectedRowId;
         var selectedStatus = "Checked";
 
         $.ajax({
-            url: '/Chief/UpdateStatus',
+            url: '/Chief/UpdatePRStatus',
             type: 'POST',
             data: {
-                fr_Id: frId,
+                pr_Id: prId,
                 newStatus: selectedStatus
             },
             success: function (response) {
-                if (response.success) {
-                    alert('Status updated successfully!');
-                } else if (response.assigned) {
-                    alert('Evaluators assigned successfully!');
-                    window.location.href = '/Chief/UEResearchApp';
-                } else if (response.approved) {
-                    alert('File requirements approved!');
-                    window.location.href = '/Chief/UploadNTP';
-                }
+                alert('Status updated successfully!');
             },
             error: function (xhr, status, error) {
                 alert('Error updating status: ' + error);
             }
         });
     }
+
+    document.getElementById('addBtn1').addEventListener('click', function () {
+        document.getElementById('warningPopup2').style.display = 'block';
+    });
+
+    document.getElementById('backBtn').addEventListener('click', function () {
+        document.getElementById('warningPopup2').style.display = 'none';
+    });
+
+    document.getElementById('confirmBtn').addEventListener('click', function () {
+        document.getElementById('extendForm1').submit();
+    });
+
+    document.getElementById('addBtn2').addEventListener('click', function () {
+        document.getElementById('warningPopup3').style.display = 'block';
+    });
+
+    document.getElementById('backBtn2').addEventListener('click', function () {
+        document.getElementById('warningPopup3').style.display = 'none';
+    });
+
+    document.getElementById('confirmBtn2').addEventListener('click', function () {
+        document.getElementById('extendForm2').submit();
+    });
 </script>

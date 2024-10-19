@@ -41,6 +41,8 @@ namespace RemcSys.Controllers
             ViewBag.Members = fr.team_Members;
             ViewBag.Field = fr.field_of_Study;
             ViewBag.Status = fr.status;
+            ViewBag.Extend1 = fr.isExtension1;
+            ViewBag.Extend2 = fr.isExtension2;
 
             int numReports = 4;
             int interval = fr.project_Duration / numReports;
@@ -51,10 +53,21 @@ namespace RemcSys.Controllers
                 deadlines.Add(deadline);
             }
 
-            if (deadlines.Count >= 1) ViewBag.Report1 = deadlines[0].ToString("MMMM d, yyyy");
-            if (deadlines.Count >= 2) ViewBag.Report2 = deadlines[1].ToString("MMMM d, yyyy");
-            if (deadlines.Count >= 3) ViewBag.Report3 = deadlines[2].ToString("MMMM d, yyyy");
-            if (deadlines.Count >= 4) ViewBag.Report4 = deadlines[3].ToString("MMMM d, yyyy");
+            if (deadlines.Count >= 1) ViewBag.Report1 = deadlines[0];
+            if (deadlines.Count >= 2) ViewBag.Report2 = deadlines[1];
+            if (deadlines.Count >= 3) ViewBag.Report3 = deadlines[2];
+            if (deadlines.Count >= 4) ViewBag.Report4 = deadlines[3];
+
+            ViewBag.Report5 = fr.end_Date.AddMonths(interval);
+            ViewBag.Report6 = fr.end_Date.AddMonths(interval * 2);
+
+            var existingRep = await _context.ProgressReports
+                .Where(pr => pr.fr_Id == fr.fr_Id)
+                .ToListAsync();
+
+            int reportNum = existingRep.Count;
+            ViewBag.Count = reportNum;
+
 
             var logs = await _context.ActionLogs
                     .Where(f => f.Name == fr.team_Leader && f.isTeamLeader == true)
@@ -65,7 +78,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Faculty")]
-        public async Task<IActionResult> UploadProgReport1(string id)
+        public async Task<IActionResult> UploadProgReport(string id)
         {
             if(id == null)
             {
@@ -101,7 +114,7 @@ namespace RemcSys.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitProgressReport1(IFormFile file, string id)
+        public async Task<IActionResult> SubmitProgressReport(IFormFile file, string id)
         {
             if (id == null)
             {
@@ -115,8 +128,15 @@ namespace RemcSys.Controllers
 
             if (file == null || file.Length == 0)
             {
-                return NotFound("There is no pdf file.");
+                return NotFound("There is no uploaded file. Please upload the file and try to submit again.");
             }
+
+            var existingReports = await _context.ProgressReports
+                .Where(pr => pr.fr_Id == id)
+                .ToListAsync();
+
+            int reportNum = existingReports.Count + 1;
+            string docuType = $"Report No.{reportNum}";
 
             byte[] pdfData;
             using (var ms = new MemoryStream())
@@ -130,16 +150,16 @@ namespace RemcSys.Controllers
                     file_Type = Path.GetExtension(file.FileName),
                     data = pdfData,
                     file_Status = "Pending",
-                    document_Type = "Progress Report No.1",
+                    document_Type = docuType,
                     file_Feedback = null,
                     file_Uploaded = DateTime.Now,
                     fr_Id = fr.fr_Id
                 };
                 _context.ProgressReports.Add(progReport);
-                fr.status = "Submitted";
+                fr.status = $"Submitted {docuType}";
             }
             await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, 
-                fr.research_Title + " already uploaded the Progress Report #1.", true, true, false, fr.fra_Id);
+                fr.research_Title + $" already uploaded the {docuType}.", true, true, false, fr.fra_Id);
             await _context.SaveChangesAsync();
             return RedirectToAction("ProgressReportStatus", new { id = id });
         }
@@ -186,6 +206,33 @@ namespace RemcSys.Controllers
             }
 
             return BadRequest("Only PDF files can be previewed.");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateFile(string id, IFormFile newFile)
+        {
+            var progReport = await _context.ProgressReports.FindAsync(id);
+            if (progReport == null)
+            {
+                return NotFound();
+            }
+
+            if (newFile != null && newFile.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await newFile.CopyToAsync(memoryStream);
+                    progReport.data = memoryStream.ToArray();
+                    progReport.file_Name = newFile.FileName;
+                    progReport.file_Type = Path.GetExtension(newFile.FileName);
+                    progReport.file_Uploaded = DateTime.Now;
+                    progReport.file_Status = "Pending";
+                    progReport.file_Feedback = null;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("ProgressReportStatus", new { id = progReport.fr_Id });
         }
     }
 }

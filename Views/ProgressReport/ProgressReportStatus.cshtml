@@ -150,29 +150,13 @@
 
 
 <script>
-    const withdrawBtn = document.getElementById('withdrawBtn');
     const warningPopup = document.getElementById('warningPopup');
     const backBtn = document.getElementById('backBtn');
     const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
-    const withdrawForm = document.getElementById('withdrawForm');
 
     const statusBtn = document.getElementById('statusBtn');
     const statusTag = document.getElementById('statusTag');
     const xBtn = document.getElementById('xBtn')
-
-    withdrawBtn.addEventListener('click', function () {
-        warningPopup.style.display = 'block';
-    });
-
-    // Hide the pop-up when 'Cancel' is clicked
-    backBtn.addEventListener('click', function () {
-        warningPopup.style.display = 'none';
-    });
-
-    // Submit the form when 'Yes' is clicked
-    confirmSubmitBtn.addEventListener('click', function () {
-        withdrawForm.submit(); // Submits the form to the post action specified in the form
-    });
 
     statusBtn.addEventListener('click', function () {
         statusTag.style.display = 'block';
