@@ -1,0 +1,145 @@
+﻿.generate-report-container {
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.title {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.report-categories {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.report-category:hover,
+.report-category:focus {
+    background-color: #850000;
+    color: white;
+}
+
+.report-category {
+    flex: 1;
+    padding: 3px;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.generate {
+    background-color: #8b0a0a;
+    color: white;
+    text-decoration: none;
+}
+
+.submit {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ccc;
+    text-decoration: none;
+}
+
+.report-category h3 {
+    font-size: 16px;
+}
+
+hr {
+    color: #850000;
+    border: 3px solid;
+    border-radius: 5px;
+}
+
+
+.category-dropdown {
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 18px;
+
+}
+
+.category-select {
+    width: 100%;
+    font-weight: bold;
+    background-color: #FFF;
+    color: #000000;
+    border: none;
+    font-size: 18px;
+    margin-left: 10px;
+    border-radius: 5px;
+    padding: 5px;
+    cursor: pointer;    
+}
+
+    .category-select option {
+        background-color: white;
+        color: black;
+    }
+
+    .category-select:focus {
+        outline: none;
+    }
+
+.bi-chevron-down {
+    font-size: 18px;
+    color: #FFDB89;
+}
+
+.date-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-top: 24%;
+}
+
+.date-container {
+    display: flex;
+    justify-content: left;
+}
+
+.date-group {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+    .date-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+.date-input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #850000;
+    border-radius: 10px;
+    width: 200px;
+    box-sizing: border-box;
+}
+
+    .date-input::placeholder {
+        color: #a9a9a9;
+    }
+
+.generate-btn {
+    margin-top: 3%;
+    text-decoration: none;
+    border: none;
+    background-color: #850000;
+    color: #fff;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-left: auto;
+}

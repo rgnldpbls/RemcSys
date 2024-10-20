@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Generate Reports";
+    Layout = "_NavChief1";
+}
+
+<div class="generate-report-container">
+    <div class="report-categories">
+        <a href="/Chief/GenerateReport" class="report-category generate">
+            <h3>Generate Report</h3>
+        </a>
+        <a href="/Chief/ArchivedReport" class="report-category submit">
+            <h3>Archived Report </h3>
+        </a>
+    </div>
+    <hr />
+    <div class="category-dropdown">
+        <select id="specialization" class="category-select">
+            <option value="" disabled selected>Select Report Type...</option>
+            <option value="totUFR">Total University Funded Research</option>
+            <option value="totEFR">Total Externally Funded Research</option>
+            <option value="totUFRL">Total University Funded Research-Load</option>
+            <option value="sumUFR">Summary of Amount in University Funded Research</option>
+            <option value="sumEFR">Summary of Amount in Externally Funded Research</option>
+            <option value="sumUFRL">Summary of Amount in University Funded Research-Load</option>
+            <option value="report">REMC Progress Report</option>
+        </select>
+    </div>
+
+    <div class="date-wrapper">
+        <div class="date-container">
+            <div class="date-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" class="date-input">
+            </div>
+            <div class="date-group">
+                <label for="endDate">End Date</label>
+                <input type="date" id="endDate" class="date-input">
+            </div>
+        </div>
+        <button class="generate-btn">Generate Report</button>
+    </div>
+</div>

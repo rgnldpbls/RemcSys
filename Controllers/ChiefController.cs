@@ -1442,6 +1442,18 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Chief")]
+        public IActionResult GenerateReport()
+        {
+            return View();
+        }
+
+        [Authorize(Roles ="Chief")]
+        public IActionResult ArchivedReport()
+        {
+            return View();
+        }
+
+        [Authorize(Roles ="Chief")]
         public IActionResult GawadTuklas()
         {
             return View();
