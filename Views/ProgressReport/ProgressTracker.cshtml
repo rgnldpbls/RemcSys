@@ -22,7 +22,7 @@
             {
                 <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
             }
-            else if(ViewBag.Status == "Submitted Report No.1" || ViewBag.Status == "Checked Report No.1")
+            else if(ViewBag.Status == "Submitted Progress Report No.1" || ViewBag.Status == "Checked Progress Report No.1")
             {
                 <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
             }
@@ -38,15 +38,15 @@
             </div>
             <strong>Progress Report 2</strong>
             <p>@ViewBag.Report2.ToString("MMMM d, yyyy")</p>
-            @if (ViewBag.Status == "Checked Report No.1") // && DateTime.Now >= ViewBag.Report1
+            @if (ViewBag.Status == "Checked Progress Report No.1") // && DateTime.Now >= ViewBag.Report1
             {
                 <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
             }
-            else if (ViewBag.Status == "Submitted Report No.2" || ViewBag.Status == "Checked Report No.2")
+            else if (ViewBag.Status == "Submitted Progress Report No.2" || ViewBag.Status == "Checked Progress Report No.2")
             {
                 <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
             }
-            else if (ViewBag.Status == "Ongoing" || ViewBag.Status == "Submitted Report No.1") // || DateTime.Now < ViewBag.Report1
+            else if (ViewBag.Status == "Ongoing" || ViewBag.Status == "Submitted Progress Report No.1") // || DateTime.Now < ViewBag.Report1
             {
                 <i class="bi bi-lock" style="color: #850000"></i>
             }
@@ -62,15 +62,15 @@
             </div>
             <strong>Progress Report 3</strong>
             <p>@ViewBag.Report3.ToString("MMMM d, yyyy")</p>
-            @if (ViewBag.Status == "Checked Report No.2") // && DateTime.Now >= ViewBag.Report2
+            @if (ViewBag.Status == "Checked Progress Report No.2") // && DateTime.Now >= ViewBag.Report2
             {
                 <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
             }
-            else if(ViewBag.Status == "Submitted Report No.3" || ViewBag.Status == "Checked Report No.3")
+            else if(ViewBag.Status == "Submitted Progress Report No.3" || ViewBag.Status == "Checked Progress Report No.3")
             {
                 <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
             }
-            else if (ViewBag.Count < 2 || ViewBag.Status == "Submitted Report No.2") // || DateTime.Now < ViewBag.Report2
+            else if (ViewBag.Count < 2 || ViewBag.Status == "Submitted Progress Report No.2") // || DateTime.Now < ViewBag.Report2
             {
                 <i class="bi bi-lock" style="color: #850000"></i>
             }
@@ -86,15 +86,15 @@
             </div>
             <strong>Progress Report 4</strong>
             <p>@ViewBag.Report4.ToString("MMMM d, yyyy")</p>
-            @if (ViewBag.Status == "Checked Report No.3") // && DateTime.Now >= ViewBag.Report3
+            @if (ViewBag.Status == "Checked Progress Report No.3") // && DateTime.Now >= ViewBag.Report3
             {
                 <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
             }
-            else if(ViewBag.Status == "Submitted Report No.4" || ViewBag.Status == "Checked Report No.4")
+            else if(ViewBag.Status == "Submitted Progress Report No.4" || ViewBag.Status == "Checked Progress Report No.4")
             {
                 <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
             }
-            else if (ViewBag.Count < 3 || ViewBag.Status == "Submitted Report No.3") // || DateTime.Now < ViewBag.Report3
+            else if (ViewBag.Count < 3 || ViewBag.Status == "Submitted Progress Report No.3") // || DateTime.Now < ViewBag.Report3
             {
                 <i class="bi bi-lock" style="color: #850000"></i>
             }
@@ -112,15 +112,15 @@
                 </div>
                 <strong>Progress Report 5</strong>
                 <p>@ViewBag.Report5.ToString("MMMM d, yyyy")</p>
-                @if (ViewBag.Status == "Checked Report No.4") // && DateTime.Now >= ViewBag.Report4
+                @if (ViewBag.Status == "Checked Progress Report No.4") // && DateTime.Now >= ViewBag.Report4
                 {
                     <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
-                else if(ViewBag.Status == "Submitted Report No.5" || ViewBag.Status == "Checked Report No.5")
+                else if(ViewBag.Status == "Submitted Progress Report No.5" || ViewBag.Status == "Checked Progress Report No.5")
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
-                else if (ViewBag.Count < 4 || ViewBag.Status == "Submitted Report No.4") // || DateTime.Now < ViewBag.Report4
+                else if (ViewBag.Count < 4 || ViewBag.Status == "Submitted Progress Report No.4") // || DateTime.Now < ViewBag.Report4
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
@@ -135,7 +135,7 @@
                     <i class="bi bi-terminal-fill" style="font-size: 35px"></i>
                 </div>
                 <strong>Terminal Report</strong>
-                @if (ViewBag.Status == "Checked Report No.5")
+                @if (ViewBag.Status == "Checked Progress Report No.5")
                 {
                     <a asp-action="UploadTerminalReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
@@ -143,7 +143,7 @@
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
-                else if (ViewBag.Count < 5 || ViewBag.Status == "Submitted Report No.5")
+                else if (ViewBag.Count < 5 || ViewBag.Status == "Submitted Progress Report No.5")
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
@@ -162,15 +162,15 @@
                 </div>
                 <strong>Progress Report 5</strong>
                 <p>@ViewBag.Report5.ToString("MMMM d, yyyy")</p>
-                @if (ViewBag.Status == "Checked Report No.4") // && DateTime.Now >= ViewBag.Report4
+                @if (ViewBag.Status == "Checked Progress Report No.4") // && DateTime.Now >= ViewBag.Report4
                 {
                     <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
-                else if(ViewBag.Status == "Submitted Report No.5" || ViewBag.Status == "Checked Report No.5")
+                else if(ViewBag.Status == "Submitted Progress Report No.5" || ViewBag.Status == "Checked Progress Report No.5")
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
-                else if (ViewBag.Count < 4 ||  ViewBag.Status == "Submitted Report No.4") // || DateTime.Now < ViewBag.Report4
+                else if (ViewBag.Count < 4 ||  ViewBag.Status == "Submitted Progress Report No.4") // || DateTime.Now < ViewBag.Report4
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
@@ -186,15 +186,15 @@
                 </div>
                 <strong>Progress Report 6</strong>
                 <p>@ViewBag.Report6.ToString("MMMM d, yyyy")</p>
-                @if (ViewBag.Status == "Checked Report No.5") // && DateTime.Now >= ViewBag.Report5
+                @if (ViewBag.Status == "Checked Progress Report No.5") // && DateTime.Now >= ViewBag.Report5
                 {
                     <a asp-action="UploadProgReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
-                else if(ViewBag.Status == "Submitted Report No.6" || ViewBag.Status == "Checked Report No.6")
+                else if(ViewBag.Status == "Submitted Progress Report No.6" || ViewBag.Status == "Checked Progress Report No.6")
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
-                else if (ViewBag.Count < 5 || ViewBag.Status == "Submitted Report No.5") // || DateTime.Now < ViewBag.Report5
+                else if (ViewBag.Count < 5 || ViewBag.Status == "Submitted Progress Report No.5") // || DateTime.Now < ViewBag.Report5
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
@@ -209,7 +209,7 @@
                     <i class="bi bi-terminal-fill" style="font-size: 35px"></i>
                 </div>
                 <strong>Terminal Report</strong>
-                @if (ViewBag.Status == "Checked Report No.6")
+                @if (ViewBag.Status == "Checked Progress Report No.6")
                 {
                     <a asp-action="UploadTerminalReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
@@ -217,7 +217,7 @@
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
-                else if (ViewBag.Count < 6 || ViewBag.Status == "Submitted Report No.6")
+                else if (ViewBag.Count < 6 || ViewBag.Status == "Submitted Progress Report No.6")
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
@@ -235,7 +235,7 @@
                     <i class="bi bi-terminal-fill" style="font-size: 35px"></i>
                 </div>
                 <strong>Terminal Report</strong>
-                @if (ViewBag.Status == "Checked Report No.4")
+                @if (ViewBag.Status == "Checked Progress Report No.4")
                 {
                     <a asp-action="UploadTerminalReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
@@ -243,7 +243,7 @@
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
-                else if (ViewBag.Count < 4 || ViewBag.Status == "Submitted Report No.4")
+                else if (ViewBag.Count < 4 || ViewBag.Status == "Submitted Progress Report No.4")
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
@@ -263,7 +263,7 @@
             {
                 <a asp-action="UploadLiquidationReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
             }
-            else if(ViewBag.Status == "Submitted Liquidation Report" || ViewBag.Status == "Done")
+            else if(ViewBag.Status == "Submitted Liquidation Report" || ViewBag.Status == "Completed")
             {
                 <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
             }
@@ -277,7 +277,7 @@
                 <i class="bi bi-check2-circle" style="font-size: 35px"></i>
             </div>
             <strong style="font-size: 14px;">Certificate of Completion</strong>
-            @if(ViewBag.Status == "Done")
+            @if(ViewBag.Status == "Completed")
             {
                 <a class="view-btn" asp-action="DownloadCC" asp-controller="ProgressReport"
                 asp-route-id="@ViewBag.Id">Download</a>

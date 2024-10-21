@@ -137,7 +137,7 @@ namespace RemcSys.Controllers
                 .ToListAsync();
 
             int reportNum = existingReports.Count + 1;
-            string docuType = $"Report No.{reportNum}";
+            string docuType = $"Progress Report No.{reportNum}";
 
             byte[] pdfData;
             using (var ms = new MemoryStream())

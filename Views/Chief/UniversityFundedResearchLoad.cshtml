@@ -35,6 +35,7 @@
                     <th>Research Work No.</th>
                     <th>Research Work Details</th>
                     <th>Start Date</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -50,7 +51,10 @@
                             <b>Field of Study:</b> @item.field_of_Study
                         </td>
                         <td>
-                            <p>@item.start_Date.ToString("MMMM d, yyyy")</p>
+                            @item.start_Date.ToString("MMMM d, yyyy")
+                        </td>
+                        <td>
+                            @item.status
                         </td>
                         <td>
                             <a asp-action="ProgressReportList" asp-route-id="@item.fr_Id" class="edit-btn">

@@ -16,13 +16,16 @@
     <div class="category-dropdown">
         <select id="specialization" class="category-select">
             <option value="" disabled selected>Select Report Type...</option>
-            <option value="totUFR">Total University Funded Research</option>
-            <option value="totEFR">Total Externally Funded Research</option>
-            <option value="totUFRL">Total University Funded Research-Load</option>
-            <option value="sumUFR">Summary of Amount in University Funded Research</option>
-            <option value="sumEFR">Summary of Amount in Externally Funded Research</option>
-            <option value="sumUFRL">Summary of Amount in University Funded Research-Load</option>
-            <option value="report">REMC Progress Report</option>
+            <option value="OngoingUFR">Total Ongoing University Funded Research</option>
+            <option value="OngoingEFR">Total Ongoing Externally Funded Research</option>
+            <option value="OngoingUFRL">Total Ongoing University Funded Research Load</option>
+            <option value="" disabled>Total Completed University Funded Research</option>
+            <option value="CompletedEFR" disabled>Total Completed Externally Funded Research</option>
+            <option value="" disabled>Total Completed University Funded Research Load</option>
+            <option value="" disabled>Summary of Amount in University Funded Research</option>
+            <option value="" disabled>Summary of Amount in Externally Funded Research</option>
+            <option value="" disabled>Summary of Amount in University Funded Research-Load</option>
+            <option value="ResearchProduction">Research Production</option>
         </select>
     </div>
 
@@ -40,3 +43,23 @@
         <button class="generate-btn">Generate Report</button>
     </div>
 </div>
+
+<script>
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("startDate").setAttribute("max", today);
+    document.getElementById("endDate").setAttribute("max", today);
+
+    document.querySelector('.generate-btn').addEventListener('click', function(){
+        const reportType = document.getElementById("specialization").value;
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+
+        if (reportType && startDate && endDate) {
+            const url = `/Chief/GenerateReports?reportType=${reportType}&startDate=${startDate}&endDate=${endDate}`;
+            window.location.href = url;
+        }
+        else {
+            alert("Please select all the necessary fields.");
+        }
+    })
+</script>

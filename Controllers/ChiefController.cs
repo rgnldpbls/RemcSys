@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MimeKit;
 using MimeKit.Utils;
+using OfficeOpenXml;
 using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
 using RemcSys.Models;
@@ -1332,7 +1333,7 @@ namespace RemcSys.Controllers
             var file = _context.ProgressReports.FirstOrDefault(f => f.pr_Id == pr_Id);
             if(file == null)
             {
-                return Json(new { success = false, message = "Progress Report not found" });
+                return Json(new { success = false, message = "Report not found" });
             }
 
             var fr = await _context.FundedResearches.Where(fr => fr.fr_Id == file.fr_Id).FirstOrDefaultAsync();
@@ -1358,7 +1359,7 @@ namespace RemcSys.Controllers
                 .ToListAsync();
 
                 int reportNum = existingReports.Count + 0;
-                string docuType = $"Report No.{reportNum}";
+                string docuType = $"Progress Report No.{reportNum}";
 
                 fr.status = $"Checked {docuType}";
             }
@@ -1401,7 +1402,8 @@ namespace RemcSys.Controllers
                     fr_Id = fr.fr_Id
                 };
 
-                fr.status = "Done";
+                fr.status = "Completed";
+                fr.end_Date = DateTime.Now;
                 _context.ProgressReports.Add(doc);
                 Directory.Delete(filledFolder, true);
                 await _context.SaveChangesAsync();
@@ -1451,6 +1453,241 @@ namespace RemcSys.Controllers
         public IActionResult ArchivedReport()
         {
             return View();
+        }
+
+        public async Task<IActionResult> GenerateReports(string reportType, DateTime startDate, DateTime endDate)
+        {
+            if(reportType == "OngoingUFR")
+            {
+                var ongoingUFR = await _context.FundedResearches
+                    .Where(f => f.fr_Type == "University Funded Research" && f.status != "Done")
+                    .ToListAsync();
+
+                if(ongoingUFR == null || !ongoingUFR.Any())
+                {
+                    return NotFound("No data found for the selected report type and date range.");
+                }
+
+                // Generate Excel report using EPPlus
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+
+                    // Add headers
+                    worksheet.Cells[1, 1].Value = "Research Work Number";
+                    worksheet.Cells[1, 2].Value = "Colleges/Branches";
+                    worksheet.Cells[1, 3].Value = "Research Title";
+                    worksheet.Cells[1, 4].Value = "Proponent/s";
+                    worksheet.Cells[1, 5].Value = "Nature of Involvement";
+                    worksheet.Cells[1, 6].Value = "Status";
+                    worksheet.Cells[1, 7].Value = "Amount of Funding";
+                    worksheet.Cells[1, 8].Value = "Started Date";
+                    worksheet.Cells[1, 9].Value = "Projected End Date";
+
+                    // Add data to cells
+                    int row = 2;
+                    foreach (var item in ongoingUFR)
+                    {
+                        var teamMembers = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members);
+                        var involvement = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members.Select(_ => "Co-Lead"));
+
+                        worksheet.Cells[row, 1].Value = item.fr_Id;
+                        worksheet.Cells[row, 2].Value = item.college + "/" + item.branch;
+                        worksheet.Cells[row, 3].Value = item.research_Title;
+                        worksheet.Cells[row, 4].Value = item.team_Leader + teamMembers;
+                        worksheet.Cells[row, 5].Value = "Lead" + involvement;
+                        worksheet.Cells[row, 6].Value = item.status;
+                        worksheet.Cells[row, 7].Value = "Php" + (item.total_project_Cost.HasValue ? item.total_project_Cost.Value.ToString("N0") : "0");
+                        worksheet.Cells[row, 8].Value = item.start_Date.ToString("MMMM d, yyyy");
+                        worksheet.Cells[row, 9].Value = item.end_Date.ToString("MMMM d, yyyy");
+                        row++;
+                    }
+
+                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells.AutoFitColumns();
+
+                    // Convert Excel package to a byte array
+                    var excelData = package.GetAsByteArray();
+
+                    // Return the Excel file as a downloadable file
+                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingUniversityFundedResearchReport.xlsx");
+                }
+            }
+            else if(reportType == "OngoingEFR")
+            {
+                var ongoingEFR = await _context.FundedResearches
+                    .Where(f => f.fr_Type == "Externally Funded Research" && f.status != "Done")
+                    .ToListAsync();
+
+                if (ongoingEFR == null || !ongoingEFR.Any())
+                {
+                    return NotFound("No data found for the selected report type and date range.");
+                }
+
+                // Generate Excel report using EPPlus
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+
+                    // Add headers
+                    worksheet.Cells[1, 1].Value = "Research Work Number";
+                    worksheet.Cells[1, 2].Value = "Colleges/Branches";
+                    worksheet.Cells[1, 3].Value = "Research Title";
+                    worksheet.Cells[1, 4].Value = "Proponent/s";
+                    worksheet.Cells[1, 5].Value = "Nature of Involvement";
+                    worksheet.Cells[1, 6].Value = "Status";
+                    worksheet.Cells[1, 7].Value = "Amount of Funding";
+                    worksheet.Cells[1, 8].Value = "Started Date";
+                    worksheet.Cells[1, 9].Value = "Projected End Date";
+
+                    // Add data to cells
+                    int row = 2;
+                    foreach (var item in ongoingEFR)
+                    {
+                        var teamMembers = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members);
+                        var involvement = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members.Select(_ => "Co-Lead"));
+
+                        worksheet.Cells[row, 1].Value = item.fr_Id;
+                        worksheet.Cells[row, 2].Value = item.college + "/" + item.branch;
+                        worksheet.Cells[row, 3].Value = item.research_Title;
+                        worksheet.Cells[row, 4].Value = item.team_Leader + teamMembers;
+                        worksheet.Cells[row, 5].Value = "Lead" + involvement;
+                        worksheet.Cells[row, 6].Value = item.status;
+                        worksheet.Cells[row, 7].Value = "Php" + (item.total_project_Cost.HasValue ? item.total_project_Cost.Value.ToString("N0") : "0");
+                        worksheet.Cells[row, 8].Value = item.start_Date.ToString("MMMM d, yyyy");
+                        worksheet.Cells[row, 9].Value = item.end_Date.ToString("MMMM d, yyyy");
+                        row++;
+                    }
+
+                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells.AutoFitColumns();
+
+                    // Convert Excel package to a byte array
+                    var excelData = package.GetAsByteArray();
+
+                    // Return the Excel file as a downloadable file
+                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingExternallyFundedResearchReport.xlsx");
+                }
+            }
+            else if(reportType == "OngoingUFRL")
+            {
+                var ongoingUFRL = await _context.FundedResearches
+                    .Where(f => f.fr_Type == "University Funded Research Load" && f.status != "Done")
+                    .ToListAsync();
+
+                if (ongoingUFRL == null || !ongoingUFRL.Any())
+                {
+                    return NotFound("No data found for the selected report type and date range.");
+                }
+
+                // Generate Excel report using EPPlus
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+
+                    // Add headers
+                    worksheet.Cells[1, 1].Value = "Research Work Number";
+                    worksheet.Cells[1, 2].Value = "Colleges/Branches";
+                    worksheet.Cells[1, 3].Value = "Research Title";
+                    worksheet.Cells[1, 4].Value = "Proponent/s";
+                    worksheet.Cells[1, 5].Value = "Nature of Involvement";
+                    worksheet.Cells[1, 6].Value = "Status";
+                    worksheet.Cells[1, 7].Value = "Amount of Funding";
+                    worksheet.Cells[1, 8].Value = "Started Date";
+                    worksheet.Cells[1, 9].Value = "Projected End Date";
+
+                    // Add data to cells
+                    int row = 2;
+                    foreach (var item in ongoingUFRL)
+                    {
+                        var teamMembers = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members);
+                        var involvement = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members.Select(_ => "Co-Lead"));
+
+                        worksheet.Cells[row, 1].Value = item.fr_Id;
+                        worksheet.Cells[row, 2].Value = item.college + "/" + item.branch;
+                        worksheet.Cells[row, 3].Value = item.research_Title;
+                        worksheet.Cells[row, 4].Value = item.team_Leader + teamMembers;
+                        worksheet.Cells[row, 5].Value = "Lead" + involvement;
+                        worksheet.Cells[row, 6].Value = item.status;
+                        worksheet.Cells[row, 7].Value = "Php" + (item.total_project_Cost.HasValue ? item.total_project_Cost.Value.ToString("N0") : "0");
+                        worksheet.Cells[row, 8].Value = item.start_Date.ToString("MMMM d, yyyy");
+                        worksheet.Cells[row, 9].Value = item.end_Date.ToString("MMMM d, yyyy");
+                        row++;
+                    }
+
+                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells.AutoFitColumns();
+
+                    // Convert Excel package to a byte array
+                    var excelData = package.GetAsByteArray();
+
+                    // Return the Excel file as a downloadable file
+                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingUniversityFundedResearchLoadReport.xlsx");
+                }
+            }
+            else if(reportType == "ResearchProduction")
+            {
+                // Retrieve data from the database based on reportType, startDate, and endDate
+                var reportData = await _context.FundedResearches
+                    .Where(f => f.status == "Done")
+                    .ToListAsync();
+
+                if (reportData == null || !reportData.Any())
+                {
+                    return NotFound("No data found for the selected report type and date range.");
+                }
+
+                // Generate Excel report using EPPlus
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+
+                    // Add headers
+                    worksheet.Cells[1, 1].Value = "Research Work Number";
+                    worksheet.Cells[1, 2].Value = "Colleges/Branches";
+                    worksheet.Cells[1, 3].Value = "Research Title";
+                    worksheet.Cells[1, 4].Value = "Proponent/s";
+                    worksheet.Cells[1, 5].Value = "Nature of Involvement";
+                    worksheet.Cells[1, 6].Value = "Funded Type";
+                    worksheet.Cells[1, 7].Value = "Amount of Funding";
+                    worksheet.Cells[1, 8].Value = "Started Date";
+                    worksheet.Cells[1, 9].Value = "Completed Date";
+
+                    // Add data to cells
+                    int row = 2;
+                    foreach (var item in reportData)
+                    {
+                        var teamMembers = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members);
+                        var involvement = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members.Select(_ => "Co-Lead"));
+
+                        worksheet.Cells[row, 1].Value = item.fr_Id;
+                        worksheet.Cells[row, 2].Value = item.college + "/" + item.branch;
+                        worksheet.Cells[row, 3].Value = item.research_Title;
+                        worksheet.Cells[row, 4].Value = item.team_Leader + teamMembers;
+                        worksheet.Cells[row, 5].Value = "Lead" + involvement;
+                        worksheet.Cells[row, 6].Value = item.fr_Type;
+                        worksheet.Cells[row, 7].Value = "Php" + (item.total_project_Cost.HasValue ? item.total_project_Cost.Value.ToString("N0") : "0");
+                        worksheet.Cells[row, 8].Value = item.start_Date.ToString("MMMM d, yyyy");
+                        worksheet.Cells[row, 9].Value = item.end_Date.ToString("MMMM d, yyyy");
+                        row++;
+                    }
+
+                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells.AutoFitColumns();
+
+                    // Convert Excel package to a byte array
+                    var excelData = package.GetAsByteArray();
+
+                    // Return the Excel file as a downloadable file
+                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ResearchProductionReport.xlsx");
+                }
+            }
+
+            return NotFound("Invalid selected report type");
         }
 
         [Authorize(Roles ="Chief")]
