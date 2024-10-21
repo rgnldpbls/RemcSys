@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Humanizer.Bytes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -185,8 +186,8 @@ namespace RemcSys.Controllers
             ViewBag.Field = fr.field_of_Study;
 
             var progReport = await _context.ProgressReports
-                    .Where(pr => pr.fr_Id == id && pr.file_Type == ".pdf")
-                    .OrderBy(pr => pr.file_Name)
+                    .Where(pr => pr.fr_Id == id)
+                    .OrderBy(pr => pr.file_Uploaded)
                     .ToListAsync();
 
             return View(progReport);
@@ -204,8 +205,28 @@ namespace RemcSys.Controllers
             {
                 return File(progReport.data, "application/pdf");
             }
+            else
+            {
+                var contentType = GetContentType(progReport.file_Type);
+                return File(progReport.data, contentType, $"report{progReport.file_Type}");
+            }
+        }
 
-            return BadRequest("Only PDF files can be previewed.");
+        private string GetContentType(string fileType)
+        {
+            switch (fileType)
+            {
+                case ".xls":
+                    return "application/vnd.ms-excel";
+                case ".xlsx":
+                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                case ".doc":
+                    return "application/msword";
+                case ".docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                default:
+                    return "application/octet-stream";
+            }
         }
 
         [HttpPost]
@@ -233,6 +254,156 @@ namespace RemcSys.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("ProgressReportStatus", new { id = progReport.fr_Id });
+        }
+
+        [Authorize(Roles = "Faculty")]
+        public async Task<IActionResult> UploadTerminalReport(string id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            var fr = await _context.FundedResearches.FindAsync(id);
+            if(fr == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Id = fr.fr_Id;
+            ViewBag.Research = fr.research_Title;
+            ViewBag.Lead = fr.team_Leader;
+            ViewBag.Members = fr.team_Members;
+
+            var docu = await _context.GeneratedForms
+                .Where(d => d.fra_Id == fr.fra_Id && d.FileName.Contains("Terminal-Report"))
+                .ToListAsync();
+
+            return View(docu);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitTerminalReport(IFormFile file, string id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            var fr = await _context.FundedResearches.FindAsync(id);
+            if(fr == null)
+            {
+                return NotFound();
+            }
+
+            if(file == null || file.Length == 0)
+            {
+                return NotFound("There is no upload file. Please upload the file and try to submit again.");
+            }
+
+            byte[] pdfData;
+            using(var ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                pdfData = ms.ToArray();
+                var progressReport = new ProgressReport
+                {
+                    pr_Id = Guid.NewGuid().ToString(),
+                    file_Name = file.FileName,
+                    file_Type = Path.GetExtension(file.FileName),
+                    data = pdfData,
+                    file_Status = "Pending",
+                    document_Type = "Terminal Report",
+                    file_Feedback = null,
+                    file_Uploaded = DateTime.Now,
+                    fr_Id = fr.fr_Id
+                };
+                _context.ProgressReports.Add(progressReport);
+                fr.status = $"Submitted Terminal Report";
+            }
+
+            await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type,
+                fr.research_Title + " already uploaded the Terminal Report.", true, true, false, fr.fra_Id);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("ProgressReportStatus", new { id = id });
+        }
+
+        [Authorize(Roles = "Faculty")]
+        public async Task<IActionResult> UploadLiquidationReport(string id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            var fr = await _context.FundedResearches.FindAsync(id);
+            if(fr == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Id = fr.fr_Id;
+            ViewBag.Research = fr.research_Title;
+            ViewBag.Lead = fr.team_Leader;
+            ViewBag.Members = fr.team_Members;
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitLiquidationReport(IFormFile file, string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var fr = await _context.FundedResearches.FindAsync(id);
+            if (fr == null)
+            {
+                return NotFound();
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return NotFound("There is no upload file. Please upload the file and try to submit again.");
+            }
+
+            byte[] pdfData;
+            using (var ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                pdfData = ms.ToArray();
+                var progressReport = new ProgressReport
+                {
+                    pr_Id = Guid.NewGuid().ToString(),
+                    file_Name = file.FileName,
+                    file_Type = Path.GetExtension(file.FileName),
+                    data = pdfData,
+                    file_Status = "Pending",
+                    document_Type = "Liquidation Report",
+                    file_Feedback = null,
+                    file_Uploaded = DateTime.Now,
+                    fr_Id = fr.fr_Id
+                };
+                _context.ProgressReports.Add(progressReport);
+                fr.status = $"Submitted Liquidation Report";
+            }
+
+            await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type,
+                fr.research_Title + " already uploaded the Liquidation Report.", true, true, false, fr.fra_Id);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("ProgressReportStatus", new { id = id });
+        }
+
+        public async Task<IActionResult> DownloadCC(string id)
+        {
+            var file = await _context.ProgressReports.FirstOrDefaultAsync(f => f.fr_Id == id && f.document_Type == "Certificate of Completion");
+            if (file == null)
+            {
+                return NotFound();
+            }
+            return File(file.data, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", file.file_Name);
         }
     }
 }

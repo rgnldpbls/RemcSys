@@ -934,7 +934,7 @@ namespace RemcSys.Controllers
             _context.FundedResearches.Add(fr);
             _context.SaveChanges();
 
-            string[] progreports = { "REMC-Progress-Report-Template.docx", "Terminal-Report-Template.docx" };
+            string[] progreports = { "Progress-Report-Template.docx", "Terminal-Report-Template.docx" };
             string filledFolder = Path.Combine(_environment.WebRootPath, "content", "output");
             Directory.CreateDirectory(filledFolder);
 

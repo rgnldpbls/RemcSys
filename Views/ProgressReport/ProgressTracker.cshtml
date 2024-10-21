@@ -124,7 +124,7 @@
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
-                else if(ViewBag.Count >= 4)
+                else if(ViewBag.Count >= 5)
                 {
                     <i class="bi bi-check-circle-fill" style="color: #850000"></i>
                 }
@@ -137,17 +137,17 @@
                 <strong>Terminal Report</strong>
                 @if (ViewBag.Status == "Checked Report No.5")
                 {
-                    <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@ViewBag.Id">Upload</a>
+                    <a asp-action="UploadTerminalReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
-                else if(ViewBag.Status == "Submitted Report No.6" || ViewBag.Status == "Checked Report No.6")
+                else if(ViewBag.Status == "Submitted Terminal Report" || ViewBag.Status == "Checked Terminal Report")
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
-                else if (ViewBag.Count < 5 || ViewBag.Status == "Submitted Progress Report No.5")
+                else if (ViewBag.Count < 5 || ViewBag.Status == "Submitted Report No.5")
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
-                else if (ViewBag.Count >= 5)
+                else if (ViewBag.Count >= 6)
                 {
                     <i class="bi bi-check-circle-fill" style="color: #850000"></i>
                 }
@@ -174,7 +174,7 @@
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
-                else if (ViewBag.Count >= 4)
+                else if (ViewBag.Count >= 5)
                 {
                     <i class="bi bi-check-circle-fill" style="color: #850000"></i>
                 }
@@ -198,7 +198,7 @@
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
-                else if (ViewBag.Count >= 5)
+                else if (ViewBag.Count >= 6)
                 {
                     <i class="bi bi-check-circle-fill" style="color: #850000"></i>
                 }
@@ -211,17 +211,17 @@
                 <strong>Terminal Report</strong>
                 @if (ViewBag.Status == "Checked Report No.6")
                 {
-                    <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@ViewBag.Id">Upload</a>
+                    <a asp-action="UploadTerminalReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
-                else if(ViewBag.Status || "Submitted Report No.7" || ViewBag.Status == "Checked Report No.7")
+                else if(ViewBag.Status == "Submitted Terminal Report" || ViewBag.Status == "Checked Terminal Report")
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
-                else if (ViewBag.Count < 6 || ViewBag.Status == "Submitted Progress Report No.6")
+                else if (ViewBag.Count < 6 || ViewBag.Status == "Submitted Report No.6")
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
-                else if (ViewBag.Count >= 6)
+                else if (ViewBag.Count >= 7)
                 {
                     <i class="bi bi-check-circle-fill" style="color: #850000"></i>
                 }
@@ -237,9 +237,9 @@
                 <strong>Terminal Report</strong>
                 @if (ViewBag.Status == "Checked Report No.4")
                 {
-                    <a asp-action="UnderMaintenance" asp-controller="Home" asp-route-id="@ViewBag.Id">Upload</a>
+                    <a asp-action="UploadTerminalReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
                 }
-                else if (ViewBag.Status == "Submitted Report No.5" || ViewBag.Status == "Checked Report No.5")
+                else if (ViewBag.Status == "Submitted Terminal Report" || ViewBag.Status == "Checked Terminal Report")
                 {
                     <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
                 }
@@ -247,7 +247,7 @@
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
-                else if (ViewBag.Count >= 4)
+                else if (ViewBag.Count >= 5)
                 {
                     <i class="bi bi-check-circle-fill" style="color: #850000"></i>
                 }
@@ -259,14 +259,33 @@
             <i class="bi bi-cash-coin" style="font-size: 35px"></i>
             </div>
             <strong>Liquidation Report</strong>
-            <i class="bi bi-lock" style="color: #850000"></i>
+            @if(ViewBag.Status == "Checked Terminal Report")
+            {
+                <a asp-action="UploadLiquidationReport" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">Upload</a>
+            }
+            else if(ViewBag.Status == "Submitted Liquidation Report" || ViewBag.Status == "Done")
+            {
+                <a asp-action="ProgressReportStatus" asp-controller="ProgressReport" asp-route-id="@ViewBag.Id">View</a>
+            }
+            else
+            {
+                <i class="bi bi-lock" style="color: #850000"></i>
+            }
         </div>
         <div class="step">
             <div class="step-icon">
                 <i class="bi bi-check2-circle" style="font-size: 35px"></i>
             </div>
             <strong style="font-size: 14px;">Certificate of Completion</strong>
-            <i class="bi bi-lock" style="color: #850000"></i>
+            @if(ViewBag.Status == "Done")
+            {
+                <a class="view-btn" asp-action="DownloadCC" asp-controller="ProgressReport"
+                asp-route-id="@ViewBag.Id">Download</a>
+            }
+            else
+            {
+                <i class="bi bi-lock" style="color: #850000"></i>
+            }
         </div>
     </div>
 

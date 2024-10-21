@@ -13,6 +13,7 @@ using RemcSys.Areas.Identity.Data;
 using RemcSys.Data;
 using RemcSys.Models;
 using System.Runtime.Intrinsics.X86;
+using Xceed.Words.NET;
 
 namespace RemcSys.Controllers
 {
@@ -252,9 +253,31 @@ namespace RemcSys.Controllers
                 {
                     return File(progReport.data, "application/pdf");
                 }
+                else
+                {
+                    var contentType = GetContentType(progReport.file_Type);
+                    return File(progReport.data, contentType, $"report{progReport.file_Type}");
+                }
             }
 
             return BadRequest("Only PDF files can be previewed.");
+        }
+
+        private string GetContentType(string fileType)
+        {
+            switch (fileType)
+            {
+                case ".xls":
+                    return "application/vnd.ms-excel";
+                case ".xlsx":
+                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                case ".doc":
+                    return "application/msword";
+                case ".docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                default:
+                    return "application/octet-stream";
+            }
         }
 
         public async Task AssignEvaluators(string fraId)
@@ -1320,18 +1343,71 @@ namespace RemcSys.Controllers
 
             file.file_Status = newStatus;
 
-            var existingReports = await _context.ProgressReports
+            if(file.document_Type == "Terminal Report")
+            {
+                fr.status = "Checked Terminal Report";
+            }
+            else if(file.document_Type == "Liquidation Report")
+            {
+                fr.status = "Checked Liquidation Report";
+            }
+            else
+            {
+                var existingReports = await _context.ProgressReports
                 .Where(pr => pr.fr_Id == file.fr_Id)
                 .ToListAsync();
 
-            int reportNum = existingReports.Count + 0;
-            string docuType = $"Progress Report No.{reportNum}";
+                int reportNum = existingReports.Count + 0;
+                string docuType = $"Report No.{reportNum}";
 
-            fr.status = $"Checked {docuType}";
+                fr.status = $"Checked {docuType}";
+            }
             _context.SaveChanges();
             await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, file.file_Name + " already checked by the Chief.",
                 true, false, false, fr.fra_Id);
 
+            var allFilesChecked = _context.ProgressReports
+                .Where(fr => fr.fr_Id == file.fr_Id)
+                .All(fr => fr.file_Status == "Checked");
+
+            if (allFilesChecked)
+            {
+                string filledFolder = Path.Combine(_webHostEnvironment.WebRootPath, "content", "ceOutput");
+                Directory.CreateDirectory(filledFolder);
+
+                string templatePath = Path.Combine(_webHostEnvironment.WebRootPath, "content", "certofcomp", "Certificate-of-Completion.docx");
+                string filledDocumentPath = Path.Combine(filledFolder, $"Generated_Certificate-of-Completion.docx");
+
+                using (DocX document = DocX.Load(templatePath))
+                {
+                    document.ReplaceText("{{ResearchTitle}}", fr.research_Title);
+                    document.ReplaceText("{{FundedType}}", fr.fr_Type);
+                    document.ReplaceText("{{DateToday}}", DateTime.Now.ToString("MMMM d, yyyy"));
+
+                    document.SaveAs(filledDocumentPath);
+                }
+
+                byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
+                var doc = new ProgressReport
+                {
+                    pr_Id = Guid.NewGuid().ToString(),
+                    file_Name = "Certificate-of-Completion.docx",
+                    file_Type = ".docx",
+                    data = fileBytes,
+                    file_Status = "Checked",
+                    document_Type = "Certificate of Completion",
+                    file_Feedback = null,
+                    file_Uploaded = DateTime.Now,
+                    fr_Id = fr.fr_Id
+                };
+
+                fr.status = "Done";
+                _context.ProgressReports.Add(doc);
+                Directory.Delete(filledFolder, true);
+                await _context.SaveChangesAsync();
+                await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, fr.research_Title + " already uploaded the Certificate of Completion. Congratulations!",
+                    true, false, false, fr.fra_Id);
+            }
             return Json(new { success = true });
         }
 

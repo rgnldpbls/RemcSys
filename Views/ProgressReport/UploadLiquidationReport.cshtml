@@ -1,9 +1,8 @@
-﻿@model IEnumerable<GeneratedForm>
-@{
+﻿@{
     Layout = "_NavTeamLeader4";
 }
 <div class="application-requirements">
-    <h1>Upload Progress Report</h1>
+    <h1>Upload Liquidation Report</h1>
 
     <div class="research-info">
         <h2><b>Research Title:</b> @ViewBag.Research</h2>
@@ -22,15 +21,7 @@
     <div class="upload-container">
         <!-- Your Attachments -->
         <div class="upload-section">
-            <h4>Progress Report Template</h4>
-            <p>Kindly download it for your reference.</p>
-            @foreach(var doc in Model)
-            {
-                <a class="btn-outline-secondary" href="@Url.Action("Download", "ProgressReport", new {id = doc.Id})">
-                    @doc.FileName
-                </a>
-            }<hr />
-            <p><b>NOTE:</b> Please follow the file naming format (Ex: Progress Report # - ResearchTitle)</p>
+            <p><b>NOTE:</b> Please follow the file naming format (Ex: Liquidation Report - ResearchTitle)</p>
 
             <div class="attachments" id="attachments">
                 <p>No Attachments</p>
@@ -40,11 +31,11 @@
         <!-- Upload and Submit button -->
         <div class="file-upload-section">
             <h3>Your Uploads</h3><hr />
-            <form id="uploadForm" enctype="multipart/form-data" method="post" action="@Url.Action("SubmitProgressReport", "ProgressReport")">
+            <form id="uploadForm" enctype="multipart/form-data" method="post" action="@Url.Action("SubmitLiquidationReport", "ProgressReport")">
                 <label for="fileUpload" class="upload-btn">
                     <span class="upload-icon">+</span> Upload Files
                 </label>
-                <input type="file" id="fileUpload" name="file" accept=".pdf" style="display:none;" required>
+                <input type="file" id="fileUpload" name="file" accept=".pdf,.xls,.xlsx" style="display:none;" required>
                 <input type="hidden" name="id" value="@ViewBag.Id"/>
                 <button type="submit" class="submit-btn">SUBMIT REPORT</button>
             </form>

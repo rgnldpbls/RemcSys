@@ -69,25 +69,19 @@
                     <td class="action-buttons">
                         @if(progressReport.file_Status == "Pending" || progressReport.file_Status == "Checked")
                         {
-                            @if (progressReport.file_Type == ".pdf")
-                            {
-                                <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = progressReport.pr_Id }) " target="_blank">
-                                    <i class="bi bi-file-pdf"></i>Preview
-                                </a>
-                            }
+                            <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = progressReport.pr_Id }) " target="_blank">
+                                <i class="bi bi-file-pdf"></i>Preview
+                            </a>
                         }
                         else
                         {
-                            @if (progressReport.file_Type == ".pdf")
-                            {
-                                <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = progressReport.pr_Id }) " target="_blank">
-                                    <i class="bi bi-file-pdf"></i>Preview
-                                </a>
-                            }
+                            <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = progressReport.pr_Id }) " target="_blank">
+                                <i class="bi bi-file-pdf"></i>Preview
+                            </a>
                             <form asp-action="UpdateFile" method="post" enctype="multipart/form-data">
                                 <div class="file-upload-container">
                                     <div class="file-input-wrapper">
-                                        <input type="file" id="newFile_@progressReport.pr_Id" name="newFile" accept=".pdf" style="display: none;" onchange="updateFileName('@progressReport.pr_Id')" required/>
+                                        <input type="file" id="newFile_@progressReport.pr_Id" name="newFile" accept=".pdf,.xls,.xlsx" style="display: none;" onchange="updateFileName('@progressReport.pr_Id')" required/>
                                         <label for="newFile_@progressReport.pr_Id" class="choose-file-btn">Choose File</label>
                                         <a id="previewLink_@progressReport.pr_Id" href="#" target="_blank" style="display: none;">
                                             <span id="fileNameDisplay_@progressReport.pr_Id">No file chosen</span>
@@ -188,18 +182,12 @@
                 // Update the file name display with the selected file name
                 fileNameDisplay.textContent = input.files[0].name;
 
-                // Check if the selected file is a PDF
-                if (input.files[0].type === 'application/pdf') {
-                    // Create a URL for the selected file
-                    var fileURL = URL.createObjectURL(input.files[0]);
-                    // Set the href of the preview link to the file URL
-                    previewLink.href = fileURL;
-                    // Show the preview link (span will be clickable)
-                    previewLink.style.display = 'inline-block';
-                } else {
-                    // Hide the preview link if it's not a PDF
-                    previewLink.style.display = 'none';
-                }
+                // Create a URL for the selected file
+                var fileURL = URL.createObjectURL(input.files[0]);
+                // Set the href of the preview link to the file URL
+                previewLink.href = fileURL;
+                // Show the preview link (span will be clickable)
+                previewLink.style.display = 'inline-block';
             } else {
                 // No file chosen, reset the file name display and hide the preview link
                 fileNameDisplay.textContent = 'No file chosen';
