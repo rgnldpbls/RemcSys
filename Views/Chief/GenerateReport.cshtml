@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<GenerateReport>
+@{
     ViewData["Title"] = "Generate Reports";
     Layout = "_NavChief1";
 }
@@ -16,12 +17,10 @@
     <div class="category-dropdown">
         <select id="specialization" class="category-select">
             <option value="" disabled selected>Select Report Type...</option>
-            <option value="OngoingUFR">Total Ongoing University Funded Research</option>
-            <option value="OngoingEFR">Total Ongoing Externally Funded Research</option>
-            <option value="OngoingUFRL">Total Ongoing University Funded Research Load</option>
-            <option value="" disabled>Total Completed University Funded Research</option>
-            <option value="CompletedEFR" disabled>Total Completed Externally Funded Research</option>
-            <option value="" disabled>Total Completed University Funded Research Load</option>
+            <option value="Application">Funded Research Application</option>
+            <option value="OngoingUFR">Ongoing University Funded Research</option>
+            <option value="OngoingEFR">Ongoing Externally Funded Research</option>
+            <option value="OngoingUFRL">Ongoing University Funded Research Load</option>
             <option value="" disabled>Summary of Amount in University Funded Research</option>
             <option value="" disabled>Summary of Amount in Externally Funded Research</option>
             <option value="" disabled>Summary of Amount in University Funded Research-Load</option>
@@ -35,12 +34,29 @@
                 <label for="startDate">Start Date</label>
                 <input type="date" id="startDate" class="date-input">
             </div>
+            <div class="date-separator">
+                <span>-</span>
+            </div>
             <div class="date-group">
                 <label for="endDate">End Date</label>
                 <input type="date" id="endDate" class="date-input">
             </div>
         </div>
         <button class="generate-btn">Generate Report</button>
+    </div>
+
+    <div class="recent-reports">
+        <h4>Recent Generated Reports</h4>
+        <ul>
+            @foreach(var report in Model)
+            {
+                <li>
+                    <span>@report.gr_fileName - Generated @ActionLog.GetTimeAgo(report.generateDate)</span>
+                    <a href="@Url.Action("PreviewFile", new {id = report.gr_Id})">[Download]</a>
+                    <a href="@Url.Action("ArchiveReport", new {id = report.gr_Id})">[Move to Archive]</a>
+                </li>
+            }
+        </ul>
     </div>
 </div>
 
@@ -49,7 +65,7 @@
     document.getElementById("startDate").setAttribute("max", today);
     document.getElementById("endDate").setAttribute("max", today);
 
-    document.querySelector('.generate-btn').addEventListener('click', function(){
+    document.querySelector('.generate-btn').addEventListener('click', function () {
         const reportType = document.getElementById("specialization").value;
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
@@ -61,5 +77,5 @@
         else {
             alert("Please select all the necessary fields.");
         }
-    })
+    });
 </script>

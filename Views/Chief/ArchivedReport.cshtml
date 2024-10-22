@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<GenerateReport>
+@{
     ViewData["Title"] = "Archived Reports";
     Layout = "_NavChief1";
 }
@@ -13,36 +14,45 @@
         </a>
     </div>
     <hr />
-    @* <div class="category-dropdown">
-        <select id="specialization" class="category-select">
-            <option value="" disabled selected>Select Report Type...</option>
-            <option value="totUFR">Total University Funded Research</option>
-            <option value="totEFR">Total Externally Funded Research</option>
-            <option value="totUFRL">Total University Funded Research-Load</option>
-            <option value="sumUFR">Summary of Amount in University Funded Research</option>
-            <option value="sumEFR">Summary of Amount in Externally Funded Research</option>
-            <option value="sumUFRL">Summary of Amount in University Funded Research-Load</option>
-            <option value="report">REMC Progress Report</option>
-        </select>
+    <div class="search-section">
+        <!-- Search Form -->
+        <form asp-controller="Chief" asp-action="ArchivedReport" method="get" class="form-inline mb-3">
+            <input type="text" name="searchString" class="search-box" placeholder="Search by Report Type" value="@ViewData["currentFilter"]" />
+            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+        </form>
     </div>
     
-    <div class="submit-group">
-        <label for="submitTo">Submit to:</label>
-        <input type="text" id="submitTo" class="submit-input" placeholder="Type here...">
-    </div>
-
-    <div class="date-wrapper">
-        <div class="date-container">
-            <div class="date-group">
-                <label for="startDate">Start Date</label>
-                <input type="date" id="startDate" class="date-input">
-            </div>
-            <div class="date-group">
-                <label for="endDate">End Date</label>
-                <input type="date" id="endDate" class="date-input">
-            </div>
-        </div>
-        <button class="generate-btn">Report Preview</button>
-        <button class="submit-btn">Submit Report</button>
-    </div> *@
+    <table class="document-table">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Type of Report</th>
+                <th>Scope of Date</th>
+                <th>Generated</th>
+                <th>Download</th>
+                <th>Unarchive</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var report in Model)
+            {
+                <tr>
+                    <td>@report.gr_fileName</td>
+                    <td>@report.gr_typeofReport</td>
+                    <td>@report.gr_startDate.ToString("MMMM d, yyyy") - @report.gr_endDate.ToString("MMMM d, yyyy")</td>
+                    <td>@ActionLog.GetTimeAgo(report.generateDate)</td>
+                    <td>
+                        <a href="@Url.Action("PreviewFile", new {id = report.gr_Id})">
+                            <i class="bi bi-download" style="font-size: 30px;"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="@Url.Action("UnarchiveReport", new {id = report.gr_Id})">
+                            Unarchive
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

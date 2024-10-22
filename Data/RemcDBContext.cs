@@ -23,6 +23,9 @@ namespace RemcSys.Data
         public DbSet<Evaluator> Evaluator { get; set; }
         public DbSet<FundedResearch> FundedResearches { get; set; }
         public DbSet<ProgressReport> ProgressReports { get; set; }
+        public DbSet<GenerateReport> GenerateReports { get; set; }
+        public DbSet<GenerateGAWADNominees> GenerateGAWADNominees { get; set; }
+        public DbSet<GAWADWinners> GAWADWinners { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

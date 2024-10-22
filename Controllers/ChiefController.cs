@@ -257,8 +257,15 @@ namespace RemcSys.Controllers
                 else
                 {
                     var contentType = GetContentType(progReport.file_Type);
-                    return File(progReport.data, contentType, $"Certificate of Completion{progReport.file_Type}");
+                    return File(progReport.data, contentType, progReport.file_Name);
                 }
+            }
+
+            var genReport = await _context.GenerateReports.FindAsync(id);
+            if(genReport != null)
+            {
+                var contentType = GetContentType(genReport.gr_fileType);
+                return File(genReport.gr_Data, contentType, genReport.gr_fileName);
             }
 
             return BadRequest("Only PDF files can be previewed.");
@@ -1356,7 +1363,7 @@ namespace RemcSys.Controllers
             {
                 fr.status = "Checked Liquidation Report";
             }
-            else
+            else if(file.document_Type == "Progress Report")
             {
                 var existingReports = await _context.ProgressReports
                 .Where(pr => pr.fr_Id == file.fr_Id)
@@ -1454,23 +1461,121 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Chief")]
-        public IActionResult GenerateReport()
+        public async Task<IActionResult> GenerateReport()
         {
-            return View();
+            var recentReports = await _context.GenerateReports
+                .OrderByDescending(r => r.generateDate)
+                .Take(10)
+                .ToListAsync();
+
+            return View(recentReports);
         }
 
         [Authorize(Roles ="Chief")]
-        public IActionResult ArchivedReport()
+        public async Task<IActionResult> ArchivedReport(string searchString)
         {
-            return View();
+            ViewData["currentFilter"] = searchString;
+            var genReport = _context.GenerateReports
+                .Where(f => f.isArchived == true);
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                genReport = genReport.Where(s => s.gr_typeofReport.Contains(searchString));
+            }
+
+            var genReports = await genReport
+                .OrderByDescending(r => r.generateDate)
+                .ToListAsync();
+
+            return View(genReports);
         }
 
         public async Task<IActionResult> GenerateReports(string reportType, DateTime startDate, DateTime endDate)
         {
-            if(reportType == "OngoingUFR")
+            var user = await _userManager.GetUserAsync(User);
+            if(reportType == "Application")
+            {
+                var application = await _context.FundedResearchApplication
+                    .Where(f => new[] {"Submitted", "UnderEvaluation","Approved"}.Contains(f.application_Status)
+                        && DateOnly.FromDateTime(f.submission_Date) >= DateOnly.FromDateTime(startDate)
+                        && DateOnly.FromDateTime(f.submission_Date) <= DateOnly.FromDateTime(endDate))
+                    .OrderBy(f => f.fra_Type)
+                    .ToListAsync();
+
+                if (application == null || !application.Any())
+                {
+                    return NotFound("No data found for the selected report type and date range.");
+                }
+
+                // Generate Excel report using EPPlus
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+
+                    // Add headers
+                    worksheet.Cells[1, 1].Value = "DTS Number";
+                    worksheet.Cells[1, 2].Value = "Colleges/Branches";
+                    worksheet.Cells[1, 3].Value = "Research Title";
+                    worksheet.Cells[1, 4].Value = "Funded Research Type";
+                    worksheet.Cells[1, 5].Value = "Proponent/s";
+                    worksheet.Cells[1, 6].Value = "Nature of Involvement";
+                    worksheet.Cells[1, 7].Value = "Status";
+                    worksheet.Cells[1, 8].Value = "Amount of Funding";
+                    worksheet.Cells[1, 9].Value = "Date of Submission";
+
+                    // Add data to cells
+                    int row = 2;
+                    foreach (var item in application)
+                    {
+                        var teamMembers = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members);
+                        var involvement = item.team_Members.Contains("N/A") ? string.Empty : "/" + string.Join("/", item.team_Members.Select(_ => "Co-Lead"));
+
+                        worksheet.Cells[row, 1].Value = item.dts_No;
+                        worksheet.Cells[row, 2].Value = item.college + "/" + item.branch;
+                        worksheet.Cells[row, 3].Value = item.research_Title;
+                        worksheet.Cells[row, 4].Value = item.fra_Type;
+                        worksheet.Cells[row, 5].Value = item.applicant_Name + teamMembers;
+                        worksheet.Cells[row, 6].Value = "Lead" + involvement;
+                        worksheet.Cells[row, 7].Value = item.application_Status;
+                        worksheet.Cells[row, 8].Value = "Php" + (item.total_project_Cost.HasValue ? item.total_project_Cost.Value.ToString("N0") : "0");
+                        worksheet.Cells[row, 9].Value = item.submission_Date.ToString("MMMM d, yyyy");
+                        row++;
+                    }
+
+                    worksheet.Cells["A1:I1"].Style.Font.Bold = true;
+                    worksheet.Cells.AutoFitColumns();
+
+                    // Convert Excel package to a byte array
+                    var excelData = package.GetAsByteArray();
+                    var s = startDate.ToString("MMddyyyy");
+                    var e = endDate.ToString("MMddyyyy");
+                    var genRep = new GenerateReport
+                    {
+                        gr_Id = Guid.NewGuid().ToString(),
+                        gr_fileName = $"FRAReport{s}-{e}.xlsx",
+                        gr_fileType = ".xlsx",
+                        gr_Data = excelData,
+                        gr_startDate = startDate,
+                        gr_endDate = endDate,
+                        gr_typeofReport = "Funded Research Applications",
+                        generateDate = DateTime.Now,
+                        UserId = user.Id,
+                        isArchived = false
+                    };
+                    _context.GenerateReports.Add(genRep);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("GenerateReport");
+                }
+            }
+            else if(reportType == "OngoingUFR")
             {
                 var ongoingUFR = await _context.FundedResearches
-                    .Where(f => f.fr_Type == "University Funded Research" && f.status != "Completed")
+                    .Where(f => f.fr_Type == "University Funded Research" && f.status != "Completed"
+                       && DateOnly.FromDateTime(f.start_Date) >= DateOnly.FromDateTime(startDate)
+                       && DateOnly.FromDateTime(f.start_Date) <= DateOnly.FromDateTime(endDate))
+                    .OrderBy(f => f.start_Date)
                     .ToListAsync();
 
                 if(ongoingUFR == null || !ongoingUFR.Any())
@@ -1514,20 +1619,39 @@ namespace RemcSys.Controllers
                         row++;
                     }
 
-                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells["A1:I1"].Style.Font.Bold = true;
                     worksheet.Cells.AutoFitColumns();
 
                     // Convert Excel package to a byte array
                     var excelData = package.GetAsByteArray();
+                    var s = startDate.ToString("MMddyyyy");
+                    var e = endDate.ToString("MMddyyyy");
+                    var genRep = new GenerateReport
+                    {
+                        gr_Id = Guid.NewGuid().ToString(),
+                        gr_fileName = $"OngoingUFRReport{s}-{e}.xlsx",
+                        gr_fileType = ".xlsx",
+                        gr_Data = excelData,
+                        gr_startDate = startDate,
+                        gr_endDate = endDate,
+                        gr_typeofReport = "Ongoing University Funded Research",
+                        generateDate = DateTime.Now,
+                        UserId = user.Id,
+                        isArchived = false
+                    };
+                    _context.GenerateReports.Add(genRep);
+                    await _context.SaveChangesAsync();
 
-                    // Return the Excel file as a downloadable file
-                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingUFRReport.xlsx");
+                    return RedirectToAction("GenerateReport");
                 }
             }
             else if(reportType == "OngoingEFR")
             {
                 var ongoingEFR = await _context.FundedResearches
-                    .Where(f => f.fr_Type == "Externally Funded Research" && f.status != "Completed")
+                    .Where(f => f.fr_Type == "Externally Funded Research" && f.status != "Completed"
+                       && DateOnly.FromDateTime(f.start_Date) >= DateOnly.FromDateTime(startDate)
+                       && DateOnly.FromDateTime(f.start_Date) <= DateOnly.FromDateTime(endDate))
+                    .OrderBy(f => f.start_Date)
                     .ToListAsync();
 
                 if (ongoingEFR == null || !ongoingEFR.Any())
@@ -1571,20 +1695,39 @@ namespace RemcSys.Controllers
                         row++;
                     }
 
-                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells["A1:I1"].Style.Font.Bold = true;
                     worksheet.Cells.AutoFitColumns();
 
                     // Convert Excel package to a byte array
                     var excelData = package.GetAsByteArray();
+                    var s = startDate.ToString("MMddyyyy");
+                    var e = endDate.ToString("MMddyyyy");
+                    var genRep = new GenerateReport
+                    {
+                        gr_Id = Guid.NewGuid().ToString(),
+                        gr_fileName = $"OngoingEFRReport{s}-{e}.xlsx",
+                        gr_fileType = ".xlsx",
+                        gr_Data = excelData,
+                        gr_startDate = startDate,
+                        gr_endDate = endDate,
+                        gr_typeofReport = "Ongoing Externally Funded Research",
+                        generateDate = DateTime.Now,
+                        UserId = user.Id,
+                        isArchived = false
+                    };
+                    _context.GenerateReports.Add(genRep);
+                    await _context.SaveChangesAsync();
 
-                    // Return the Excel file as a downloadable file
-                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingEFRReport.xlsx");
+                    return RedirectToAction("GenerateReport");
                 }
             }
             else if(reportType == "OngoingUFRL")
             {
                 var ongoingUFRL = await _context.FundedResearches
-                    .Where(f => f.fr_Type == "University Funded Research Load" && f.status != "Completed")
+                    .Where(f => f.fr_Type == "University Funded Research Load" && f.status != "Completed"
+                       && DateOnly.FromDateTime(f.start_Date) >= DateOnly.FromDateTime(startDate)
+                       && DateOnly.FromDateTime(f.start_Date) <= DateOnly.FromDateTime(endDate))
+                    .OrderBy(f => f.start_Date)
                     .ToListAsync();
 
                 if (ongoingUFRL == null || !ongoingUFRL.Any())
@@ -1628,21 +1771,40 @@ namespace RemcSys.Controllers
                         row++;
                     }
 
-                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells["A1:I1"].Style.Font.Bold = true;
                     worksheet.Cells.AutoFitColumns();
 
                     // Convert Excel package to a byte array
                     var excelData = package.GetAsByteArray();
 
-                    // Return the Excel file as a downloadable file
-                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingUFRLReport.xlsx");
+                    var s = startDate.ToString("MMddyyyy");
+                    var e = endDate.ToString("MMddyyyy");
+                    var genRep = new GenerateReport
+                    {
+                        gr_Id = Guid.NewGuid().ToString(),
+                        gr_fileName = $"OngoingUFRLReport{s}-{e}.xlsx",
+                        gr_fileType = ".xlsx",
+                        gr_Data = excelData,
+                        gr_startDate = startDate,
+                        gr_endDate = endDate,
+                        gr_typeofReport = "Ongoing University Funded Research Load",
+                        generateDate = DateTime.Now,
+                        UserId = user.Id,
+                        isArchived = false
+                    };
+                    _context.GenerateReports.Add(genRep);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("GenerateReport");
                 }
             }
             else if(reportType == "ResearchProduction")
             {
                 // Retrieve data from the database based on reportType, startDate, and endDate
                 var reportData = await _context.FundedResearches
-                    .Where(f => f.status == "Completed")
+                    .Where(f => f.status == "Completed" && DateOnly.FromDateTime(f.end_Date) >= DateOnly.FromDateTime(startDate)
+                        && DateOnly.FromDateTime(f.end_Date) <= DateOnly.FromDateTime(endDate))
+                    .OrderBy(f => f.fr_Type)
                     .ToListAsync();
 
                 if (reportData == null || !reportData.Any())
@@ -1686,18 +1848,72 @@ namespace RemcSys.Controllers
                         row++;
                     }
 
-                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells["A1:I1"].Style.Font.Bold = true;
                     worksheet.Cells.AutoFitColumns();
 
                     // Convert Excel package to a byte array
                     var excelData = package.GetAsByteArray();
 
-                    // Return the Excel file as a downloadable file
-                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ResearchProductionReport.xlsx");
+                    var s = startDate.ToString("MMddyyyy");
+                    var e = endDate.ToString("MMddyyyy");
+                    var genRep = new GenerateReport
+                    {
+                        gr_Id = Guid.NewGuid().ToString(),
+                        gr_fileName = $"ResearchProductionReport{s}-{e}.xlsx",
+                        gr_fileType = ".xlsx",
+                        gr_Data = excelData,
+                        gr_startDate = startDate,
+                        gr_endDate = endDate,
+                        gr_typeofReport = "Research Production",
+                        generateDate = DateTime.Now,
+                        UserId = user.Id,
+                        isArchived = false
+                    };
+                    _context.GenerateReports.Add(genRep);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("GenerateReport");
                 }
             }
-
             return NotFound("Invalid selected report type");
+        }
+
+        public async Task<IActionResult> ArchiveReport(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var genReport = await _context.GenerateReports.FindAsync(id);
+            if (genReport == null)
+            {
+                return NotFound();
+            }
+
+            genReport.isArchived = true;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("ArchivedReport");
+        }
+
+        public async Task<IActionResult> UnarchiveReport(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var genReport = await _context.GenerateReports.FindAsync(id);
+            if (genReport == null)
+            {
+                return NotFound();
+            }
+
+            genReport.isArchived = false;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("ArchivedReport");
         }
 
         [Authorize(Roles ="Chief")]

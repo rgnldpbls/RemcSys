@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RemcSys.Data;
 
@@ -11,9 +12,11 @@ using RemcSys.Data;
 namespace RemcSys.Migrations.RemcDB
 {
     [DbContext(typeof(RemcDBContext))]
-    partial class RemcDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241022144653_add generateReport & generateGAWADNominees & GAWADWinners model")]
+    partial class addgenerateReportgenerateGAWADNomineesGAWADWinnersmodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -355,6 +358,7 @@ namespace RemcSys.Migrations.RemcDB
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("file_Uploaded")
@@ -372,10 +376,6 @@ namespace RemcSys.Migrations.RemcDB
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("gw_fileType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("gw_Id");
 
                     b.ToTable("GAWADWinners");
@@ -387,6 +387,7 @@ namespace RemcSys.Migrations.RemcDB
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("generateDate")
@@ -397,10 +398,6 @@ namespace RemcSys.Migrations.RemcDB
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("gn_fileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("gn_fileType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -422,6 +419,7 @@ namespace RemcSys.Migrations.RemcDB
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("generateDate")
@@ -435,10 +433,6 @@ namespace RemcSys.Migrations.RemcDB
                         .HasColumnType("datetime2");
 
                     b.Property<string>("gr_fileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("gr_fileType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
