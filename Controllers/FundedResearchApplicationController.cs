@@ -338,7 +338,8 @@ namespace RemcSys.Controllers
 
             if (researchApp != null)
             {
-                _context.FundedResearchApplication.Remove(researchApp);
+                researchApp.application_Status = "Withdrawn";
+                researchApp.isArchive = true;
 
                 await _context.SaveChangesAsync();
             }

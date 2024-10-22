@@ -1,4 +1,4 @@
-﻿@model List<FundedResearchApplication>
+﻿@model Tuple<List<FundedResearchApplication>, List<Evaluation>>
 @{
     ViewData["Title"] = "University Funded Research Applications";
     Layout = "_NavChief1";
@@ -26,7 +26,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var app in Model)
+            @foreach (var app in Model.Item1)
             {
                 <tr>
                     <td>
@@ -44,16 +44,19 @@
                         {
                             <p class="approved">@app.application_Status</p>
                         }
-                        else if(app.application_Status == "Rejected")
+                        else if(app.application_Status == "Rejected" || app.application_Status == "Withdrawn")
                         {
                             <p class="rejected">@app.application_Status</p>
                         }
                     </td>
+                    @{
+                        var existEvals = Model.Item2.Any(e => e.fra_Id == app.fra_Id);
+                    }
                     <td>
                         <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
                             <i class="bi bi-file-pdf"></i>
                         </a>
-                        @if (app.fra_Type == "University Funded Research")
+                        @if (app.fra_Type == "University Funded Research" && existEvals)
                         {
                             <a asp-action="ChiefEvaluationResult" asp-route-id="@app.fra_Id" class="edit-btn">
                                 <i class="bi bi-file-word"></i>

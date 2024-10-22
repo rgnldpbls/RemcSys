@@ -110,6 +110,9 @@ namespace RemcSys.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            public string Role { get; set; }
         }
 
 
@@ -136,6 +139,16 @@ namespace RemcSys.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    if(Input.Role == "Evaluator")
+                    {
+                        await _userManager.AddToRoleAsync(user, "EVALUATOR");
+                        await _userManager.AddToRoleAsync(user, "FACULTY");
+                    }
+                    else if(Input.Role == "Faculty")
+                    {
+                        await _userManager.AddToRoleAsync(user, "FACULTY");
+                    }
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);

@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using RemcSys.Areas.Identity.Data
+
+@inject SignInManager<SystemUser> SignInManager
+@inject UserManager<SystemUser> UserManager
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -24,23 +29,39 @@
                     <a class="nav-link active" href="/Chief/UFResearchApp">Application</a>
                     <a class="nav-link active" href="/Chief/UniversityFundedResearch">Funded Research</a>
                     <a class="nav-link active" href="/Chief/GenerateReport">Reports</a>
+                    <a class="nav-link active" href="/Chief/TuklasNominee">GAWAD</a>
                 </nav>
                 <div class="profile">
-                    <a asp-controller="Chief" asp-action="ChiefNotif">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var user = await UserManager.GetUserAsync(User);
+                        <span>Welcome, @user.Name!</span>
+                    }
+                    <a asp-controller="Chief" asp-action="ChiefNotif" class="btn-outline-light">
                         <i class="bi bi-bell-fill" style="font-size: 30px;"></i>
                     </a>
-                    <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        Chief
+                    <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expnaded="false">
+                        <i class="bi-person-circle" style="font-size: 25px;"></i>
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" asp-action="Evaluator">Evaluator</a></li>
-                        <li><a class="dropdown-item" asp-action="Chief">Chief</a></li>
+                        @if (User.IsInRole("Evaluator"))
+                        {
+                            <li><a class="dropdown-item" asp-action="Evaluator" asp-controller="Home">Switch to Evaluator</a></li>
+                        }
+                        <hr />
+                        <li>
+                            <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+                                Profile
+                            </a>
+                        </li>
+                        <li>
+                            <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
                     </ul>
-                    <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                        <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">
-                            <i class="bi-person-circle" style="font-size: 35px;"></i>
-                        </button>
-                    </form>
                 </div>
             </div>
     </header>

@@ -257,7 +257,7 @@ namespace RemcSys.Controllers
                 else
                 {
                     var contentType = GetContentType(progReport.file_Type);
-                    return File(progReport.data, contentType, $"report{progReport.file_Type}");
+                    return File(progReport.data, contentType, $"Certificate of Completion{progReport.file_Type}");
                 }
             }
 
@@ -1212,7 +1212,11 @@ namespace RemcSys.Controllers
                 .OrderByDescending(f => f.submission_Date)
                 .ToListAsync();
 
-            return View(researchAppList);
+            var evaluation = await _context.Evaluations.ToListAsync();
+
+            var model = new Tuple<List<FundedResearchApplication>, List<Evaluation>>(researchAppList, evaluation);
+
+            return View(model);
         }
 
         [Authorize(Roles ="Chief")]
@@ -1460,7 +1464,7 @@ namespace RemcSys.Controllers
             if(reportType == "OngoingUFR")
             {
                 var ongoingUFR = await _context.FundedResearches
-                    .Where(f => f.fr_Type == "University Funded Research" && f.status != "Done")
+                    .Where(f => f.fr_Type == "University Funded Research" && f.status != "Completed")
                     .ToListAsync();
 
                 if(ongoingUFR == null || !ongoingUFR.Any())
@@ -1517,7 +1521,7 @@ namespace RemcSys.Controllers
             else if(reportType == "OngoingEFR")
             {
                 var ongoingEFR = await _context.FundedResearches
-                    .Where(f => f.fr_Type == "Externally Funded Research" && f.status != "Done")
+                    .Where(f => f.fr_Type == "Externally Funded Research" && f.status != "Completed")
                     .ToListAsync();
 
                 if (ongoingEFR == null || !ongoingEFR.Any())
@@ -1574,7 +1578,7 @@ namespace RemcSys.Controllers
             else if(reportType == "OngoingUFRL")
             {
                 var ongoingUFRL = await _context.FundedResearches
-                    .Where(f => f.fr_Type == "University Funded Research Load" && f.status != "Done")
+                    .Where(f => f.fr_Type == "University Funded Research Load" && f.status != "Completed")
                     .ToListAsync();
 
                 if (ongoingUFRL == null || !ongoingUFRL.Any())
@@ -1632,7 +1636,7 @@ namespace RemcSys.Controllers
             {
                 // Retrieve data from the database based on reportType, startDate, and endDate
                 var reportData = await _context.FundedResearches
-                    .Where(f => f.status == "Done")
+                    .Where(f => f.status == "Completed")
                     .ToListAsync();
 
                 if (reportData == null || !reportData.Any())
@@ -1691,20 +1695,23 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Chief")]
-        public IActionResult GawadTuklas()
+        public IActionResult TuklasNominee()
         {
+            ViewBag.CurrentPage = "tuklas";
             return View();
         }
 
         [Authorize(Roles ="Chief")]
-        public IActionResult GawadLathala()
+        public IActionResult LathalaNominee()
         {
+            ViewBag.CurrentPage = "lathala";
             return View();
         }
 
         [Authorize(Roles ="Chief")]
-        public IActionResult GawadWinners()
+        public IActionResult GawadWinner()
         {
+            ViewBag.CurrentPage = "generate";
             return View();
         }
     }

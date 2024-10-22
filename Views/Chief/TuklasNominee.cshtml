@@ -1,0 +1,34 @@
+﻿@{
+    Layout = "_NavChief1";
+    ViewData["Title"] = "Gawad Tuklas Nominees 2024";
+    var currentPage = ViewBag.CurrentPage as string;
+}
+
+<h2> GAWAD </h2>
+
+<!-- Buttons here-->
+<div class="button-container">
+    <a href="/Chief/TuklasNominee" class="gawad-button @(currentPage == "tuklas" ? "active" : "")" >Gawad Tuklas</a>
+    <a href="/Chief/LathalaNominee" class="gawad-button @(currentPage == "lathala" ? "active" : "")" >Gawad Lathala</a>
+    <a href="/Chief/GawadWinner" class="gawad-button @(currentPage == "generate" ? "active" : "")" >Generate Gawad Winners</a>
+</div>
+
+<hr />
+<h1>@ViewData["Title"]</h1>
+
+<button id="generateExcel">Generate Excel</button>
+<a id="downloadExcel" style="display:none;" href="#">Download Excel</a>
+
+<script>
+    document.getElementById("generateExcel").addEventListener("click", function () {
+        // Call server-side method to generate excel file
+        fetch('/Gawad/GenerateTuklasExcel')
+            .then(response => response.blob())
+            .then(blob => {
+                var link = document.getElementById("downloadExcel");
+                link.href = URL.createObjectURL(blob);
+                link.download = 'GawadTuklasNominees2024.xlsx';
+                link.style.display = 'block';
+            });
+    });
+</script>

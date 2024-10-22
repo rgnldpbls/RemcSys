@@ -43,7 +43,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-/*using (var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
@@ -56,24 +56,6 @@ app.MapRazorPages();
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
-}*/
-
-/*using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var userManager = services.GetRequiredService<UserManager<SystemUser>>();
-
-    string email = "user123@pup.com";
-    string password = "User@123";
-    if (await userManager.FindByEmailAsync(email) == null)
-    {
-        var user = new SystemUser();
-        user.UserName = email;
-        user.Email = email;
-
-        await userManager.CreateAsync(user, password);
-        await userManager.AddToRoleAsync(user, "TEAMLEADER");
-    }
-}*/
+}
 
 app.Run();
