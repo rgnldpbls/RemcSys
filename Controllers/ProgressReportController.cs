@@ -151,7 +151,7 @@ namespace RemcSys.Controllers
                     file_Type = Path.GetExtension(file.FileName),
                     data = pdfData,
                     file_Status = "Pending",
-                    document_Type = docuType,
+                    document_Type = "Progress Report",
                     file_Feedback = null,
                     file_Uploaded = DateTime.Now,
                     fr_Id = fr.fr_Id
@@ -208,7 +208,7 @@ namespace RemcSys.Controllers
             else
             {
                 var contentType = GetContentType(progReport.file_Type);
-                return File(progReport.data, contentType, $"report{progReport.file_Type}");
+                return File(progReport.data, contentType, progReport.file_Name);
             }
         }
 

@@ -338,6 +338,22 @@ namespace RemcSys.Controllers
 
             if (researchApp != null)
             {
+                _context.FundedResearchApplication.Remove(researchApp);
+
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Faculty", "Home");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Withdrawn(string fraId)
+        {
+            var researchApp = await _context.FundedResearchApplication
+                .FirstOrDefaultAsync(f => f.fra_Id == fraId);
+
+            if (researchApp != null)
+            {
                 researchApp.application_Status = "Withdrawn";
                 researchApp.isArchive = true;
 

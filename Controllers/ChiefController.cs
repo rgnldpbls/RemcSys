@@ -1371,11 +1371,17 @@ namespace RemcSys.Controllers
             await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, file.file_Name + " already checked by the Chief.",
                 true, false, false, fr.fra_Id);
 
-            var allFilesChecked = _context.ProgressReports
-                .Where(fr => fr.fr_Id == file.fr_Id)
+            var allProgressReportChecked = _context.ProgressReports
+                .Where(fr => fr.fr_Id == file.fr_Id && fr.document_Type == "Progress Report")
                 .All(fr => fr.file_Status == "Checked");
 
-            if (allFilesChecked)
+            var terminalReportExist = _context.ProgressReports.Any(fr => fr.fr_Id == file.fr_Id
+                && fr.document_Type == "Terminal Report" && fr.file_Status == "Checked");
+
+            var liquidationReportExist = _context.ProgressReports.Any(fr => fr.fr_Id == file.fr_Id
+                && fr.document_Type == "Liquidation Report" && fr.file_Status == "Checked");
+
+            if (allProgressReportChecked && terminalReportExist && liquidationReportExist)
             {
                 string filledFolder = Path.Combine(_webHostEnvironment.WebRootPath, "content", "ceOutput");
                 Directory.CreateDirectory(filledFolder);
@@ -1515,7 +1521,7 @@ namespace RemcSys.Controllers
                     var excelData = package.GetAsByteArray();
 
                     // Return the Excel file as a downloadable file
-                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingUniversityFundedResearchReport.xlsx");
+                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingUFRReport.xlsx");
                 }
             }
             else if(reportType == "OngoingEFR")
@@ -1572,7 +1578,7 @@ namespace RemcSys.Controllers
                     var excelData = package.GetAsByteArray();
 
                     // Return the Excel file as a downloadable file
-                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingExternallyFundedResearchReport.xlsx");
+                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingEFRReport.xlsx");
                 }
             }
             else if(reportType == "OngoingUFRL")
@@ -1629,7 +1635,7 @@ namespace RemcSys.Controllers
                     var excelData = package.GetAsByteArray();
 
                     // Return the Excel file as a downloadable file
-                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingUniversityFundedResearchLoadReport.xlsx");
+                    return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OngoingUFRLReport.xlsx");
                 }
             }
             else if(reportType == "ResearchProduction")
