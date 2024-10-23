@@ -27,7 +27,6 @@
             <tr>
                 <th>File Name</th>
                 <th>Type of Report</th>
-                <th>Scope of Date</th>
                 <th>Generated</th>
                 <th>Download</th>
                 <th>Unarchive</th>
@@ -39,7 +38,6 @@
                 <tr>
                     <td>@report.gr_fileName</td>
                     <td>@report.gr_typeofReport</td>
-                    <td>@report.gr_startDate.ToString("MMMM d, yyyy") - @report.gr_endDate.ToString("MMMM d, yyyy")</td>
                     <td>@ActionLog.GetTimeAgo(report.generateDate)</td>
                     <td>
                         <a href="@Url.Action("PreviewFile", new {id = report.gr_Id})">

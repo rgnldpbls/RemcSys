@@ -268,6 +268,20 @@ namespace RemcSys.Controllers
                 return File(genReport.gr_Data, contentType, genReport.gr_fileName);
             }
 
+            var genNominees = await _context.GenerateGAWADNominees.FindAsync(id);
+            if(genNominees != null)
+            {
+                var contentType = GetContentType(genNominees.gn_fileType);
+                return File(genNominees.gn_Data, contentType, genNominees.gn_fileName);
+            }
+
+            var gawadFiles = await _context.GAWADWinners.FindAsync(id);
+            if(gawadFiles != null)
+            {
+                var contentType = GetContentType(gawadFiles.gw_fileType);
+                return File(gawadFiles.gw_Data, contentType, gawadFiles.gw_fileName);
+            }
+
             return BadRequest("Only PDF files can be previewed.");
         }
 
@@ -1511,7 +1525,7 @@ namespace RemcSys.Controllers
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (var package = new ExcelPackage())
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+                    var worksheet = package.Workbook.Worksheets.Add("FundedResearchApplications");
 
                     // Add headers
                     worksheet.Cells[1, 1].Value = "DTS Number";
@@ -1569,6 +1583,76 @@ namespace RemcSys.Controllers
                     return RedirectToAction("GenerateReport");
                 }
             }
+            else if(reportType == "Evaluator")
+            {
+                var evaluators = await _context.Evaluator
+                    .Include(e => e.Evaluations)
+                    .ToListAsync();
+
+                if (evaluators == null || !evaluators.Any())
+                {
+                    return NotFound("No data found for the selected report type and date range.");
+                }
+
+                // Generate Excel report using EPPlus
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("EvaluatorsReport");
+
+                    // Add headers
+                    worksheet.Cells[1, 1].Value = "Evaluator Name";
+                    worksheet.Cells[1, 2].Value = "Evaluator Email";
+                    worksheet.Cells[1, 3].Value = "Field of Interest";
+                    worksheet.Cells[1, 4].Value = "Pending";
+                    worksheet.Cells[1, 5].Value = "Completed";
+                    worksheet.Cells[1, 6].Value = "Declined";
+
+                    // Add data to cells
+                    int row = 2;
+                    foreach (var item in evaluators)
+                    {
+                        var interestFields = item.field_of_Interest.Contains("N/A") ? string.Empty : string.Join(" / ", item.field_of_Interest);
+                        int pending = item.Evaluations.Where(e => e.evaluation_Status == "Pending").Count();
+                        int completed = item.Evaluations.Where(e => new[] {"Approved", "Rejected"}.Contains(e.evaluation_Status)).Count();
+                        int declined = item.Evaluations.Where(e => e.evaluation_Status == "Decline").Count();
+                        
+
+                        worksheet.Cells[row, 1].Value = item.evaluator_Name;
+                        worksheet.Cells[row, 2].Value = item.evaluator_Email;
+                        worksheet.Cells[row, 3].Value = interestFields;
+                        worksheet.Cells[row, 4].Value = pending;
+                        worksheet.Cells[row, 5].Value = completed;
+                        worksheet.Cells[row, 6].Value = declined;
+                        row++;
+                    }
+
+                    worksheet.Cells["A1:F1"].Style.Font.Bold = true;
+                    worksheet.Cells.AutoFitColumns();
+
+                    // Convert Excel package to a byte array
+                    var excelData = package.GetAsByteArray();
+                    var date = DateTime.Now.ToString("MMddyyyy:HHmmss");
+                    var genRep = new GenerateReport
+                    {
+                        gr_Id = Guid.NewGuid().ToString(),
+                        gr_fileName = $"UFREvaluatorsReport{date}.xlsx",
+                        gr_fileType = ".xlsx",
+                        gr_Data = excelData,
+                        gr_startDate = DateTime.Now,
+                        gr_endDate = DateTime.Now,
+                        gr_typeofReport = "UFR - Evaluators",
+                        generateDate = DateTime.Now,
+                        UserId = user.Id,
+                        isArchived = false
+                    };
+                    _context.GenerateReports.Add(genRep);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("GenerateReport");
+                }
+
+            }
             else if(reportType == "OngoingUFR")
             {
                 var ongoingUFR = await _context.FundedResearches
@@ -1587,7 +1671,7 @@ namespace RemcSys.Controllers
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (var package = new ExcelPackage())
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+                    var worksheet = package.Workbook.Worksheets.Add("OngoingUFR");
 
                     // Add headers
                     worksheet.Cells[1, 1].Value = "Research Work Number";
@@ -1663,7 +1747,7 @@ namespace RemcSys.Controllers
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (var package = new ExcelPackage())
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+                    var worksheet = package.Workbook.Worksheets.Add("OngoingEFR");
 
                     // Add headers
                     worksheet.Cells[1, 1].Value = "Research Work Number";
@@ -1739,7 +1823,7 @@ namespace RemcSys.Controllers
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (var package = new ExcelPackage())
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+                    var worksheet = package.Workbook.Worksheets.Add("OngoingUFRL");
 
                     // Add headers
                     worksheet.Cells[1, 1].Value = "Research Work Number";
@@ -1816,7 +1900,7 @@ namespace RemcSys.Controllers
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (var package = new ExcelPackage())
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("ProgressReport");
+                    var worksheet = package.Workbook.Worksheets.Add("ResearchProduction");
 
                     // Add headers
                     worksheet.Cells[1, 1].Value = "Research Work Number";
@@ -1917,24 +2001,180 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Chief")]
-        public IActionResult TuklasNominee()
+        public async Task<IActionResult> GenerateGAWADNominees()
         {
-            ViewBag.CurrentPage = "tuklas";
-            return View();
+            var recentFile = await _context.GenerateGAWADNominees
+                .OrderByDescending(r => r.generateDate)
+                .Take(10)
+                .ToListAsync();
+
+            return View(recentFile);
+        }
+
+        public async Task<IActionResult> GenerateNominees(string gawadType)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (gawadType == "Tuklas")
+            {
+                var tuklas = await _context.FundedResearches
+                    .Where(f => f.status == "Completed")
+                    .OrderBy(f => f.team_Leader)
+                    .ToListAsync();
+
+                if (tuklas == null || !tuklas.Any())
+                {
+                    return NotFound("No data found for the selected report type and date range.");
+                }
+
+                // Generate Excel report using EPPlus
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("GAWADTuklasNominees");
+
+                    // Add headers
+                    worksheet.Cells[1, 1].Value = "Name";
+                    worksheet.Cells[1, 2].Value = "Research Title";
+                    worksheet.Cells[1, 3].Value = "Funded Research Type";
+                    worksheet.Cells[1, 4].Value = "Nature of Involvement";
+                    worksheet.Cells[1, 5].Value = "Contact Information";
+                    worksheet.Cells[1, 6].Value = "Research Co-Proponent/s";
+                    worksheet.Cells[1, 7].Value = "Completion Date";
+
+                    // Add data to cells
+                    int row = 2;
+                    foreach (var item in tuklas)
+                    {
+                        var teamMembers = item.team_Members.Contains("N/A") ? string.Empty : string.Join("/", item.team_Members);
+
+                        worksheet.Cells[row, 1].Value = item.team_Leader;
+                        worksheet.Cells[row, 2].Value = item.research_Title;
+                        worksheet.Cells[row, 3].Value = item.fr_Type;
+                        worksheet.Cells[row, 4].Value = "Project Leader";
+                        worksheet.Cells[row, 5].Value = item.teamLead_Email;
+                        worksheet.Cells[row, 6].Value = teamMembers;
+                        worksheet.Cells[row, 7].Value = item.end_Date.ToString("MMMM d, yyyy");
+                        row++;
+                    }
+
+                    worksheet.Cells["A1:G1"].Style.Font.Bold = true;
+                    worksheet.Cells.AutoFitColumns();
+
+                    // Convert Excel package to a byte array
+                    var excelData = package.GetAsByteArray();
+                    var date = DateTime.Now.ToString("MMddyyyy:HHmmss");
+                    var genTuklas = new GenerateGAWADNominees
+                    {
+                        gn_Id = Guid.NewGuid().ToString(),
+                        gn_fileName = $"GenerateTuklasNominees{date}.xlsx",
+                        gn_fileType = ".xlsx",
+                        gn_Data = excelData,
+                        gn_type = "GAWAD Tuklas",
+                        generateDate = DateTime.Now,
+                        UserId = user.Id,
+                        isArchived = false
+                    };
+                    _context.GenerateGAWADNominees.Add(genTuklas);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("GenerateGAWADNominees");
+                }
+            }
+            else if(gawadType == "Lathala")
+            {
+                var lathala = await _context.FundedResearches
+                    .Where(f => f.status == "Completed")
+                    .OrderBy(f => f.team_Leader)
+                    .ToListAsync();
+
+                if (lathala == null || !lathala.Any())
+                {
+                    return NotFound("No data found for the selected report type and date range.");
+                }
+
+                // Generate Excel report using EPPlus
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("GAWADLathalaNominees");
+
+                    // Add headers
+                    worksheet.Cells[1, 1].Value = "Name";
+                    worksheet.Cells[1, 2].Value = "Research Title";
+                    worksheet.Cells[1, 3].Value = "Funded Research Type";
+                    worksheet.Cells[1, 4].Value = "Contact Information";
+                    worksheet.Cells[1, 5].Value = "Completion Date";
+
+                    // Add data to cells
+                    int row = 2;
+                    foreach (var item in lathala)
+                    {
+
+                        worksheet.Cells[row, 1].Value = item.team_Leader;
+                        worksheet.Cells[row, 2].Value = item.research_Title;
+                        worksheet.Cells[row, 3].Value = item.fr_Type;
+                        worksheet.Cells[row, 4].Value = item.teamLead_Email;
+                        worksheet.Cells[row, 5].Value = item.end_Date.ToString("MMMM d, yyyy");
+                        row++;
+                    }
+
+                    worksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                    worksheet.Cells.AutoFitColumns();
+
+                    // Convert Excel package to a byte array
+                    var excelData = package.GetAsByteArray();
+                    var date = DateTime.Now.ToString("MMddyyyy:HHmmss");
+                    var genLathala = new GenerateGAWADNominees
+                    {
+                        gn_Id = Guid.NewGuid().ToString(),
+                        gn_fileName = $"GenerateLathalaNominees{date}.xlsx",
+                        gn_fileType = ".xlsx",
+                        gn_Data = excelData,
+                        gn_type = "GAWAD Lathala",
+                        generateDate = DateTime.Now,
+                        UserId = user.Id,
+                        isArchived = false
+                    };
+                    _context.GenerateGAWADNominees.Add(genLathala);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("GenerateGAWADNominees");
+                }
+            }
+            return NotFound("Invalid selected GAWAD type");
         }
 
         [Authorize(Roles ="Chief")]
-        public IActionResult LathalaNominee()
+        public async Task<IActionResult> GawadWinner()
         {
-            ViewBag.CurrentPage = "lathala";
-            return View();
+            var gawadWinner = await _context.GAWADWinners
+                .OrderBy(g => g.file_Uploaded)
+                .ToListAsync();
+            return View(gawadWinner);
         }
 
-        [Authorize(Roles ="Chief")]
-        public IActionResult GawadWinner()
+        [HttpPost]
+        public async Task<IActionResult> UploadGAWADWinners(IFormFile file)
         {
-            ViewBag.CurrentPage = "generate";
-            return View();
+            var user = await _userManager.GetUserAsync(User);
+            byte[] pdfData;
+            using (var ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                pdfData = ms.ToArray();
+                var gawadWinners = new GAWADWinners
+                {
+                    gw_Id = Guid.NewGuid().ToString(),
+                    gw_fileName = file.FileName,
+                    gw_fileType = Path.GetExtension(file.FileName),
+                    gw_Data = pdfData,
+                    file_Uploaded = DateTime.Now,
+                    UserId = user.Id
+                };
+                _context.GAWADWinners.Add(gawadWinners);
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction("GawadWinner");
         }
     }
 }

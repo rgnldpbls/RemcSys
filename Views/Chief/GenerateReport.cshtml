@@ -18,18 +18,16 @@
         <select id="specialization" class="category-select">
             <option value="" disabled selected>Select Report Type...</option>
             <option value="Application">Funded Research Application</option>
+            <option value="Evaluator">University Funded Research - Evaluators</option>
             <option value="OngoingUFR">Ongoing University Funded Research</option>
             <option value="OngoingEFR">Ongoing Externally Funded Research</option>
             <option value="OngoingUFRL">Ongoing University Funded Research Load</option>
-            <option value="" disabled>Summary of Amount in University Funded Research</option>
-            <option value="" disabled>Summary of Amount in Externally Funded Research</option>
-            <option value="" disabled>Summary of Amount in University Funded Research-Load</option>
             <option value="ResearchProduction">Research Production</option>
         </select>
     </div>
 
     <div class="date-wrapper">
-        <div class="date-container">
+        <div class="date-container" id="dateContainer">
             <div class="date-group">
                 <label for="startDate">Start Date</label>
                 <input type="date" id="startDate" class="date-input">
@@ -65,13 +63,30 @@
     document.getElementById("startDate").setAttribute("max", today);
     document.getElementById("endDate").setAttribute("max", today);
 
+    const reportType = document.getElementById("specialization");
+    const dateContainer = document.getElementById("dateContainer");
+
+    reportType.addEventListener('change', function () {
+        const selectedValue = this.value;
+        if (selectedValue == "Evaluator") {
+            dateContainer.style.display = 'none';
+        }
+        else {
+            dateContainer.style.display = 'flex';
+        }
+    });
+
     document.querySelector('.generate-btn').addEventListener('click', function () {
-        const reportType = document.getElementById("specialization").value;
+        const selectedType = document.getElementById("specialization").value;
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
 
-        if (reportType && startDate && endDate) {
-            const url = `/Chief/GenerateReports?reportType=${reportType}&startDate=${startDate}&endDate=${endDate}`;
+        if (selectedType != "Evaluator" && startDate && endDate) {
+            const url = `/Chief/GenerateReports?reportType=${selectedType}&startDate=${startDate}&endDate=${endDate}`;
+            window.location.href = url;
+        }
+        else if (selectedType == "Evaluator") {
+            const url = `/Chief/GenerateReports?reportType=${selectedType}&startDate=null&endDate=null`;
             window.location.href = url;
         }
         else {

@@ -115,8 +115,8 @@ h2, h5 {
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #8B0000;
-    color: white;
+    background-color: white;
+    color: black;
 }
 
 th, td {
@@ -126,5 +126,57 @@ th, td {
 }
 
 th {
-    background-color: #600000;
+    background-color: #850000;
+    color: white;
+}
+
+.generate-report-container {
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.report-categories {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 60%;
+    transition: background-color 0.3s ease;
+}
+
+.report-category:hover,
+.report-category:focus {
+    background-color: #850000;
+    color: white;
+}
+
+.report-category {
+    flex: 1;
+    padding: 3px;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.generate {
+    background-color: #8b0a0a;
+    color: white;
+    text-decoration: none;
+}
+
+.submit {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ccc;
+    text-decoration: none;
+}
+
+.report-category h3 {
+    font-size: 16px;
+}
+
+hr {
+    color: #850000;
+    border: 3px solid;
+    border-radius: 5px;
 }

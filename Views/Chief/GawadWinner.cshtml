@@ -1,49 +1,65 @@
-﻿@{
+﻿@model IEnumerable<GAWADWinners>
+@{
     Layout = "_NavChief1";
     ViewData["Title"] = "Gawad Winner Upload";
     var currentPage = ViewBag.CurrentPage as string;
 }
 
-<h2> GAWAD </h2>
+<div class="generate-report-container">
+    <div class="report-categories">
+        <a href="/Chief/GenerateGAWADNominees" class="report-category submit">
+            <h3>Generate GAWAD Nominees</h3>
+        </a>
+        <a href="/Chief/GAWADWinner" class="report-category generate">
+            <h3>GAWAD Winners</h3>
+        </a>
+    </div>
 
-<!-- Buttons here-->
-<div class="button-container">
-    <a href="/Chief/TuklasNominee" class="gawad-button @(currentPage == "tuklas" ? "active" : "")" >Gawad Tuklas</a>
-    <a href="/Chief/LathalaNominee" class="gawad-button @(currentPage == "lathala" ? "active" : "")" >Gawad Lathala</a>
-    <a href="/Chief/GawadWinner" class="gawad-button @(currentPage == "generate" ? "active" : "")" >Generate Gawad Winners</a>
-</div>
-
-<hr />
-
-
-<div class="upload-container">
-    <h5>Upload Gawad Winners Attachment</h5>
-    <p><em>Note: PDF or Excel only</em></p>
     <hr />
 
-    <div id="drop-area">
-        <p>Drag & Drop your file here</p>
-        <input type="file" id="fileInput" accept=".pdf,.docx">
-    </div>
+    <form id="uploadFile" method="post" enctype="multipart/form-data" action="@Url.Action("UploadGAWADWinners", "Chief")">
+        <div class="upload-container">
+            <h5>Upload Gawad Winners Attachment</h5>
+            <p><em>Note: PDF or Excel only</em></p>
+            <hr />
 
-    <div class="button-group">
-        <button id="previewButton" class="file-action-button">Preview File</button>
-        <button id="uploadButton" class="file-action-button">Submit File</button>
-    </div>
+            <div id="drop-area">
+                <p>Drag & Drop your file here</p>
+                <input type="file" id="fileInput" name="file" accept=".pdf,.xls,.xlsx">
+            </div>
+
+            <div class="button-group">
+                <button id="previewButton" type="button" class="file-action-button">Preview File</button>
+                <button id="uploadButton" type="button" class="file-action-button">Submit File</button>
+            </div>
+        </div>
+    </form>
 </div>
 
 <!-- Archive section -->
 <h2 class="archive-title">Archive:</h2>
 <div class="archive-container">
-    <table id="archiveTable">
+    <table id="archiveTable" class="document-table">
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Download</th>
+                <th>File Uploaded</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Archive entries will be added here -->
+            @foreach(var item in Model)
+            {
+                <tr>
+                    <td>@item.gw_fileName</td>
+                    <td>@ActionLog.GetTimeAgo(item.file_Uploaded)</td>
+                    <td>
+                        <a href="@Url.Action("PreviewFile", new {id = item.gw_Id})" style="color: #850000;">
+                            <i class="bi bi-eye-fill" style="font-size: 30px;"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>
@@ -129,48 +145,7 @@
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const response = await fetch('/uploadfile', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                alert('File uploaded successfully');
-                updateArchive();
-            } else {
-                alert('Failed to upload file');
-            }
+            document.getElementById('uploadFile').submit();
         });
-
-        // Fetch and update archive table
-        async function updateArchive() {
-            const response = await fetch('/getarchive');
-            const archive = await response.json();
-
-            const tableBody = document.getElementById('archiveTable').querySelector('tbody');
-            tableBody.innerHTML = '';
-
-            archive.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                            <td>${item.name}</td>
-                            <td><a href="${item.url}" download>Download as PDF</a></td>
-                        `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        // Initial load of archive
-        updateArchive();
-
-        // Confirm page navigation
-        function confirmPageChange(event) {
-            if (!confirm('Are you sure you want to change pages? You will lose any progress you have made.')) {
-                event.preventDefault();
-            }
-        }
     </script>
 }
