@@ -5,8 +5,10 @@
 }
 
 <div class="container">
-    <div class="card bg-danger text-white p-4" style="border-radius: 20px;">
-        <h4 class="text-center font-weight-bold">General Information</h4>
+    <div class="card bg-danger text-black p-4" style="border-radius: 20px;">
+        <h4 class="text-center font-weight-bold" style="color: #850000;">General Information</h4>
+
+        <hr />
 
         <form asp-action="FormFill" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -14,7 +16,7 @@
                 <label asp-for="ResearchType">Funded Research Type:</label>
                 <div class="dropdown-container">
                     <select asp-for="ResearchType" class="form-control custom-select">
-                        @if(ViewBag.Type == "University Funded Research")
+                        @if (ViewBag.Type == "University Funded Research")
                         {
                             <option value="University Funded Research" selected>University Funded Research</option>
                             <option value="Externally Funded Research">Externally Funded Research</option>
@@ -44,28 +46,28 @@
             </div>
             <div class="form-group">
                 <label asp-for="ProjectLeader">Program/Project Proponent: </label>
-                <input asp-for="ProjectLeader" type="text" class="form-control" placeholder="Project Leader..." value="@ViewBag.Name"/>
+                <input asp-for="ProjectLeader" type="text" class="form-control" placeholder="Project Leader..." value="@ViewBag.Name" />
                 <span asp-validation-for="ProjectLeader" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ProjectMembers">Program/Project Co-Proponent's and Research Assistants: [Type N/A if Not Applicable]</label>
-                @Html.TextAreaFor(m => m.ProjectMembers, new {@class = "form-control", @placeholder = "Project Member1...\nProject Member2..."})
+                @Html.TextAreaFor(m => m.ProjectMembers, new { @class = "form-control", @placeholder = "Project Member1...\nProject Member2...\nProject Member3...", @rows = "3" })
                 <span asp-validation-for="ProjectMembers" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ImplementingInstitution">Implementing Institution:</label>
-                @Html.TextAreaFor(m => m.ImplementingInstitution, new { @class = "form-control", @placeholder = "Implementing Institution..." })
+                @Html.TextAreaFor(m => m.ImplementingInstitution, new { @class = "form-control", @placeholder = "Implementing Institution...", @rows = "3" })
                 <span asp-validation-for="ImplementingInstitution" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="CollaboratingInstitution">Collaborating Institution:</label>
-                @Html.TextAreaFor(m => m.CollaboratingInstitution, new { @class = "form-control", @placeholder = "Collaborating Institution..." })
+                @Html.TextAreaFor(m => m.CollaboratingInstitution, new { @class = "form-control", @placeholder = "Collaborating Institution...", @rows = "3" })
                 <span asp-validation-for="CollaboratingInstitution" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ProjectDuration">Project Duration: [in months]</label>
                 <div class="input-group">
-                    <input asp-for="ProjectDuration" type="number" class="form-control" placeholder="Project Duration..." max="36"/>
+                    <input asp-for="ProjectDuration" type="number" class="form-control" placeholder="Project Duration..." max="36" />
                     <span class="input-group-text">month/s</span>
                 </div>
                 <span asp-validation-for="ProjectDuration" class="text-danger"></span>
@@ -80,17 +82,17 @@
             </div>
             <div class="form-group">
                 <label asp-for="Objectives">Objectives:</label>
-                @Html.TextAreaFor(m => m.Objectives, new { @class = "form-control", @placeholder = "Objectives..." })
+                @Html.TextAreaFor(m => m.Objectives, new { @class = "form-control", @placeholder = "Objectives...", @rows = "5" })
                 <span asp-validation-for="Objectives" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Scope">Scope:</label>
-                @Html.TextAreaFor(m => m.Scope, new { @class = "form-control", @placeholder = "Scope..." })
+                @Html.TextAreaFor(m => m.Scope, new { @class = "form-control", @placeholder = "Scope...", @rows = "5" })
                 <span asp-validation-for="Scope" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Methodology">Methodology:</label>
-                @Html.TextAreaFor(m => m.Methodology, new { @class = "form-control", @placeholder = "Methodology..." })
+                @Html.TextAreaFor(m => m.Methodology, new { @class = "form-control", @placeholder = "Methodology...", @rows = "5" })
                 <span asp-validation-for="Methodology" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -112,8 +114,8 @@
                     <span asp-validation-for="StudyField" class="text-danger"></span>
                 </div>
             </div>
-            <div class="text-center mt-4">
-                <input type="submit" class="btn btn-warning font-weight-bold px-4" value="Generate Documents" style="border-radius: 5px;" />
+            <div class="text-center text-white mt-4">
+                <input type="submit" class="btn btn-danger font-weight-bold px-4" value="Generate Documents" style="border-radius: 5px; padding:10px;" />
             </div>
         </form>
     </div>

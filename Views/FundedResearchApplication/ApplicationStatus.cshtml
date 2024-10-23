@@ -18,7 +18,7 @@
             }
         }
     </p>
-    @if(ViewBag.Status == "Submitted")
+    @if (ViewBag.Status == "Submitted")
     {
         <form id="withdrawForm" method="post" asp-action="Withdrawn">
             <input type="hidden" name="fraId" value="@ViewBag.FraId" />
@@ -38,17 +38,17 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(var fileRequirement in Model)
+            @foreach (var fileRequirement in Model)
             {
                 <tr>
                     <td>@fileRequirement.file_Name</td>
                     <td>@fileRequirement.file_Uploaded.ToString("MMMM d, yyyy")</td>
                     <td>
-                        @if(fileRequirement.file_Status == "Pending")
+                        @if (fileRequirement.file_Status == "Pending")
                         {
                             <span class="status pending">Pending</span>
                         }
-                        @if(fileRequirement.file_Status == "Compliance")
+                        @if (fileRequirement.file_Status == "Compliance")
                         {
                             <span class="status compliance">For Compliance</span>
                             <button class="feedback-button" id="feedbackBtn-@fileRequirement.fr_Id" onclick="showFeedback('@fileRequirement.fr_Id')">
@@ -68,13 +68,13 @@
                                 </div>
                             </div>
                         }
-                        @if(fileRequirement.file_Status == "Checked" || fileRequirement.file_Status == "Proceed")
+                        @if (fileRequirement.file_Status == "Checked" || fileRequirement.file_Status == "Proceed")
                         {
                             <span class="status approved">Checked by the Chief</span>
                         }
                     </td>
                     <td class="action-buttons">
-                        @if(fileRequirement.file_Status == "Pending" || fileRequirement.file_Status == "Checked" || fileRequirement.file_Status == "Proceed")
+                        @if (fileRequirement.file_Status == "Pending" || fileRequirement.file_Status == "Checked" || fileRequirement.file_Status == "Proceed")
                         {
                             @if (fileRequirement.file_Type == ".pdf")
                             {
@@ -94,25 +94,29 @@
                             <form asp-action="UpdateFile" method="post" enctype="multipart/form-data">
                                 <div class="file-upload-container">
                                     <div class="file-input-wrapper">
-                                        <input type="file" id="newFile_@fileRequirement.fr_Id" name="newFile" accept=".pdf" style="display: none;" onchange="updateFileName('@fileRequirement.fr_Id')" required/>
-                                        <label for="newFile_@fileRequirement.fr_Id" class="choose-file-btn">Choose File</label>
+                                        <input type="file" id="newFile_@fileRequirement.fr_Id" name="newFile" accept=".pdf" style="display: none;" onchange="updateFileName('@fileRequirement.fr_Id')" required />
+                                        <label for="newFile_@fileRequirement.fr_Id" class="choose-file-btn"> Choose File </label>
                                         <a id="previewLink_@fileRequirement.fr_Id" href="#" target="_blank" style="display: none;">
-                                            <span id="fileNameDisplay_@fileRequirement.fr_Id">No file chosen</span>
+                                            Preview
+                                            <span id="fileNameDisplay_@fileRequirement.fr_Id" style="margin-left: 10px;">No file chosen</span>
+
                                         </a>
                                     </div>
                                     <input type="hidden" name="id" value="@fileRequirement.fr_Id" />
                                     <div class="submit-button-wrapper">
-                                        <button type="submit" class="resubmit-btn"><i class="bi bi-upload"></i> Re-submit Document</button>
+                                        <button type="submit" class="resubmit-btn"> <i class="bi bi-upload"></i>Submit</button>
                                     </div>
                                 </div>
                             </form>
+
                         }
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-    @if(ViewBag.Type == "University Funded Research")
+
+    @if (ViewBag.Type == "University Funded Research")
     {
         <a class="back-btn" href="/FundedResearchApplication/ApplicationTracker">Back</a>
     }
@@ -125,7 +129,7 @@
 <!--status-tag pop-up-->
 <div class="status_tag" id="statusTag">
     <div class="card3">
-        <button type="button" class="sdismiss" id="xBtn">×</button>
+        <button type="button" class="sdismiss" id="statusX">×</button>
         <span class="title">Status Tags</span>
         <div class="card4">
             <ol>
@@ -152,13 +156,11 @@
         <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
         <span class="wtitle">Are you sure you want to withdraw your application?</span>
     </div>
-    <button class="wsubmit-btn" id="confirmSubmitBtn"
-       style="position: absolute; background-color: #FFDB89;color: #850000; bottom: 10px;right: 10px;font-size: 20px;width: 150px;height: 50px;font-weight: 500;border: 1px #FFDB89;border-radius: 5px; text-align: center; margin-top: 10px;line-height: 50px;"> 
-       Yes
-   </button>
-    <button class="wback-btn" id="backBtn"
-            style="background-color: #850000; color: white; width: 150px; height: 50px; font-size: 20px; position: absolute; bottom: 10px; left: 10px;">
-            Cancel
+    <button class="wsubmit-btn" id="confirmSubmitBtn">
+        Yes
+    </button>
+    <button class="wback-btn" id="backBtn">
+        Cancel
     </button>
 </div>
 
@@ -169,10 +171,6 @@
     const backBtn = document.getElementById('backBtn');
     const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
     const withdrawForm = document.getElementById('withdrawForm');
-
-    const statusBtn = document.getElementById('statusBtn');
-    const statusTag = document.getElementById('statusTag');
-    const xBtn = document.getElementById('xBtn')
 
     withdrawBtn.addEventListener('click', function () {
         warningPopup.style.display = 'block';
@@ -188,14 +186,6 @@
         withdrawForm.submit(); // Submits the form to the post action specified in the form
     });
 
-    statusBtn.addEventListener('click', function () {
-        statusTag.style.display = 'block';
-    });
-
-    xBtn.addEventListener('click', function () {
-        statusTag.style.display = 'none';
-    });
-
     // Function to show the feedback pop-up
     function showFeedback(id) {
         var feedbackPopup = document.getElementById("feedback-" + id);
@@ -209,31 +199,38 @@
     }
 </script>
 <script>
-        function updateFileName(fr_Id) {
-            var input = document.getElementById('newFile_' + fr_Id);
-            var fileNameDisplay = document.getElementById('fileNameDisplay_' + fr_Id);
-            var previewLink = document.getElementById('previewLink_' + fr_Id);
+    function updateFileName(fr_Id) {
+        const input = document.getElementById('newFile_' + fr_Id);
+        const fileNameDisplay = document.getElementById('fileNameDisplay_' + fr_Id);
+        const previewLink = document.getElementById('previewLink_' + fr_Id);
 
-            if (input.files && input.files.length > 0) {
-                // Update the file name display with the selected file name
-                fileNameDisplay.textContent = input.files[0].name;
+        if (input.files && input.files.length > 0) {
+            const selectedFile = input.files[0];
 
-                // Check if the selected file is a PDF
-                if (input.files[0].type === 'application/pdf') {
-                    // Create a URL for the selected file
-                    var fileURL = URL.createObjectURL(input.files[0]);
-                    // Set the href of the preview link to the file URL
-                    previewLink.href = fileURL;
-                    // Show the preview link (span will be clickable)
-                    previewLink.style.display = 'inline-block';
-                } else {
-                    // Hide the preview link if it's not a PDF
-                    previewLink.style.display = 'none';
-                }
+            // Display "No file chosen" only if no file is selected.
+            fileNameDisplay.textContent = '';
+
+            if (selectedFile.type === 'application/pdf') {
+                // Create a URL for the selected file and assign it to the preview link.
+                const fileURL = URL.createObjectURL(selectedFile);
+                previewLink.href = fileURL;
+                previewLink.style.display = 'inline-block'; // Show the "Preview" link.
             } else {
-                // No file chosen, reset the file name display and hide the preview link
-                fileNameDisplay.textContent = 'No file chosen';
-                previewLink.style.display = 'none';
+                previewLink.style.display = 'none'; // Hide if not a PDF.
             }
+        } else {
+            fileNameDisplay.textContent = 'No file chosen';
+            previewLink.style.display = 'none'; // Hide if no file is selected.
         }
+    }
+
+</script>
+<script>
+    document.getElementById('statusBtn').addEventListener('click', function () {
+        document.getElementById('statusTag').style.display = 'block';
+    });
+
+    document.getElementById('statusX').addEventListener('click', function () {
+        document.getElementById('statusTag').style.display = 'none';
+    });
 </script>

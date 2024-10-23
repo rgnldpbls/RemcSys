@@ -13,7 +13,7 @@
                 @foreach (var file in ViewBag.exec)
                 {
                     <li>
-                        <a class="btn" onclick="showDocument('@file.FilePath')">@file.FileName</a>
+                        <a class="btn" onclick="showDocument('@file.FilePath')"><i class="bi bi-file-pdf" style="margin-right: 10px;"></i>@file.FileName</a>
                     </li>
                 }
 

@@ -1,7 +1,9 @@
 ﻿@model IEnumerable<RemcSys.Models.GeneratedForm>
 @{
     ViewData["Title"] = "Generated Documents";
+
     Layout = "_NavTeamLeader3";
+
     var fraId = Model.FirstOrDefault()?.fra_Id;
 }
 <div class="container">
@@ -14,19 +16,21 @@
             {
                 <li>
                     <a class="btn" href="@Url.Action("Download", "FundedResearchApplication", new { id = doc.Id })">
-                        @doc.FileName
+                        <i class="bi bi-file-word" style="margin-right: 10px;"></i>    @doc.FileName
+                        <i class="bi bi-download" style="font-size: 20px; float:right"></i>
                     </a>
                 </li>
             }
         </ul>
     </div>
 </div>
-
-<a class="proceed-btn" href="@Url.Action("UploadFile", "FundedResearchApplication")">Proceed</a>
-<form id="resetForm" method="post" asp-action="Reset">
-    <input type="hidden" name="fraId" value="@fraId" />
-    <button type="button" class="proceed-btn" id="resetBtn">Reset</button>
-</form>
+<div class="button-container">
+    <form id="resetForm" method="post" asp-action="Reset">
+        <input type="hidden" name="fraId" value="@fraId" />
+        <button type="button" class="reset-btn" id="resetBtn">Reset</button>
+    </form>
+    <a class="proceed-btn" href="@Url.Action("UploadFile", "FundedResearchApplication")">Proceed</a>
+</div>
 
 <!-- Warning Pop-up -->
 <div class="warning_section" id="warningPopup" style="display: none">

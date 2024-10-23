@@ -2033,27 +2033,41 @@ namespace RemcSys.Controllers
                     var worksheet = package.Workbook.Worksheets.Add("GAWADTuklasNominees");
 
                     // Add headers
-                    worksheet.Cells[1, 1].Value = "Name";
-                    worksheet.Cells[1, 2].Value = "Research Title";
-                    worksheet.Cells[1, 3].Value = "Funded Research Type";
-                    worksheet.Cells[1, 4].Value = "Nature of Involvement";
-                    worksheet.Cells[1, 5].Value = "Contact Information";
-                    worksheet.Cells[1, 6].Value = "Research Co-Proponent/s";
-                    worksheet.Cells[1, 7].Value = "Completion Date";
+                    worksheet.Cells["A1:D1"].Merge = true;
+                    worksheet.Cells["A1"].Value = $"Gawad Tuklas Nominees - {DateTime.Now.Year}";
+                    worksheet.Cells["A1"].Style.Font.Bold = true;
+                    worksheet.Cells["A1"].Style.Font.Size = 20;
+
+                    worksheet.Cells["A2"].Value = "Name";
+                    worksheet.Cells["B2"].Value = "Nature of Involvement";
+                    worksheet.Cells["C2"].Value = "Research Title";
+                    worksheet.Cells["D2"].Value = "Funded Research Type";
+                    worksheet.Cells["E2"].Value = "College/Branch";
+                    worksheet.Cells["F2"].Value = "Field of Study";
+                    worksheet.Cells["G2"].Value = "Email";
+                    worksheet.Cells["H2"].Value = "Research Co-Proponent/s";
+                    worksheet.Cells["I2"].Value = "Completion Date";
+
+                    worksheet.Cells["A2:I2"].Style.Font.Bold = true;
+                    worksheet.Cells["A2:I2"].Style.Font.Size = 14;
+                    worksheet.Cells["A2:I2"].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    worksheet.Cells["A2:I2"].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
 
                     // Add data to cells
-                    int row = 2;
+                    int row = 3;
                     foreach (var item in tuklas)
                     {
                         var teamMembers = item.team_Members.Contains("N/A") ? string.Empty : string.Join("/", item.team_Members);
 
                         worksheet.Cells[row, 1].Value = item.team_Leader;
-                        worksheet.Cells[row, 2].Value = item.research_Title;
-                        worksheet.Cells[row, 3].Value = item.fr_Type;
-                        worksheet.Cells[row, 4].Value = "Project Leader";
-                        worksheet.Cells[row, 5].Value = item.teamLead_Email;
-                        worksheet.Cells[row, 6].Value = teamMembers;
-                        worksheet.Cells[row, 7].Value = item.end_Date.ToString("MMMM d, yyyy");
+                        worksheet.Cells[row, 2].Value = "Project Leader";
+                        worksheet.Cells[row, 3].Value = item.research_Title;
+                        worksheet.Cells[row, 4].Value = item.fr_Type;
+                        worksheet.Cells[row, 5].Value = $"{item.college}/{item.branch}";
+                        worksheet.Cells[row, 6].Value = item.field_of_Study;
+                        worksheet.Cells[row, 7].Value = item.teamLead_Email;
+                        worksheet.Cells[row, 8].Value = teamMembers;
+                        worksheet.Cells[row, 9].Value = item.end_Date.ToString("MMMM d, yyyy");
                         row++;
                     }
 
@@ -2062,11 +2076,10 @@ namespace RemcSys.Controllers
 
                     // Convert Excel package to a byte array
                     var excelData = package.GetAsByteArray();
-                    var date = DateTime.Now.ToString("MMddyyyy:HHmmss");
                     var genTuklas = new GenerateGAWADNominees
                     {
                         gn_Id = Guid.NewGuid().ToString(),
-                        gn_fileName = $"GenerateTuklasNominees{date}.xlsx",
+                        gn_fileName = $"Gawad-Tuklas-Nominees_{DateTime.Now.Year}.xlsx",
                         gn_fileType = ".xlsx",
                         gn_Data = excelData,
                         gn_type = "GAWAD Tuklas",
@@ -2098,23 +2111,37 @@ namespace RemcSys.Controllers
                 {
                     var worksheet = package.Workbook.Worksheets.Add("GAWADLathalaNominees");
 
-                    // Add headers
-                    worksheet.Cells[1, 1].Value = "Name";
-                    worksheet.Cells[1, 2].Value = "Research Title";
-                    worksheet.Cells[1, 3].Value = "Funded Research Type";
-                    worksheet.Cells[1, 4].Value = "Contact Information";
-                    worksheet.Cells[1, 5].Value = "Completion Date";
+                    // header
+                    worksheet.Cells["A1:D1"].Merge = true;
+                    worksheet.Cells["A1"].Value = $"Gawad Lathala Nominees - {DateTime.Now.Year}";
+                    worksheet.Cells["A1"].Style.Font.Bold = true;
+                    worksheet.Cells["A1"].Style.Font.Size = 20;
+
+                    worksheet.Cells["A2"].Value = "Name";
+                    worksheet.Cells["B2"].Value = "Research Title";
+                    worksheet.Cells["C2"].Value = "Funded Research Type";
+                    worksheet.Cells["D2"].Value = "College/Branch";
+                    worksheet.Cells["E2"].Value = "Field of Study";
+                    worksheet.Cells["F2"].Value = "Email";
+                    worksheet.Cells["G2"].Value = "Completion Date";
+
+                    worksheet.Cells["A2:G2"].Style.Font.Bold = true;
+                    worksheet.Cells["A2:G2"].Style.Font.Size = 14;
+                    worksheet.Cells["A2:G2"].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    worksheet.Cells["A2:G2"].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
 
                     // Add data to cells
-                    int row = 2;
+                    int row = 3;
                     foreach (var item in lathala)
                     {
 
                         worksheet.Cells[row, 1].Value = item.team_Leader;
                         worksheet.Cells[row, 2].Value = item.research_Title;
                         worksheet.Cells[row, 3].Value = item.fr_Type;
-                        worksheet.Cells[row, 4].Value = item.teamLead_Email;
-                        worksheet.Cells[row, 5].Value = item.end_Date.ToString("MMMM d, yyyy");
+                        worksheet.Cells[row, 4].Value = $"{item.college}/{item.branch}";
+                        worksheet.Cells[row, 5].Value = item.field_of_Study;
+                        worksheet.Cells[row, 6].Value = item.teamLead_Email;
+                        worksheet.Cells[row, 7].Value = item.end_Date.ToString("MMMM d, yyyy");
                         row++;
                     }
 
@@ -2123,11 +2150,10 @@ namespace RemcSys.Controllers
 
                     // Convert Excel package to a byte array
                     var excelData = package.GetAsByteArray();
-                    var date = DateTime.Now.ToString("MMddyyyy:HHmmss");
                     var genLathala = new GenerateGAWADNominees
                     {
                         gn_Id = Guid.NewGuid().ToString(),
-                        gn_fileName = $"GenerateLathalaNominees{date}.xlsx",
+                        gn_fileName = $"Gawad-Lathala-Nominees_{DateTime.Now.Year}.xlsx",
                         gn_fileType = ".xlsx",
                         gn_Data = excelData,
                         gn_type = "GAWAD Lathala",

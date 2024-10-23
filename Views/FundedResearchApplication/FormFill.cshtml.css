@@ -6,14 +6,18 @@
 }
 
 .container {
-    max-width: 800px;
+    width: 80%;
     margin: 0 auto;
     padding-top: 20px;
     margin-bottom: 50px;
 }
 
+hr {
+    color: #850000;
+}
+
 .form-group {
-    margin-bottom: 5px;
+    margin-bottom: 20px;
 }
 
 .form-control, .btn {
@@ -21,7 +25,8 @@
 }
 
 .bg-danger {
-    background-color: #850000 !important;
+    background-color: #f8f8f8 !important;
+    border: 2px solid #850000;
 }
 
 .btn-warning {
@@ -32,6 +37,10 @@
 
 .btn-secondary {
     background-color: #888;
+}
+
+.btn-danger {
+    background-color: #850000 !important;
 }
 
 .dropdown-container {

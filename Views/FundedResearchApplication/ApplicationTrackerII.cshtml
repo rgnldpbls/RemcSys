@@ -8,13 +8,13 @@
 <div class="container">
     @foreach (var item in Model.Item1)
     {
-        @if(item.fra_Type == "Externally Funded Research")
+        @if (item.fra_Type == "Externally Funded Research")
         {
-            <h1 class="my-4">Externally Funded Research - Application Tracker</h1>
+            <h1 class="my-4">EXTERNALLY FUNDED RESEARCH - APPLICATION TRACKER</h1>
         }
-        else if(item.fra_Type == "University Funded Research Load")
+        else if (item.fra_Type == "University Funded Research Load")
         {
-            <h1 class="my-4">University Funded Research Load - Application Tracker</h1>
+            <h1 class="my-4">UNIVERSITY FUNDED RESEARCH LOAD - APPLICATION TRACKER</h1>
         }
 
         <form asp-action="SetDTS2" method="post">
@@ -41,8 +41,10 @@
                     <i class="bi bi-list-check" style="font-size: 35px"></i>
                 </div>
                 <strong>Document Under Review</strong>
-                <a class="view-btn" asp-action="ApplicationStatus" asp-controller="FundedResearchApplication"
-                   asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">View</a>
+                <div class="view-btn">
+                    <a asp-action="ApplicationStatus" asp-controller="FundedResearchApplication"
+                       asp-route-id="@item.fra_Id" style="font-size:12px; text-decoration: none; color: #850000;">View</a>
+                </div>
             </div>
             <form asp-action="GoToEthics" asp-route-id="@item.fra_Id" method="post">
                 <div class="step">
@@ -51,7 +53,7 @@
                         <i class="bi bi-file-earmark-lock-fill" style="font-size: 35px"></i>
                     </div>
                     <strong>Ethics Clearance Secured</strong>
-                    <button class="view-btn" type="submit" style="font-size:12px; margin-left: 5px;">Apply</button>
+                    <button class="clearance-btn" type="submit" style="font-size:12px; margin-left: 5px;">Apply</button>
                 </div>
             </form>
             <div class="step">
@@ -60,10 +62,12 @@
                     <i class="bi bi-check2-circle" style="font-size: 35px"></i>
                 </div>
                 <strong>Notice To Proceed</strong>
-                @if(item.application_Status == "Proceed")
+                @if (item.application_Status == "Proceed")
                 {
-                    <a class="view-btn" asp-action="PdfDownload" asp-controller="FundedResearchApplication"
-                        asp-route-id="@item.fra_Id" style="font-size:12px; margin-left: 5px;">Download</a>
+                    <div class="view-btn2">
+                        <a asp-action="PdfDownload" asp-controller="FundedResearchApplication"
+                           asp-route-id="@item.fra_Id" style="font-size:12px; text-decoration: none; color: #850000">Download</a>
+                    </div>
                 }
                 else
                 {
@@ -75,7 +79,7 @@
                     <i class="bi bi-flag" style="font-size: 35px"></i>
                 </div>
                 <strong>Progress Report Tracker</strong>
-                @if(item.application_Status == "Proceed")
+                @if (item.application_Status == "Proceed")
                 {
                     <form id="progressForm" method="post" asp-action="Progress">
                         <input type="hidden" name="fraId" value="@item.fra_Id" />
@@ -130,29 +134,3 @@
         </div>
     }
 </div>
-
-<!-- Warning Pop-up ReApply -->
-@* <div class="warning_section" id="warningPopup" style="display: none">
-    <div class="card5">
-        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
-        <span class="wtitle">
-            Are you sure you want to go to the Progress Report Tracker?
-        </span>
-    </div>
-    <button class="wsubmit-btn" id="confirmSubmitBtn">Yes</button>
-    <button class="wback-btn" id="backBtn">Cancel</button>
-</div>
-
-<script>
-    document.getElementById('gotoBtn').addEventListener('click', function () {
-        document.getElementById('warningPopup').style.display = 'block';
-    });
-
-    document.getElementById('backBtn').addEventListener('click', function () {
-        document.getElementById('warningPopup').style.display = 'none';
-    });
-
-    document.getElementById('confirmSubmitBtn').addEventListener('click', function () {
-        document.getElementById('progressForm').submit();
-    });
-</script> *@

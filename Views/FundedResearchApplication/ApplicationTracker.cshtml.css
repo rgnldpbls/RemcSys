@@ -57,13 +57,20 @@
     display: inline;
 }
 
-.step-container a.view-btn {
-    color: #000000;
-    font-size: 12px;
-    margin-left: 5px;
-    display: inline;
+.view-btn {
+    justify-content: center;
+    border: 2px solid #850000;
+    background-color: #fff;
+    width: 50px;
+    color: #850000;
+    cursor: pointer;
+    border-radius: 5px;
     font-weight: 500;
 }
+
+    .view-btn:hover {
+        text-decoration: underline;
+    }
 
 
 .step-icon {
@@ -104,6 +111,24 @@
         left: 62%;
         transform: translateX(3%);
         z-index: -1;
+    }
+
+
+.clearance-btn {
+    justify-content: center;
+    border: 2px solid #850000;
+    text-decoration: none;
+    background-color: #fff;
+    width: 70px;
+    padding: 5px;
+    color: #850000;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+    .clearance-btn:hover {
+        text-decoration: underline;
     }
 
 

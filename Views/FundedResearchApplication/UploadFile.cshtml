@@ -3,16 +3,19 @@
     Layout = "_NavTeamLeader3";
 }
 <div class="application-requirements">
-    <h1>Application Requirements</h1>
+    <h1>DOCUMENTARY REQUIREMENTS</h1>
 
-    @foreach(var item in Model){
+    @foreach (var item in Model)
+    {
         <div class="research-info">
             <h4><b>Research Type:</b> @item.fra_Type</h4>
             <h2><b>Research Title:</b> @item.research_Title</h2>
             <h6>
                 <b>Proponent/s:</b><br>@item.applicant_Name <br>
-                @if(!item.team_Members.Contains("N/A")){
+                @if (!item.team_Members.Contains("N/A"))
+                {
                     @foreach (var member in item.team_Members)
+
                     {
                         @member <br>
                     }
@@ -24,45 +27,50 @@
         <!-- Your Attachments -->
         <div class="upload-section">
             <h3>Your Attachments</h3><hr />
-            <p><b>NOTE:</b> Please follow the file naming format (Ex: FORM # - FormName)</p>
+            <p><b>NOTE:</b> Please follow the file naming format (Ex: FORM # - FormName.pdf)</p>
 
             <div class="attachments">
                 <form id="uploadForm" method="post" enctype="multipart/form-data">
                     <div class="file-input">
                         <label for="capsulizedResearch">Capsulized Research Proposal:</label>
                         <input type="file" id="capsulizedResearch" name="capsulizedResearch" accept=".pdf" required>
-                        <span class="file-name" data-for="capsulizedResearch"></span>
+                        <button type="button" class="preview-btn" data-for="capsulizedResearch" disabled>Preview</button>
                     </div>
                     <div class="file-input">
                         <label for="form1">Form 1 - Term of Reference:</label>
                         <input type="file" id="form1" name="form1" accept=".pdf" required>
-                        <span class="file-name" data-for="form1"></span>
+                        <button type="button" class="preview-btn" data-for="form1" disabled>Preview</button>
                     </div>
                     <div class="file-input">
                         <label for="form2">Form 2 - Line Item Budget:</label>
                         <input type="file" id="form2" name="form2" accept=".pdf" required>
-                        <span class="file-name" data-for="form2"></span>
+                        <button type="button" class="preview-btn" data-for="form2" disabled>Preview</button>
                     </div>
                     <div class="file-input">
                         <label for="form3">Form 3 - Schedule of Outputs/Tranche Release:</label>
                         <input type="file" id="form3" name="form3" accept=".pdf" required>
-                        <span class="file-name" data-for="form3"></span>
+                        <button type="button" class="preview-btn" data-for="form3" disabled>Preview</button>
                     </div>
                     <div class="file-input">
                         <label for="form4">Form 4 - Workplan:</label>
                         <input type="file" id="form4" name="form4" accept=".pdf" required>
-                        <span class="file-name" data-for="form4"></span>
+                        <button type="button" class="preview-btn" data-for="form4" disabled>Preview</button>
                     </div>
                     <div class="file-input">
                         <label for="manuscript">Research Proposal Manuscript:</label>
                         <input type="file" id="manuscript" name="manuscript" accept=".pdf" required>
-                        <span class="file-name" data-for="manuscript"></span>
+                        <button type="button" class="preview-btn" data-for="manuscript" disabled>Preview</button>
                     </div>
+                    <hr />
                     <div id="additionalFiles"></div>
-                    <button type="button" id="addFileBtn">Add Another File</button>
-                    <button type="button" id="uploadFilesBtn">Upload Files</button>
+                    <button class="upload-btn" id="addFileBtn">+ Add Another File</button>
                 </form>
             </div>
+        </div>
+        <!-- Submit button -->
+        <div class="file-upload-section">
+            <h3>Your Uploads</h3><hr />
+            <button class="submit-btn" id="uploadFilesBtn">UPLOAD FILES</button>
         </div>
     </div>
 </div>
@@ -122,14 +130,20 @@
         function addFileNameListener(input) {
             input.addEventListener('change', function () {
                 const fileName = this.files[0] ? this.files[0].name : '';
-                const fileNameSpan = this.nextElementSibling;
-                fileNameSpan.textContent = fileName;
-                fileNameSpan.style.cursor = fileName ? 'pointer' : 'default';
+                const previewBtn = this.nextElementSibling;
+
+                if (fileName) {
+                    previewBtn.disabled = false;
+                    previewBtn.textContent = `Preview`;
+                } else {
+                    previewBtn.disabled = true;
+                    previewBtn.textContent = 'Preview';
+                }
             });
         }
 
-        function addFilePreviewListener(span) {
-            span.addEventListener('click', function () {
+        function addFilePreviewListener(button) {
+            button.addEventListener('click', function () {
                 const inputId = this.getAttribute('data-for');
                 const input = document.getElementById(inputId);
                 if (input.files && input.files[0]) {
@@ -150,17 +164,18 @@
                 const newFileInput = document.createElement('div');
                 newFileInput.className = 'file-input';
                 newFileInput.innerHTML = `
-                        <label for="additionalFile${fileCount}">Additional File ${fileCount - 4}:</label>
-                        <input type="file" id="additionalFile${fileCount}" name="additionalFile${fileCount}" accept=".pdf" required>
-                        <span class="file-name" data-for="additionalFile${fileCount}"></span>
-                        <button type="button" class="remove-file">X</button>
-                    `;
+                                <label for="additionalFile${fileCount}">Additional File ${fileCount - 4}:</label>
+                                <input type="file" id="additionalFile${fileCount}" name="additionalFile${fileCount}" accept=".pdf" required>
+                                        <button type="button" class="preview-btn" data-for="additionalFile${fileCount}" disabled>Preview</button>
+                                        <button type="button" class="remove-file" style=" background-color: #850000;color: #fff;padding: 5px 10px; border-radius: 5px; border: 2px solid white">X</button>
+                            `;
                 additionalFiles.appendChild(newFileInput);
 
                 const input = newFileInput.querySelector('input[type="file"]');
-                const span = newFileInput.querySelector('.file-name');
+                const previewBtn = newFileInput.querySelector('.preview-btn');
                 addFileNameListener(input);
-                addFilePreviewListener(span);
+                addFilePreviewListener(previewBtn);
+
 
                 const removeBtn = newFileInput.querySelector('.remove-file');
                 removeBtn.addEventListener('click', function () {

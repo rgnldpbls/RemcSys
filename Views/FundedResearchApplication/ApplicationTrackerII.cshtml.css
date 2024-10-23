@@ -41,7 +41,6 @@
         position: absolute;
         top: 50%;
         left: -50%;
-        width: 100%;
         height: 2px;
         background-color: #D3D3D3;
         z-index: -1;
@@ -57,13 +56,36 @@
     display: inline;
 }
 
-.step-container a.view-btn {
-    color: #000000;
-    font-size: 12px;
-    margin-left: 5px;
-    display: inline;
+
+.view-btn {
+    justify-content: center;
+    border: 2px solid #850000;
+    background-color: #fff;
+    width: 50px;
+    color: #850000;
+    cursor: pointer;
+    border-radius: 5px;
     font-weight: 500;
 }
+
+    .view-btn:hover {
+        text-decoration: underline;
+    }
+
+.view-btn2 {
+    justify-content: center;
+    border: 2px solid #850000;
+    background-color: #fff;
+    width: 70px;
+    color: #850000;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+    .view-btn2:hover {
+        text-decoration: underline;
+    }
 
 
 .step-icon {
@@ -77,16 +99,16 @@
     justify-content: center;
     align-items: center;
     margin-bottom: 5px;
-    z-index: 2;
+    z-index: 0;
 }
 
     .step-icon span.progress_line {
         background: #0D6B4A;
-        width: 100%;
+        width: 81%;
         height: 2px;
         position: absolute;
         top: 25%;
-        left: 59%;
+        left: 57%;
         transform: translateX(5%);
         z-index: -1;
     }
@@ -97,14 +119,35 @@
 
     .step-icon span.still-progress_line {
         background: #757171;
-        width: 75%;
+        width: 85%;
         height: 2px;
         position: absolute;
         top: 25%;
-        left: 62%;
+        left: 60%;
         transform: translateX(3%);
-        z-index: -1;
+        z-index: -2;
     }
+
+
+.clearance-btn {
+    justify-content: center;
+    border: 2px solid #850000;
+    text-decoration: none;
+    background-color: #fff;
+    width: 50px;
+    padding: 5px;
+    color: #850000;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+    .clearance-btn:hover {
+        background-color: #850000;
+        color: #fff;
+        border: 2px solid #850000;
+    }
+
 
 
 .document-history {

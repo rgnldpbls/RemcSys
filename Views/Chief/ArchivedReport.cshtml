@@ -28,7 +28,7 @@
                 <th>File Name</th>
                 <th>Type of Report</th>
                 <th>Generated</th>
-                <th>Download</th>
+                <th>Action</th>
                 <th>Unarchive</th>
             </tr>
         </thead>
@@ -40,13 +40,13 @@
                     <td>@report.gr_typeofReport</td>
                     <td>@ActionLog.GetTimeAgo(report.generateDate)</td>
                     <td>
-                        <a href="@Url.Action("PreviewFile", new {id = report.gr_Id})">
-                            <i class="bi bi-download" style="font-size: 30px;"></i>
+                        <a href="@Url.Action("PreviewFile", new {id = report.gr_Id})" style="color: #850000;">
+                            <i class="bi bi-eye-fill" style="font-size: 30px;"></i>
                         </a>
                     </td>
                     <td>
-                        <a href="@Url.Action("UnarchiveReport", new {id = report.gr_Id})">
-                            Unarchive
+                        <a href="@Url.Action("UnarchiveReport", new {id = report.gr_Id})" style="color: #850000;">
+                            <i class="bi bi-archive" style="font-size: 30px;"></i>
                         </a>
                     </td>
                 </tr>
