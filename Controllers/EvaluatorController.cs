@@ -17,13 +17,19 @@ namespace RemcSys.Controllers
         private readonly ActionLoggerService _actionLogger;
         private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public EvaluatorController(RemcDBContext context, UserManager<SystemUser> userManager, 
+        public EvaluatorController(RemcDBContext context, UserManager<SystemUser> userManager,
             ActionLoggerService actionLogger, IWebHostEnvironment hostingEnvironment)
         {
             _context = context;
             _userManager = userManager;
             _actionLogger = actionLogger;
             _hostingEnvironment = hostingEnvironment;
+        }
+
+        [Authorize(Roles ="Evaluator")]
+        public IActionResult EvaluatorDashboard()
+        {
+            return View();
         }
 
         [Authorize(Roles ="Evaluator")]

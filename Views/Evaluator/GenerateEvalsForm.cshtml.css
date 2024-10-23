@@ -7,25 +7,37 @@
 
 .container {
     display: flex;
-    justify-content: space-between;
-    margin: 50px;
+    justify-content: center;
+    margin-top: 80px;
+    margin-bottom: 30px;
+}
+
+hr {
+    color: #fff;
+    height: 2px;
 }
 
 .document-section {
-    width: 45%;
-    background-color: #F8F8F8;
+    width: 80%;
+    background-color: #850000;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h5 {
-    color: #850000;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+}
+
+h6 {
+    color: #fff;
     text-align: center;
     font-weight: bold;
 }
 
 p {
-    color: #FDB000;
+    color: #fff;
     font-style: italic;
 }
 
@@ -35,8 +47,8 @@ p {
 }
 
     .doc-list li .btn {
-        background-color: #800000;
-        color: #fff;
+        background-color: #fff;
+        color: #850000;
         width: 100%;
         padding: 15px;
         margin-bottom: 10px;
@@ -45,7 +57,7 @@ p {
     }
 
         .doc-list li .btn:hover {
-            background-color: #a52a2a;
+            background-color: #F8F8F8;
         }
 
 
@@ -55,8 +67,19 @@ p {
     font-size: 0.9em;
 }
 
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 .proceed-btn {
-    background-color: #FFDB89 !important;
+    text-align: center;
+    text-decoration: none;
+    background-color: #FFDB89;
     width: 100px;
     border: none;
     padding: 15px;
@@ -65,11 +88,13 @@ p {
     cursor: pointer;
     border-radius: 5px;
     display: block;
-    margin: 30px auto 0 auto;
-    margin-bottom: 20px;
+    margin: 0px auto 0 auto;
     font-weight: 500;
+    margin-top: 20px;
+    border: 2px solid #FFDB89;
 }
 
     .proceed-btn:hover {
-        background-color: #d2691e;
+        background-color: #fff2d6;
+        border: 2px solid #FFDB89;
     }

@@ -13,13 +13,14 @@
             {
                 <li>
                     <a class="btn" href="@Url.Action("Download", "Evaluator", new { id = doc.fr_Id })">
-                        @doc.file_Name
+                        <i class="bi bi-file-word" style="margin-right: 10px;"></i> @doc.file_Name
+                        <i class="bi bi-download" style="font-size: 20px; float:right"></i>
                     </a>
                 </li>
             }
         </ul>
-        <p>Final Grade: @ViewBag.Grade</p>
-        <p>Remarks: @ViewBag.Remarks</p>
+        <h6>Final Grade: @ViewBag.Grade</h6>
+        <h6>Remarks: @ViewBag.Remarks</h6>
     </div>
 </div>
 

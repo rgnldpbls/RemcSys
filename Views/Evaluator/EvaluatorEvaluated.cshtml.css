@@ -52,6 +52,7 @@
 .evaluated {
     background-color: #850000;
     color: #fff;
+    text-decoration: none;
 }
 
 .eval-category h3 {

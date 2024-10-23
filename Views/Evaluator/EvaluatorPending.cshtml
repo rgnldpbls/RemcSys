@@ -16,7 +16,7 @@
             <h3>Evaluated</h3>
         </a>
     </div>
-    @if(Model != null && Model.Any())
+    @if (Model != null && Model.Any())
     {
         <table class="document-table">
             <thead>
@@ -49,7 +49,7 @@
                         </td>
                         <td class="action-buttons">
                             <a asp-action="EvaluationForm" asp-route-id="@item.fra_Id" class="fillup-btn">
-                                <i class="bi bi-journal-text"></i>
+                                <i class="bi bi-journal-text" style="color: #000;"></i>
                             </a>
                         </td>
                     </tr>
@@ -61,5 +61,5 @@
     {
         <p>No pending evaluations at this time.</p>
     }
-    <a href="/Home/UnderMaintenance" class="back-btn">Back</a>
+    <a href="/Evaluator/EvaluatorDashboard" class="back-btn">Back</a>
 </div>

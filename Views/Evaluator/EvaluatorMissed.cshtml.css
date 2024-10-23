@@ -40,12 +40,12 @@
     text-decoration: none;
 }
 
-    .to-be {
-        background-color: #f5f5f5;
-        color: #333;
-        border: 1px solid #ccc;
-        text-decoration: none;
-    }
+.to-be {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ccc;
+    text-decoration: none;
+}
 
 .evaluated {
     background-color: #f5f5f5;

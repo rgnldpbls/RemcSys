@@ -17,7 +17,7 @@
             <h3>Evaluated</h3>
         </a>
     </div>
-    @if(Model != null && Model.Any())
+    @if (Model != null && Model.Any())
     {
         <table class="document-table">
             <thead>
@@ -30,7 +30,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach(var item in Model)
+                @foreach (var item in Model)
                 {
                     <tr>
                         <td>
@@ -44,7 +44,7 @@
                             @item.evaluation_deadline?.ToString("MMMM d, yyyy")
                         </td>
                         <td>
-                            @if(item.application_Status == "Approved")
+                            @if (item.application_Status == "Approved")
                             {
                                 <span class="status approved">@item.application_Status</span>
                             }
@@ -55,7 +55,7 @@
                         </td>
                         <td class="action-buttons">
                             <a asp-action="GenerateEvalsForm" asp-route-id="@item.fra_Id" class="fillup-btn">
-                                <i class="bi bi-eye-fill"></i>
+                                <i class="bi bi-eye-fill" style="color:#000;"></i>
                             </a>
                         </td>
                     </tr>
@@ -67,5 +67,5 @@
     {
         <p>No done evaluations at this time.</p>
     }
-    <a href="/Home/UnderMaintenance" class="back-btn">Back</a>
+    <a href="/Evaluator/EvaluatorDashboard" class="back-btn">Back</a>
 </div>

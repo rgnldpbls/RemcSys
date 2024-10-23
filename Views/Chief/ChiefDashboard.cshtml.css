@@ -7,42 +7,30 @@
     font-size: 2.5rem;
 }
 
-.stats-cards {
+.UFR, .EFR, .UFRL {
     display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 0 0 10px 10px;
 }
 
-.stat-card {
-    background-color: #f5f5f5;
-    border-radius: 10px;
-    padding: 20px;
-    width: 30%;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.UFR {
+    background-color: #850000;
+    color: #FFDB89;
 }
 
-    .stat-card h3 {
-        font-size: 2rem;
-        margin: 0;
-    }
+.EFR {
+    background-color: #FFDB89;
+    color: #850000;
+}
 
-    .stat-card p {
-        margin: 5px 0;
-    }
-
-    .stat-card.red {
-        background-color: #850000;
-        color: white;
-    }
-
-    .stat-card.yellow {
-        background-color: #FFDB89;
-    }
-
-    .stat-card.green {
-        background-color: #66CC66;
-    }
+.UFRL {
+    background-color: #0D6B4A;
+    color: #FFDB89;
+}
 
 .content-row {
     display: flex;
@@ -67,6 +55,7 @@
 }
 
 .quick-access {
+    align-content: center;
     background-color: #e6d3c0;
     padding: 20px;
     border-radius: 10px;
@@ -165,33 +154,34 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-    .top-research-section h2 {
-        text-align: center;
-        font-size: 2.5rem;
+.heading-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Center both headings horizontally */
+    gap: 0px; /* Add some space between the h2 and h3 */
+}
+
+.top-research-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #850000;
+    display: inline-block;
+    margin: 0;
+}
+
+    .top-research-section h2 span {
+        font-size: 3rem;
         color: #850000;
-        display: inline-block;
-        margin: 0;
+        font-weight: bold;
     }
 
-        .top-research-section h2 span {
-            font-size: 3rem;
-            color: #850000;
-            font-weight: bold;
-        }
-
-    .top-research-section h3 {
-        text-align: center;
-        font-size: 1.5rem;
-        color: #850000;
-        margin: 10px 0;
-    }
-
-    .top-research-section p {
-        text-align: center;
-        font-size: 1rem;
-        color: #850000;
-        margin-bottom: 20px;
-    }
+.top-research-section h3 {
+    text-align: left;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #850000;
+    margin: 5%;
+}
 
 .top-research-list {
     font-weight: bold;
@@ -222,11 +212,6 @@
             margin-right: 10px;
         }
 
-        .top-research-list li img.icon {
-            width: 30px;
-            height: 30px;
-        }
-
 .first-place {
     background-color: #850000;
     color: #fff;
@@ -248,4 +233,70 @@
 
 ol li, ul li {
     margin: 5px 0;
+}
+
+.top-branches {
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.branch-card {
+    height: 100%;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    background-color: white;
+}
+
+.branch-card-header {
+    background-color: #b71c1c;
+    color: white;
+    text-align: center;
+    padding: 12px 0;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.branch-card-body {
+    padding: 16px;
+}
+
+.branch {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+    .branch p {
+        margin: 4px 0 0;
+        font-weight: bold;
+    }
+
+.first p {
+    font-size: 16px;
+    color: gold;
+}
+
+.second span, .third span {
+    font-size: 20px;
+}
+
+.second p {
+    font-size: 16px;
+    color: silver;
+    opacity: 0.6;
+}
+
+.third p {
+    font-size: 16px;
+    color: #cd7f32;
+}
+
+hr {
+    border: none;
+    border-top: 3px solid #ddd;
+    margin: 12px 0;
 }

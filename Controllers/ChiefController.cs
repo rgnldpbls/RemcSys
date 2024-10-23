@@ -37,8 +37,16 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Chief")]
-        public IActionResult ChiefDashboard()
+        public async Task<IActionResult> ChiefDashboard()
         {
+            var UFRCount = await _context.FundedResearches.Where(f => f.fr_Type == "University Funded Research").CountAsync();
+            var EFRCount = await _context.FundedResearches.Where(f => f.fr_Type == "Externally Funded Research").CountAsync();
+            var UFRLCount = await _context.FundedResearches.Where(f => f.fr_Type == "University Funded Research Load").CountAsync();
+
+            ViewBag.UFR = UFRCount;
+            ViewBag.EFR = EFRCount;
+            ViewBag.UFRL = UFRLCount;
+
             return View();
         }
 

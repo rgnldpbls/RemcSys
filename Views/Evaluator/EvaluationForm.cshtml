@@ -7,7 +7,7 @@
 <div class="evaluation-sheet-container">
     <div class="card2">
         <div class="tab-container">
-            @foreach(var file in Model)
+            @foreach (var file in Model)
             {
                 <div class="tab">
                     <button class="tablinks" onclick="openFile(event, 'file-@file.fr_Id')">
@@ -21,7 +21,7 @@
             {
                 <div id="file-@file.fr_Id" class="tabcontent">
                     <iframe src="@Url.Action("PreviewFile", "Evaluator", new {id = file.fr_Id})"
-                            width="100%;" height="1600px;" frameborder="0"></iframe>
+                            width="100%;" height="1750px;" frameborder="0"></iframe>
                 </div>
             }
         </div>
@@ -29,144 +29,144 @@
 
     <div class="card">
         <div class="evaluation-form">
-                <h3>IR Evaluation Sheet</h3>
-                <p>For Reference: Kindly click the links below.</p>
-                <ul>
-                    @if(ViewBag.exec != null)
+            <h3>IR Evaluation Sheet</h3>
+            <p>For Reference: Kindly click the links below.</p>
+            <ul>
+                @if (ViewBag.exec != null)
+                {
+                    @foreach (var file in ViewBag.exec)
                     {
-                        @foreach(var file in ViewBag.exec)
-                        {
-                            <li>
-                                <a onclick="showDocument('@file.FilePath')">@file.FileName</a>
-                            </li>
-                        }
+                        <li>
+                            <a onclick="showDocument('@file.FilePath')">@file.FileName</a>
+                        </li>
                     }
-                </ul>
-                <form id="evalForm">
-                    <input type="hidden" id="fraId" value="@ViewBag.Id"/>
-                    <!-- Track Record and Competence -->
-                    <h6>Track Record and Competence (10%)</h6>
-                    <div class="form-group">
-                        <label>Academic Qualification</label>
-                        <select id="AQScore" class="form-control custom-select">
-                            <option value="" disabled selected>Select score...</option>
-                            <option value=1>1 [Does not meet expectations]</option>
-                            <option value=2>2 [Does not meet expectations]</option>
-                            <option value=3>3 [Does not meet expectations]</option>
-                            <option value=4>4 [Does not meet expectations]</option>
-                            <option value=5>5 [Meet expectations]</option>
-                            <option value=6>6 [Meet expectations]</option>
-                            <option value=7>7 [Meet expectations]</option>
-                            <option value=8>8 [Exceeds expectations]</option>
-                            <option value=9>9 [Exceeds expectations]</option>
-                            <option value=10>10 [Exceeds expectations]</option>
-                        </select>
-                        <textarea id="AQComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
-                    </div>
-                    <br />
-                    <div class="form-group">
-                        <label>Research Experience in the field of specialization</label>
-                        <select id="REScore" class="form-control custom-select">
-                            <option value="" disabled selected>Select score...</option>
-                            <option value=1>1 [Does not meet expectations]</option>
-                            <option value=2>2 [Does not meet expectations]</option>
-                            <option value=3>3 [Does not meet expectations]</option>
-                            <option value=4>4 [Does not meet expectations]</option>
-                            <option value=5>5 [Meet expectations]</option>
-                            <option value=6>6 [Meet expectations]</option>
-                            <option value=7>7 [Meet expectations]</option>
-                            <option value=8>8 [Exceeds expectations]</option>
-                            <option value=9>9 [Exceeds expectations]</option>
-                            <option value=10>10 [Exceeds expectations]</option>
-                        </select>
-                        <textarea id="REComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
-                    </div>
-                    <br />
-                
-                    <!-- Dissemination/Utilization of Results  -->
-                    <h6>Dissemination/Utilization of Results (60%)</h6>
-                    <div class="form-group">
-                        <label>Relevance & Impact</label>
-                        <select id="RIScore" class="form-control custom-select">
-                            <option value="" disabled selected>Select score...</option>
-                            <option value=1>1 [Does not meet expectations]</option>
-                            <option value=2>2 [Does not meet expectations]</option>
-                            <option value=3>3 [Does not meet expectations]</option>
-                            <option value=4>4 [Does not meet expectations]</option>
-                            <option value=5>5 [Meet expectations]</option>
-                            <option value=6>6 [Meet expectations]</option>
-                            <option value=7>7 [Meet expectations]</option>
-                            <option value=8>8 [Exceeds expectations]</option>
-                            <option value=9>9 [Exceeds expectations]</option>
-                            <option value=10>10 [Exceeds expectations]</option>
-                        </select>
-                        <textarea id="RIComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
-                    </div>
-                    <br />
-                    <div class="form-group">
-                        <label>Level of Collaboration</label>
-                        <select id="LCScore" class="form-control custom-select">
-                            <option value="" disabled selected>Select score...</option>
-                            <option value=1>1 [Does not meet expectations]</option>
-                            <option value=2>2 [Does not meet expectations]</option>
-                            <option value=3>3 [Does not meet expectations]</option>
-                            <option value=4>4 [Does not meet expectations]</option>
-                            <option value=5>5 [Meet expectations]</option>
-                            <option value=6>6 [Meet expectations]</option>
-                            <option value=7>7 [Meet expectations]</option>
-                            <option value=8>8 [Exceeds expectations]</option>
-                            <option value=9>9 [Exceeds expectations]</option>
-                            <option value=10>10 [Exceeds expectations]</option>
-                        </select>
-                        <textarea id="LCComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
-                    </div>
-                    <br />
-                    <div class="form-group">
-                        <label>Appropriateness of Research Design or Methodology</label>
-                        <select id="RDScore" class="form-control custom-select">
-                            <option value="" disabled selected>Select score...</option>
-                            <option value=1>1 [Does not meet expectations]</option>
-                            <option value=2>2 [Does not meet expectations]</option>
-                            <option value=3>3 [Does not meet expectations]</option>
-                            <option value=4>4 [Does not meet expectations]</option>
-                            <option value=5>5 [Meet expectations]</option>
-                            <option value=6>6 [Meet expectations]</option>
-                            <option value=7>7 [Meet expectations]</option>
-                            <option value=8>8 [Exceeds expectations]</option>
-                            <option value=9>9 [Exceeds expectations]</option>
-                            <option value=10>10 [Exceeds expectations]</option>
-                        </select>
-                        <textarea id="RDComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
-                    </div>
-                    <br />
+                }
+            </ul>
+            <form id="evalForm">
+                <input type="hidden" id="fraId" value="@ViewBag.Id" />
+                <!-- Track Record and Competence -->
+                <h6>Track Record and Competence (10%)</h6>
+                <div class="form-group">
+                    <label>Academic Qualification</label>
+                    <select id="AQScore" class="form-control custom-select">
+                        <option value="" disabled selected>Select score...</option>
+                        <option value=1>1 [Does not meet expectations]</option>
+                        <option value=2>2 [Does not meet expectations]</option>
+                        <option value=3>3 [Does not meet expectations]</option>
+                        <option value=4>4 [Does not meet expectations]</option>
+                        <option value=5>5 [Meet expectations]</option>
+                        <option value=6>6 [Meet expectations]</option>
+                        <option value=7>7 [Meet expectations]</option>
+                        <option value=8>8 [Exceeds expectations]</option>
+                        <option value=9>9 [Exceeds expectations]</option>
+                        <option value=10>10 [Exceeds expectations]</option>
+                    </select>
+                    <textarea id="AQComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label>Research Experience in the field of specialization</label>
+                    <select id="REScore" class="form-control custom-select">
+                        <option value="" disabled selected>Select score...</option>
+                        <option value=1>1 [Does not meet expectations]</option>
+                        <option value=2>2 [Does not meet expectations]</option>
+                        <option value=3>3 [Does not meet expectations]</option>
+                        <option value=4>4 [Does not meet expectations]</option>
+                        <option value=5>5 [Meet expectations]</option>
+                        <option value=6>6 [Meet expectations]</option>
+                        <option value=7>7 [Meet expectations]</option>
+                        <option value=8>8 [Exceeds expectations]</option>
+                        <option value=9>9 [Exceeds expectations]</option>
+                        <option value=10>10 [Exceeds expectations]</option>
+                    </select>
+                    <textarea id="REComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                </div>
+                <br />
 
-                    <!-- Technical Quality  -->
-                    <h6>Technical Quality (30%)</h6>
-                    <div class="form-group">
-                        <label>Feasibility of Work and Financial Plan</label>
-                        <select id="FFScore" class="form-control custom-select">
-                            <option value="" disabled selected>Select score...</option>
-                            <option value=1>1 [Does not meet expectations]</option>
-                            <option value=2>2 [Does not meet expectations]</option>
-                            <option value=3>3 [Does not meet expectations]</option>
-                            <option value=4>4 [Does not meet expectations]</option>
-                            <option value=5>5 [Meet expectations]</option>
-                            <option value=6>6 [Meet expectations]</option>
-                            <option value=7>7 [Meet expectations]</option>
-                            <option value=8>8 [Exceeds expectations]</option>
-                            <option value=9>9 [Exceeds expectations]</option>
-                            <option value=10>10 [Exceeds expectations]</option>
-                        </select>
-                        <textarea id="FFComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
-                    </div>
-                    
-                    <br />
-                    <!-- General Comments -->
-                    <h5>General Comments and Suggestions</h5>
-                    <textarea id="GenComment" class="form-control" placeholder="Type here your comments and suggestions" rows="5"></textarea>
-                    <br />
-                    <button type="button" class="submit-btn" id="submitEvalBtn">Submit Evaluation</button>
-                </form>
+                <!-- Dissemination/Utilization of Results  -->
+                <h6>Dissemination/Utilization of Results (60%)</h6>
+                <div class="form-group">
+                    <label>Relevance & Impact</label>
+                    <select id="RIScore" class="form-control custom-select">
+                        <option value="" disabled selected>Select score...</option>
+                        <option value=1>1 [Does not meet expectations]</option>
+                        <option value=2>2 [Does not meet expectations]</option>
+                        <option value=3>3 [Does not meet expectations]</option>
+                        <option value=4>4 [Does not meet expectations]</option>
+                        <option value=5>5 [Meet expectations]</option>
+                        <option value=6>6 [Meet expectations]</option>
+                        <option value=7>7 [Meet expectations]</option>
+                        <option value=8>8 [Exceeds expectations]</option>
+                        <option value=9>9 [Exceeds expectations]</option>
+                        <option value=10>10 [Exceeds expectations]</option>
+                    </select>
+                    <textarea id="RIComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label>Level of Collaboration</label>
+                    <select id="LCScore" class="form-control custom-select">
+                        <option value="" disabled selected>Select score...</option>
+                        <option value=1>1 [Does not meet expectations]</option>
+                        <option value=2>2 [Does not meet expectations]</option>
+                        <option value=3>3 [Does not meet expectations]</option>
+                        <option value=4>4 [Does not meet expectations]</option>
+                        <option value=5>5 [Meet expectations]</option>
+                        <option value=6>6 [Meet expectations]</option>
+                        <option value=7>7 [Meet expectations]</option>
+                        <option value=8>8 [Exceeds expectations]</option>
+                        <option value=9>9 [Exceeds expectations]</option>
+                        <option value=10>10 [Exceeds expectations]</option>
+                    </select>
+                    <textarea id="LCComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label>Appropriateness of Research Design or Methodology</label>
+                    <select id="RDScore" class="form-control custom-select">
+                        <option value="" disabled selected>Select score...</option>
+                        <option value=1>1 [Does not meet expectations]</option>
+                        <option value=2>2 [Does not meet expectations]</option>
+                        <option value=3>3 [Does not meet expectations]</option>
+                        <option value=4>4 [Does not meet expectations]</option>
+                        <option value=5>5 [Meet expectations]</option>
+                        <option value=6>6 [Meet expectations]</option>
+                        <option value=7>7 [Meet expectations]</option>
+                        <option value=8>8 [Exceeds expectations]</option>
+                        <option value=9>9 [Exceeds expectations]</option>
+                        <option value=10>10 [Exceeds expectations]</option>
+                    </select>
+                    <textarea id="RDComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                </div>
+                <br />
+
+                <!-- Technical Quality  -->
+                <h6>Technical Quality (30%)</h6>
+                <div class="form-group">
+                    <label>Feasibility of Work and Financial Plan</label>
+                    <select id="FFScore" class="form-control custom-select">
+                        <option value="" disabled selected>Select score...</option>
+                        <option value=1>1 [Does not meet expectations]</option>
+                        <option value=2>2 [Does not meet expectations]</option>
+                        <option value=3>3 [Does not meet expectations]</option>
+                        <option value=4>4 [Does not meet expectations]</option>
+                        <option value=5>5 [Meet expectations]</option>
+                        <option value=6>6 [Meet expectations]</option>
+                        <option value=7>7 [Meet expectations]</option>
+                        <option value=8>8 [Exceeds expectations]</option>
+                        <option value=9>9 [Exceeds expectations]</option>
+                        <option value=10>10 [Exceeds expectations]</option>
+                    </select>
+                    <textarea id="FFComment" class="form-control" placeholder="Type here your comments and suggestions" rows="3"></textarea>
+                </div>
+
+                <br />
+                <!-- General Comments -->
+                <h5>General Comments and Suggestions</h5>
+                <textarea id="GenComment" class="form-control" placeholder="Type here your comments and suggestions" rows="10"></textarea>
+                <br />
+                <button type="button" class="submit-btn" id="submitEvalBtn">Submit Evaluation</button>
+            </form>
         </div>
     </div>
 </div>
@@ -179,8 +179,9 @@
         <div class="d-grid gap-3 col-14 mx-auto">
             <p class="deets">Changes may not be possible after submission.</p>
         </div>
-        <button class="wsubmit-btn" id="confirmSubmitBtn">Submit</button>
+
         <button class="wback-btn" id="backBtn">Back</button>
+        <button class="wsubmit-btn" id="confirmSubmitBtn">Submit</button>
     </div>
 </div>
 

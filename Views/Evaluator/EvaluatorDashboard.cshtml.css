@@ -1,0 +1,89 @@
+﻿body {
+    height: 100vh;
+    overflow: hidden;
+}
+
+
+.dashboard-evaluator {
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Search Bar */
+.search-bar {
+    margin-top: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+    .search-bar input {
+        width: 80%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+.welcome-section h1 {
+    color: #850000;
+    font-size: 2.5rem;
+}
+
+.Peval, .Meval, .Eeval {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 0 0 10px 10px;
+}
+
+.Peval {
+    background-color: #850000;
+    color: #FFDB89;
+}
+
+.Meval {
+    background-color: #FFDB89;
+    color: #850000;
+}
+
+.Eeval {
+    background-color: #0D6B4A;
+    color: #FFDB89;
+}
+
+/* Upcoming Deadlines */
+.upcoming-deadlines {
+    background-color: #ffe6e6;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    margin: auto;
+    float: right;
+}
+
+    .upcoming-deadlines h2 {
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+.deadline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8d7da;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.due-date {
+    background-color: #B22222;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}

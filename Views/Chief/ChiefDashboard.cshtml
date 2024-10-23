@@ -1,28 +1,48 @@
 ﻿@{
     ViewData["Title"] = "Chief Dashboard";
+
     Layout = "_NavChief1";
 }
 <div class="dashboard">
     <div class="welcome-section">
-        <h2>Welcome,</h2>
-        <h1>REMC Chief!</h1>
+        <h1>REMC CHIEF DASHBOARD</h1>
     </div>
-
-    <div class="stats-cards">
-        <div class="stat-card red">
-            <h3>1,757</h3>
-            <p>Total</p>
-            <span>University Funded Research</span>
+    <div class="row justify-content-end">
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-white">
+                <div class="card-body text-center">
+                    <h2 class="text">@ViewBag.UFR</h2>
+                    <input type="hidden" id="countUFR" value="@ViewBag.UFR"/>
+                    <p class="mb-0 text"><strong>TOTAL</strong></p>
+                </div>
+                <div class="card-footer justify-content-center text-center UFR">
+                    University<br />Funded Research
+                </div>
+            </div>
         </div>
-        <div class="stat-card yellow">
-            <h3>567</h3>
-            <p>Total</p>
-            <span>Externally-Funded Research</span>
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-white">
+                <div class="card-body text-center">
+                    <h2 class="text">@ViewBag.EFR</h2>
+                    <input type="hidden" id="countEFR" value="@ViewBag.EFR"/>
+                    <p class="mb-0 text"><strong>TOTAL</strong></p>
+                </div>
+                <div class="card-footer justify-content-center text-center EFR">
+                    Externally<br />Funded Research
+                </div>
+            </div>
         </div>
-        <div class="stat-card green">
-            <h3>2</h3>
-            <p>Total</p>
-            <span>University Funded Research Load</span>
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-white">
+                <div class="card-body text-center">
+                    <h2 class="text">@ViewBag.UFRL</h2>
+                    <input type="hidden" id="countUFRL" value="@ViewBag.UFRL"/>
+                    <p class="mb-0 text"><strong>TOTAL</strong></p>
+                </div>
+                <div class="card-footer justify-content-center text-center UFRL">
+                    University Funded<br />Research-Load
+                </div>
+            </div>
         </div>
     </div>
 
@@ -34,6 +54,11 @@
                 <canvas id="pieChart"></canvas>
             </div>
         </div>
+
+
+        <!-- Add Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
         <div class="quick-access">
             <h3>Quick Access Menu</h3>
@@ -87,7 +112,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/Chief/TuklasNominee">
+                    <a href="/Chief/GenerateGAWADNominees">
                         <div class="icon">
                             <i class="bi bi-award-fill"></i>
                         </div>
@@ -101,58 +126,107 @@
             </ul>
         </div>
     </div>
+</div>
 
-    <!-- Second row: Top Research and Top Branches -->
-    <div class="content-row">
-        <div class="top-research-section">
+<!-- Second row: Top Research and Top Branches -->
+<div class="content-row">
+    <div class="top-research-section">
+        <div class="heading-container">
             <h2>TOP <br /> <span>3</span></h2>
-            <h3>Most Funded Research</h3>
-            <p>University and Externally-Funded Research</p>
-            <ol class="top-research-list">
-                <li class="first-place">
-                    <div class="rank">1.</div>
-                    <img src="~/img/ccis_logo.png" alt="CCIS" style="height:30px; margin-right: 10px;" class="icon">
-                    <span>College of Computer and Information Sciences</span>
-                </li>
-                <li class="second-place">
-                    <div class="rank">2.</div>
-                    <img src="~/img/ccis_logo.png" alt="COL" style="height: 30px; margin-right: 10px;" class="icon">
-                    <span>College of Law</span>
-                </li>
-                <li class="third-place">
-                    <div class="rank">3.</div>
-                    <img src="~/img/ccis_logo.png" alt="CS" style="height: 30px; margin-right: 10px;" class="icon">
-                    <span>College of Science</span>
-                </li>
-            </ol>
-        </div>
+            <h3><strong>Most Funded Research</strong><br> University and Externally-Funded Research</h3>
 
-        <div class="top-branches">
-            <h3>Top Performing Branches</h3>
-            <ul>
-                <li>Sta. Mesa, Manila Branch - 1st</li>
-                <li>Paranaque City Branch - 2nd</li>
-                <li>Sta Rosa, Laguna Branch - 3rd</li>
-            </ul>
+        </div>
+        <ol class="top-research-list">
+            <li class="first-place">
+                <div class="rank">1.</div>
+                <img src="~/img/ccis_logo.png" alt="CCIS" style="height:30px; margin-right: 10px;" class="icon">
+                <span>College of Computer and Information Sciences</span>
+            </li>
+            <li class="second-place">
+                <div class="rank">2.</div>
+                <img src="~/img/cl_logo.png" alt="CL" style="height: 30px; margin-right: 10px;" class="icon">
+                <span>College of Law</span>
+            </li>
+            <li class="third-place">
+                <div class="rank">3.</div>
+                <img src="~/img/cs_logo.png" alt="CS" style="height: 30px; margin-right: 10px;" class="icon">
+                <span>College of Science</span>
+            </li>
+        </ol>
+    </div>
+
+    <div class="top-branches">
+        <div class="branch-card">
+            <div class="branch-card-header">
+                TOP PERFORMING BRANCHES
+            </div>
+            <div class="branch-card-body">
+                <div class="branch first">
+                    <h4><strong>Sta. Mesa, Manila Branch</strong></h4>
+                    <p>1st</p>
+                </div>
+                <hr />
+                <div class="branch second">
+                    <span>Paranaque City Branch</span>
+                    <p>2nd</p>
+                </div>
+                <hr />
+                <div class="branch third">
+                    <span>Sta Rosa, Laguna Branch</span>
+                    <p>3rd</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 
-@section Scripts {
-    <script>
-        // Pie chart rendering logic
-        var ctx = document.getElementById('pieChart').getContext('2d');
-        var chart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'],
-                datasets: [{
-                    label: 'Funding Breakdown',
-                    data: [10, 35, 20, 20, 15],
-                    backgroundColor: ['#850000', '#FF5C5C', '#E23E57', '#FF9999', '#FFD9D9'],
-                }]
+<script>
+    const universityFundedResearch = document.getElementById('countUFR').value;
+    const externallyFundedResearch = document.getElementById('countEFR').value;
+    const universityFundedResearchLoad = document.getElementById('countUFRL').value;
+
+    // Data for the pie chart
+    const data = {
+        labels: ['University Funded Research', 'Externally Funded Research', 'University Funded Research-Load'],
+        datasets: [{
+            label: 'Most Funded Research',
+            data: [universityFundedResearch, externallyFundedResearch, universityFundedResearchLoad],
+            backgroundColor: [
+                '#850000',
+                '#ffc107',
+                '#198754'
+            ],
+            hoverOffset: 4
+        }]
+    };
+
+    // Config for the pie chart
+    const config = {
+        type: 'pie',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            let label = data.labels[tooltipItem.dataIndex] || '';
+                            let value = data.datasets[0].data[tooltipItem.dataIndex];
+                            return `${label}: ${value}`;
+                        }
+                    }
+                }
             }
-        });
-    </script>
-}
+        }
+    };
+
+    // Render the pie chart
+    const pieChart = new Chart(
+        document.getElementById('pieChart'),
+        config
+    );
+</script>
