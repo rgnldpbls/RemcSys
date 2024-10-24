@@ -1,25 +1,41 @@
 ﻿@model Tuple<List<FundedResearchApplication>, List<Evaluation>, List<Evaluator>>
 @{
     ViewData["Title"] = "University Funded Research Applications";
+
     Layout = "_NavChief1";
 }
 <div class="funded-research-container">
     <div class="research-categories">
-        <div class="research-category inactive">
-            <a asp-action="UFResearchApp"><h3>University Funded Research</h3></a>
-        </div>
-        <div class="research-category inactive">
-            <a asp-action="EFResearchApp"><h3>Externally Funded Research</h3></a>
-        </div>
-        <div class="research-category inactive">
-            <a asp-action="UFRLApp"><h3>University Funded Research Load</h3></a>
-        </div>
-        <div class="research-category active">
-            <a asp-action="UEResearchApp"><h3>UFR - Evaluation</h3></a>
-        </div>
-        <div class="research-category inactive">
-            <a asp-action="UploadNTP"><h3>Funded Research - Upload NTP</h3></a>
-        </div>
+        <a href="UFResearchApp" class="UFR">
+            <div class="research-category inactive">
+                <h3>University Funded Research</h3>
+            </div>
+        </a>
+
+
+        <a href="EFResearchApp" class="EFR">
+            <div class="research-category inactive">
+                <h3>Externally Funded Research</h3>
+            </div>
+        </a>
+
+        <a href="UFRLApp" class="UFRL">
+            <div class="research-category inactive">
+                <h3>University Funded Research Load</h3>
+            </div>
+        </a>
+
+        <a href="UEResearchApp" class="UFR-E">
+            <div class="research-category active">
+                <h3>UFR - Evaluation</h3>
+            </div>
+        </a>
+
+        <a href="UploadNTP" class="NTP">
+            <div class="research-category inactive">
+                <h3>Funded Research - Upload NTP</h3>
+            </div>
+        </a>
     </div>
     <h2 class="title">UNIVERSITY FUNDED RESEARCH APPLICATIONS - EVALUATION</h2>
     <hr />
@@ -37,7 +53,10 @@
             <tr>
                 <th>DTS No.</th>
                 <th>Application Details</th>
-                <th>Assign Evaluators</th>
+                <th>
+                    Assign Evaluators
+                    <button class="status-button"><i class="bi bi-question-circle-fill"></i></button>
+                </th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -55,47 +74,60 @@
                     <td>
                         @{
                             //Filter the evaluations list by the current application ID (fra_Id)
+
                             var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
                         }
                         @if (assignedEvaluators.Count > 0)
+
                         {
                             foreach (var eval in assignedEvaluators)
                             {
+
                                 if(eval.evaluation_Status == "Pending")
+
                                 {
                                     <button class="assign wevaluator"
                                             data-evaluation-id="@eval.evaluation_Id">
                                         @eval.evaluator_Name
                                     </button>
                                 }
+
                                 else if(eval.evaluation_Status == "Approved")
+
                                 {
                                     <button class="approved">
                                         @eval.evaluator_Name
                                     </button>
                                 }
+
                                 else if(eval.evaluation_Status == "Rejected")
+
                                 {
                                     <button class="rejected">
                                         @eval.evaluator_Name
                                     </button>
                                 }
                             }
+
                         }
+
                         else
+
                         {
                             <span class="assign noevaluator">No Evaluator yet</span>
                         }
                     </td>
                     <td>
                         <button class="manageevaluator-btn"
-                            data-fra-id="@app.fra_Id"
-                            data-field-of-study="@app.field_of_Study"><i class="bi bi-people-fill"></i></button>
+                                data-fra-id="@app.fra_Id"
+                                data-field-of-study="@app.field_of_Study">
+                            <i class="bi bi-people-fill" style="color:#000;"></i>
+                        </button>
                         <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
-                            <i class="bi bi-file-pdf"></i>
+                            <i class="bi bi-file-pdf" style=" color:#000;"></i>
                         </a>
                         <a asp-action="ChiefResearchEvaluation" asp-controller="Chief" asp-route-id="@app.fra_Id" class="edit-btn">
-                            <i class="bi bi-pencil-square"></i>
+                            <i class="bi bi-pencil-square" style="color:#000;"></i>
                         </a>
                     </td>
                 </tr>
@@ -103,6 +135,32 @@
         </tbody>
     </table>
 </div>
+
+
+<!--status-tag pop-up-->
+<div class="status_tag" id="statusTag">
+    <div class="card3">
+        <button type="button" class="sdismiss" id="xBtn">×</button>
+        <span class="title">Status Tags</span>
+        <div class="card4">
+            <ol>
+                <li>
+                    <span class="sstatus pending">Evaluator Name</span>
+                    <p>- Under Evaluation</p>
+                </li>
+                <li>
+                    <span class="sstatus approved">Evaluator Name</span>
+                    <p>- Approved by the Evaluator.</p>
+                </li>
+                <li>
+                    <span class="sstatus rejected">Evaluator Name</span>
+                    <p>- Rejected by the Evaluator.</p>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
 
 
 <!--modal evaluator-->
@@ -113,9 +171,19 @@
     </div>
 
     <div class="evaluator-list">
-        
     </div>
 </div>
+
+<script>
+    document.querySelector('.status-button').addEventListener('click', function () {
+        document.querySelector('.status_tag').style.display = 'block';
+    });
+
+    document.querySelector('.sdismiss').addEventListener('click', function () {
+        document.querySelector('.status_tag').style.display = 'none';
+    });
+</script>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -124,7 +192,7 @@
         $('.manageevaluator-btn').click(function () {
             var fraId = $(this).data('fra-id');
             var fieldOfStudy = $(this).data('field-of-study');
-            
+
             $.ajax({
                 url: '@Url.Action("GetEvaluatorsForResearch", "Chief")',
                 type: 'GET',
@@ -196,7 +264,7 @@
                         } else {
                             evaluatorItem.append(icon, details, button);
                         }
-                        
+
 
                         // Add the evaluator item to the list
                         $('.evaluator-list').append(evaluatorItem);

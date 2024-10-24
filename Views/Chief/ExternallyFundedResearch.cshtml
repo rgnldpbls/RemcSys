@@ -3,18 +3,27 @@
     ViewData["Title"] = "Externally Funded Researches";
     Layout = "_NavChief1";
 }
-
 <div class="funded-research-container">
     <div class="research-categories">
-        <div class="research-category inactive">
-            <a asp-action="UniversityFundedResearch"><h3>University Funded Research</h3></a>
-        </div>
-        <div class="research-category active">
-            <a asp-action="ExternallyFundedResearch"><h3>Externally Funded Research</h3></a>
-        </div>
-        <div class="research-category inactive">
-            <a asp-action="UniversityFundedResearchLoad"><h3>University Funded Research Load</h3></a>
-        </div>
+        <a href="UniversityFundedResearch" class="UFR">
+            <div class="research-category inactive">
+                <h3>University Funded Research</h3>
+            </div>
+        </a>
+
+
+        <a href="ExternallyFundedResearch" class="EFR">
+            <div class="research-category active">
+                <h3>Externally Funded Research</h3>
+            </div>
+        </a>
+
+        <a href="UniversityFundedResearchLoad" class="UFRL">
+            <div class="research-category inactive">
+                <h3>University Funded Research Load</h3>
+            </div>
+        </a>
+
     </div>
     <h2 class="title">EXTERNALLY FUNDED RESEARCHES</h2>
     <hr />
@@ -22,8 +31,8 @@
     <div class="search-section">
         <!-- Search Form -->
         <form asp-controller="Chief" asp-action="ExternallyFundedResearch" method="get" class="form-inline mb-3">
-            <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" 
-                value="@ViewData["currentFilter"]" />
+            <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title"
+                   value="@ViewData["currentFilter"]" />
             <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
         </form>
     </div>
@@ -55,11 +64,11 @@
                             @item.start_Date.ToString("MMMM d, yyyy")
                         </td>
                         <td>
-                            <p>@item.status</p>
+                            @item.status
                         </td>
                         <td>
                             <a asp-action="ProgressReportList" asp-route-id="@item.fr_Id" class="edit-btn">
-                                <i class="bi bi-pencil-square"></i>
+                                <i class="bi bi-pencil-square" style="color:#000"></i>
                             </a>
                         </td>
                     </tr>

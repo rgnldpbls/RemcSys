@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<dynamic>
+@{
     ViewData["Title"] = "Chief Dashboard";
 
     Layout = "_NavChief1";
@@ -137,21 +138,43 @@
 
         </div>
         <ol class="top-research-list">
-            <li class="first-place">
-                <div class="rank">1.</div>
-                <img src="~/img/ccis_logo.png" alt="CCIS" style="height:30px; margin-right: 10px;" class="icon">
-                <span>College of Computer and Information Sciences</span>
-            </li>
-            <li class="second-place">
-                <div class="rank">2.</div>
-                <img src="~/img/cl_logo.png" alt="CL" style="height: 30px; margin-right: 10px;" class="icon">
-                <span>College of Law</span>
-            </li>
-            <li class="third-place">
-                <div class="rank">3.</div>
-                <img src="~/img/cs_logo.png" alt="CS" style="height: 30px; margin-right: 10px;" class="icon">
-                <span>College of Science</span>
-            </li>
+            @{
+                var groupedColleges = Model
+                    .GroupBy(c => c.TotalResearch)
+                    .OrderByDescending(g => g.Key);
+                var currentRank = 1;
+            }
+            @foreach (var group in groupedColleges)
+            {
+                <div class="rank-group rank-@currentRank">
+                    @foreach(var college in group)
+                    {
+                        <li class="rank-item">
+                            <div class="rank">@currentRank.</div>
+                            <img src="~/img/@college.CollegeName.ToLower().Replace(" ", "_")_logo.png"
+                                alt="@college.CollegeName"
+                                style="height: 30px; margin-right: 10px;" class="icon" />
+                            <div class="college-info">
+                                @* @if (college.CollegeName.ToUpper() == "CCIS")
+                                {
+                                    <span class="college-name">College of Computer and Information Sciences</span>
+                                }
+                                else if (college.CollegeName.ToUpper() == "CE")
+                                {
+                                <span class="college-name">College of Engineering</span>
+                                }
+                                else
+                                {
+                                    <span class="college-name">@college.CollegeName</span>
+                                } *@
+                                <span class="college-name">@college.CollegeName</span>
+                                <span class="research-count">Total Research: @college.TotalResearch</span>
+                            </div>
+                        </li>
+                    }
+                </div>
+                currentRank++;
+            }
         </ol>
     </div>
 

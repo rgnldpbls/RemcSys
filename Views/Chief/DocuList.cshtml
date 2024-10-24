@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<RemcSys.Models.FileRequirement>
 @{
     ViewData["Title"] = "Application Requirements";
+
     Layout = "_NavChief1";
 }
 
@@ -9,8 +10,8 @@
         <form asp-action="SetDTS" method="post">
             <div class="dts-container mb-4">
                 <label for="dtsNumber">DTS No.:</label>
-                <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..." 
-                    value="@ViewBag.DTSNo" />
+                <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..."
+                       value="@ViewBag.DTSNo" />
                 <button type="submit" class="dts_edit-button"><i class="bi bi-pencil"></i></button>
                 <input type="hidden" name="fraId" value="@ViewBag.FraId" />
             </div>
@@ -20,8 +21,10 @@
     <p><b>Field of Study:</b> @ViewBag.Field</p>
     <p><b>Proponents:</b><br />  @ViewBag.Lead 
         @if (!ViewBag.Member.Contains("N/A"))
+
         {
             @foreach (var member in ViewBag.Member)
+
             {
                 <br />
                 @member
@@ -66,8 +69,8 @@
                         </div>
                     </td>
                     <td class="action-buttons">
-                        <a href="@Url.Action("PreviewFile", new {id = item.fr_Id})" target="_blank"><i class="bi bi-eye-fill"></i></a>
-                        <button class="comment-btn" id="comment-@item.fr_Id" style="display: none;" data-row-id="@item.fr_Id"><i class="bi bi-chat-left-fill"></i></button>
+                        <a href="@Url.Action("PreviewFile", new {id = item.fr_Id})" target="_blank"><i class="bi bi-eye-fill" style="color:#000; font-size: 30px;"></i></a>
+                        <button class="comment-btn" id="comment-@item.fr_Id" style="display: none; font-size: 28px;" data-row-id="@item.fr_Id"><i class="bi bi-chat-left-fill"></i></button>
                     </td>
                 </tr>
             }
@@ -80,7 +83,7 @@
     <div class="card1">
         <button type="button" class="fdismiss" id="closePopupBtn">×</button>
         <span class="title">Feedback</span>
-        <input class="card2" id="feedback" placeholder="Enter your feedback here..."/>
+        <textarea class="card2" id="feedback" placeholder="Enter your feedback here..."></textarea>
         <button type="button" class="send-btn" id="sendFeedbackBtn">Send</button>
     </div>
 </div>
@@ -220,13 +223,13 @@
             warningPopup.style.display = 'none';
         });
 
-        finalSubmitBtn.addEventListener('click', function () { 
-            
+        finalSubmitBtn.addEventListener('click', function () {
+
         });
     });
 </script>
 <script>
-    let selectedRowId = null; 
+    let selectedRowId = null;
     let previousStatus = null;
 
     function handleStatusChange(selectElement) {

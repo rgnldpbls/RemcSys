@@ -47,7 +47,19 @@ namespace RemcSys.Controllers
             ViewBag.EFR = EFRCount;
             ViewBag.UFRL = UFRLCount;
 
-            return View();
+            var rankedColleges = _context.FundedResearches
+                .Where(fr => fr.fr_Type != "University Funded Research Load")
+                .GroupBy(r => r.college)
+                .Select(g => new
+                {
+                    CollegeName = g.Key,
+                    TotalResearch = g.Count(),
+                })
+                .OrderByDescending(g => g.TotalResearch)
+                .Take(3)
+                .ToList();
+
+            return View(rankedColleges);
         }
 
         [Authorize(Roles = "Chief")]

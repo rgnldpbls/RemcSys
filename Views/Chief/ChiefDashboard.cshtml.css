@@ -212,24 +212,59 @@
             margin-right: 10px;
         }
 
-.first-place {
-    background-color: #850000;
-    color: #fff;
+.rank-group {
+    margin-bottom: 10px;
 }
 
-.second-place, .third-place {
+.rank-1 .rank-item {
+    background-color: #850000;
+    color: #FFDB89;
+}
+
+.rank-item {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+}
+
+.rank-2 .rank-item,
+.rank-3 .rank-item {
     margin-left: 25px;
     width: 90%;
     background-color: #f5f5f5;
     color: #000;
 }
 
-    .second-place img, .third-place img {
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-    }
+.rank {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 10px;
+}
 
+.college-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.college-name {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.research-count {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.icon {
+    align-self: flex-start;
+    margin-top: 5px;
+}
 
 ol li, ul li {
     margin: 5px 0;

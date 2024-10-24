@@ -1,25 +1,41 @@
 ﻿@model IEnumerable<FundedResearchApplication>
 @{
     ViewData["Title"] = "University Funded Research Applications";
+
     Layout = "_NavChief1";
 }
 <div class="funded-research-container">
     <div class="research-categories">
-        <div class="research-category active">
-            <a asp-action="UFResearchApp"><h3>University Funded Research</h3></a>
-        </div>
-        <div class="research-category inactive">
-            <a asp-action="EFResearchApp"><h3>Externally Funded Research</h3></a>
-        </div>
-        <div class="research-category inactive">
-            <a asp-action="UFRLApp"><h3>University Funded Research Load</h3></a>
-        </div>
-        <div class="research-category inactive">
-            <a asp-action="UEResearchApp"><h3>UFR - Evaluation</h3></a>
-        </div>
-        <div class="research-category inactive">
-            <a asp-action="UploadNTP"><h3>Funded Research - Upload NTP</h3></a>
-        </div>
+        <a href="UFResearchApp" class="UFR">
+            <div class="research-category active">
+                <h3>University Funded Research</h3>
+            </div>
+        </a>
+
+
+        <a href="EFResearchApp" class="EFR">
+            <div class="research-category inactive">
+                <h3>Externally Funded Research</h3>
+            </div>
+        </a>
+
+        <a href="UFRLApp" class="UFRL">
+            <div class="research-category inactive">
+                <h3>University Funded Research Load</h3>
+            </div>
+        </a>
+
+        <a href="UEResearchApp" class="UFR-E">
+            <div class="research-category inactive">
+                <h3>UFR - Evaluation</h3>
+            </div>
+        </a>
+
+        <a href="UploadNTP" class="NTP">
+            <div class="research-category inactive">
+                <h3>Funded Research - Upload NTP</h3>
+            </div>
+        </a>
     </div>
     <h2 class="title">UNIVERSITY FUNDED RESEARCH APPLICATIONS</h2>
     <hr />
@@ -57,7 +73,7 @@
                     </td>
                     <td>
                         <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
-                            <i class="bi bi-pencil-square"></i>
+                            <i class="bi bi-pencil-square" style="color:#000"></i>
                         </a>
                     </td>
                 </tr>

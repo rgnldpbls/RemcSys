@@ -11,11 +11,13 @@
     </div>
     @foreach (var log in Model)
     {
-        <div class="notification-card">
-            <span class="notification-text">
-                @log.Action
-            </span>
-            <span class="notification-time">@ActionLog.GetTimeAgo(log.Timestamp)</span>
-        </div>
+        <a href="EvaluatorPending" class="notification-link">
+            <div class="notification-card">
+                <span class="notification-text">
+                    @log.Action
+                </span>
+                <span class="notification-time">@ActionLog.GetTimeAgo(log.Timestamp)</span>
+            </div>
+        </a>
     }
 </div>
