@@ -1010,5 +1010,63 @@ namespace RemcSys.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("ProgressTracker", "ProgressReport");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddEvent(string eventTitle, DateTime startDate, DateTime endDate)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (ModelState.IsValid)
+            {
+                var addEvent = new CalendarEvent
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Title = eventTitle,
+                    Start = startDate,
+                    End = endDate.AddDays(1),
+                    Visibility = "JustYou",
+                    UserId = user.Id
+                };
+
+                _context.CalendarEvents.Add(addEvent);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("TeamLeaderDashboard");
+            }
+            return RedirectToAction("TeamLeaderDashboard");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserEvents()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var events = _context.CalendarEvents
+                .Where(e => e.Visibility == "Broadcasted" || (e.Visibility == "JustYou" && e.UserId == user.Id))
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Title,
+                    e.Start,
+                    e.End,
+                    e.Visibility,
+                })
+                .ToList();
+
+            return Json(events);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteEvent(string id)
+        {
+            var events = await _context.CalendarEvents.FindAsync(id);
+            if (events != null && events.Visibility == "JustYou")
+            {
+                _context.CalendarEvents.Remove(events);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
     }
 }

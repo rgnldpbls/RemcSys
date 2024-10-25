@@ -91,18 +91,29 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="eventForm">
+                            <form asp-action="AddEvent" method="post">
                                 <div class="mb-3">
                                     <label for="event-title" class="form-label">Event Title</label>
-                                    <input type="text" class="form-control" id="event-title" required>
+                                    <input type="text" class="form-control" id="event-title" name="eventTitle" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="event-start" class="form-label">Start Date</label>
-                                    <input type="date" class="form-control" id="event-start" required>
+                                    <input type="date" class="form-control" id="event-start" name="startDate" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="event-end" class="form-label">End Date</label>
-                                    <input type="date" class="form-control" id="event-end">
+                                    <input type="date" class="form-control" id="event-end" name="endDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Event Visibility</label>
+                                    <div>
+                                        <input type="radio" id="broadcasted" name="eventVisibility" value="Broadcasted"/>
+                                        <label for="broadcasted">Broadcasted</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" id="justYou" name="eventVisibility" value="JustYou" checked/>
+                                        <label for="justYou">Just You</label>
+                                    </div>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Add Event</button>
                             </form>
@@ -221,6 +232,12 @@
         const addEventModal = new bootstrap.Modal(document.getElementById('addEventModal'));
         const eventForm = document.getElementById('eventForm');
 
+        async function fetchEvents() {
+            const response = await fetch('/Chief/GetUserEvents');
+            const events = await response.json();
+            return events;
+        }
+
         // Get stored events from localStorage or initialize
         let storedEvents = JSON.parse(localStorage.getItem('events')) || [];
 
@@ -234,19 +251,26 @@
 
         // Function to delete an event by its ID
         const deleteEvent = (eventId) => {
-            storedEvents = storedEvents.filter(event => event.id !== eventId);
-            localStorage.setItem('events', JSON.stringify(storedEvents));
-
-            // Remove the event from the calendar
-            const eventToRemove = calendar.getEventById(eventId);
-            if (eventToRemove) {
-                eventToRemove.remove();
-            }
+            $.ajax({
+                url: '@Url.Action("DeleteEvent", "Chief")',
+                type: 'POST',
+                data: {
+                    id: eventId
+                },
+                success: function (response) {
+                    alert('Event deleted successfully!');
+                    window.location.href = '/Chief/ChiefDashboard';
+                },
+                error: function (xhr, status, error) {
+                    alert('Error deleting event. Please try again.');
+                }
+            });
         };
 
         // Initialize FullCalendar
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
+            nextDayThreshold: '00:00:00',
             customButtons: {
                 addEventButton: {
                     text: 'Add Event',
@@ -261,7 +285,7 @@
                 center: 'title',
                 right: 'addEventButton dayGridMonth,timeGridWeek,timeGridDay'
             },
-            events: storedEvents, // Load events from localStorage
+            events: fetchEvents, 
             editable: true,
             droppable: true,
             datesSet: removeUnderlines, // Remove underlines after rendering
@@ -279,8 +303,12 @@
                 const deleteButton = info.el.querySelector('.delete-event-btn');
                 if (deleteButton) {
                     deleteButton.addEventListener('click', function (e) {
-                        const eventId = deleteButton.getAttribute('data-id');
-                        deleteEvent(eventId);
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (confirm('Are you sure you want to delete this event?')) {
+                            const eventId = deleteButton.getAttribute('data-id');
+                            deleteEvent(eventId);
+                        }
                     });
                 }
             }
@@ -288,38 +316,6 @@
 
         // Render calendar
         calendar.render();
-
-        // Handle event form submission
-        eventForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            // Get form input values
-            const title = document.getElementById('event-title').value;
-            const startDate = document.getElementById('event-start').value;
-            const endDate = document.getElementById('event-end').value || startDate; // Use startDate if endDate is empty
-
-            // Create new event object
-            const newEvent = {
-                id: Date.now().toString(),
-                title: title,
-                start: startDate,
-                end: endDate
-            };
-
-            // Add event to calendar
-            calendar.addEvent(newEvent);
-
-            // Save event to localStorage
-            storedEvents.push(newEvent);
-            localStorage.setItem('events', JSON.stringify(storedEvents));
-
-            // Close modal and reset form
-            addEventModal.hide();
-            eventForm.reset();
-
-            // Re-apply underline removal after new event is added
-            removeUnderlines();
-        });
 
         // Initial underline removal after calendar renders
         removeUnderlines();
