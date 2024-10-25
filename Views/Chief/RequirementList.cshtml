@@ -1,0 +1,64 @@
+﻿@model IEnumerable<RemcSys.Models.FileRequirement>
+@{
+    ViewData["Title"] = "Application Requirements";
+
+    Layout = "_NavChief1";
+}
+
+<div class="document-management-container">
+    <p>
+        <form asp-action="SetDTS" method="post">
+            <div class="dts-container mb-4">
+                <label for="dtsNumber">DTS No.:</label>
+                <input type="text" id="dtsNumber" name="DTSNo" class="form-control dts-input" placeholder="Type here..."
+                       value="@ViewBag.DTSNo" />
+                <button type="submit" class="dts_edit-button"><i class="bi bi-pencil"></i></button>
+                <input type="hidden" name="fraId" value="@ViewBag.FraId" />
+            </div>
+        </form>
+    </p>
+    <h3><b>RESEARCH TITLE:</b> @ViewBag.Research</h3>
+    <p><b>Field of Study:</b> @ViewBag.Field</p>
+    <p><b>Proponents:</b><br />  @ViewBag.Lead 
+        @if (!ViewBag.Member.Contains("N/A"))
+
+        {
+            @foreach (var member in ViewBag.Member)
+
+            {
+                <br />
+                @member
+            }
+        }
+    </p>
+    <table class="document-table">
+        <thead>
+            <tr>
+                <th>Document Title</th>
+                <th>Document Type</th>
+                <th>File Uploaded</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.file_Name
+                    </td>
+                    <td>
+                        @item.document_Type
+                    </td>
+                    <td>
+                        @item.file_Uploaded.ToString("MMMM d, yyyy")
+                    </td>
+                    <td class="action-buttons">
+                        <a href="@Url.Action("PreviewFile", new {id = item.fr_Id})" target="_blank"><i class="bi bi-eye-fill" style="color:#000; font-size: 30px;"></i></a>
+                        <button class="comment-btn" id="comment-@item.fr_Id" style="display: none; font-size: 28px;" data-row-id="@item.fr_Id"><i class="bi bi-chat-left-fill"></i></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

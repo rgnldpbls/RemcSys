@@ -29,7 +29,14 @@
                 {
                     @if (ViewBag.IsFunded)
                     {
-                        <a class="nav-link active" href="/ProgressReport/ProgressTracker">Progress Report</a>
+                        @if(ViewBag.IsFrArchived == false)
+                        {
+                            <a class="nav-link active" href="/ProgressReport/ProgressTracker">Progress Report</a>
+                        }
+                        else
+                        {
+                            <a class="nav-link active" href="/Home/Forms">Application</a>
+                        }
                     }
                     else if (ViewBag.Status == "Submitted" || ViewBag.Status == "UnderEvaluation" || ViewBag.Status == "Approved" ||
                        ViewBag.Status == "Rejected" || ViewBag.Status == "Proceed")
@@ -40,12 +47,23 @@
                     {
                         <a class="nav-link active" href="/FundedResearchApplication/GeneratedDocuments">Application</a>
                     }
+                    else if(ViewBag.IsFraArchived == true)
+                    {
+                        <a class="nav-link active" href="/Home/Forms">Application</a>
+                    }
                 }
                 else if(ViewBag.Type == "Externally Funded Research" || ViewBag.Type == "University Funded Research Load")
                 {
                     @if (ViewBag.IsFunded)
                     {
-                        <a class="nav-link active" href="/ProgressReport/ProgressTracker">Progress Report</a>
+                        @if (ViewBag.IsFrArchived == false)
+                        {
+                            <a class="nav-link active" href="/ProgressReport/ProgressTracker">Progress Report</a>
+                        }
+                        else
+                        {
+                            <a class="nav-link active" href="/Home/Forms">Application</a>
+                        }
                     }
                     else if(ViewBag.Status == "Submitted" || ViewBag.Status == "Approved" || ViewBag.Status == "Proceed")
                     {
@@ -54,6 +72,10 @@
                     else if(ViewBag.Status == "Pending")
                     {
                         <a class="nav-link active" href="/FundedResearchApplication/GeneratedDocuments">Application</a>
+                    }
+                    else if (ViewBag.IsFraArchived == true)
+                    {
+                        <a class="nav-link active" href="/Home/Forms">Application</a>
                     }
                 }
             </nav>

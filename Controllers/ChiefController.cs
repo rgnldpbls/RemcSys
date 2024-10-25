@@ -166,6 +166,38 @@ namespace RemcSys.Controllers
             return View(fileRequirement);
         }
 
+        [Authorize(Roles = "Chief")]
+        public async Task<IActionResult> RequirementList(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var fra = await _context.FundedResearchApplication.FindAsync(id);
+            if (fra == null)
+            {
+                return NotFound();
+            }
+            ViewBag.FraId = fra.fra_Id;
+            ViewBag.DTSNo = fra.dts_No;
+            ViewBag.Research = fra.research_Title;
+            ViewBag.Field = fra.field_of_Study;
+            ViewBag.Lead = fra.applicant_Name;
+            ViewBag.Member = fra.team_Members;
+            ViewBag.Type = fra.fra_Type;
+            ViewBag.Status = fra.application_Status;
+
+            var fileRequirement = await _context.FileRequirement.Where(f => f.fra_Id == id && f.file_Type == ".pdf")
+                .OrderBy(fr => fr.file_Name)
+                .ToListAsync();
+            if (fileRequirement == null)
+            {
+                return NotFound();
+            }
+            return View(fileRequirement);
+        }
+
         [HttpPost]
         public async Task<IActionResult> SaveFeedback(string fileId, string fileStatus, string fileFeedback)
         {
@@ -1232,7 +1264,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Chief")]
-        public async Task<IActionResult> ArchivedApplication(string searchString)
+        public async Task<IActionResult> ArchivedResearch(string searchString)
         {
             ViewData["currentFilter"] = searchString;
             var appQuery = _context.FundedResearchApplication
@@ -1244,15 +1276,12 @@ namespace RemcSys.Controllers
             }
 
             var researchAppList = await appQuery
+                .Include(f => f.FundedResearch)
                 .Where(f => f.isArchive == true)
                 .OrderByDescending(f => f.submission_Date)
                 .ToListAsync();
 
-            var evaluation = await _context.Evaluations.ToListAsync();
-
-            var model = new Tuple<List<FundedResearchApplication>, List<Evaluation>>(researchAppList, evaluation);
-
-            return View(model);
+            return View(researchAppList);
         }
 
         [Authorize(Roles ="Chief")]
@@ -1269,7 +1298,9 @@ namespace RemcSys.Controllers
 
             if(appQuery != null)
             {
-                var fundedResearch = await appQuery.OrderByDescending(f => f.start_Date).ToListAsync();
+                var fundedResearch = await appQuery
+                    .Where(f => f.isArchive == false)
+                    .OrderByDescending(f => f.start_Date).ToListAsync();
 
                 return View(fundedResearch);
             }
@@ -1291,7 +1322,9 @@ namespace RemcSys.Controllers
 
             if(appQuery != null)
             {
-                var fundedResearch = await appQuery.OrderByDescending(f => f.start_Date).ToListAsync();
+                var fundedResearch = await appQuery
+                    .Where(f => f.isArchive == false)
+                    .OrderByDescending(f => f.start_Date).ToListAsync();
 
                 return View(fundedResearch);
             }
@@ -1312,7 +1345,9 @@ namespace RemcSys.Controllers
 
             if(appQuery != null)
             {
-                var fundedResearch = await appQuery.OrderByDescending(f => f.start_Date).ToListAsync();
+                var fundedResearch = await appQuery
+                    .Where(f => f.isArchive == false)
+                    .OrderByDescending(f => f.start_Date).ToListAsync();
 
                 return View(fundedResearch);
             }

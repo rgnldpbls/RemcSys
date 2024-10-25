@@ -4,9 +4,11 @@
     {
         ViewBag.Type = Model.First().fra_Type;
         ViewBag.Status = Model.First().application_Status;
+        ViewBag.IsFraArchived = Model.First().isArchive;
         @if(Model.First().FundedResearch != null)
         {
             ViewBag.IsFunded = true;
+            ViewBag.IsFrArchived = Model.First().FundedResearch.isArchive;
         }
         else
         {
@@ -67,73 +69,96 @@
             </div>
         </div>
 
-        <div class="upcoming-deadlines">
+        @* <div class="upcoming-deadlines">
             <h2>Upcoming Deadline</h2>
             <div class="deadline">
                 <p><b>Submit:</b> Progress Report 1</p>
                 <span class="due-date">08/20 DUE</span>
             </div>
-           @*  <div class="deadline">
-            </div>
             <div class="deadline">
             </div>
             <div class="deadline">
             </div>
             <div class="deadline">
-            </div> *@
-        </div>
+            </div>
+            <div class="deadline">
+            </div>
+        </div> *@
     </div>
-    @* <div class="attachments-section">
-    <h2>Recent Files</h2>
+    <div class="attachments-section">
+    <h2>List of Funded Researches</h2>
+    @{
+        var archivedApplication = Model.Where(f => f.isArchive == true).ToList();
+    }
     <hr />
     <div class="attachments-container">
-            <div class="attachment-card">
-                <div class="attachment-image">
-                    <img src="#" alt="Document Image Preview">
-                </div>
-                <div class="attachment-info">
-                    <p><strong>Document Title:</strong> Capsule Research Proposal</p>
-                    <p><strong>Status:</strong> Approved</p>
-                </div>
-            </div>
-            <div class="attachment-card">
-                <div class="attachment-image">
-                    <img src="#" alt="Document Image Preview">
-                </div>
-                <div class="attachment-info">
-                    <p><strong>Document Title:</strong> Form 1: Term-of-Reference</p>
-                    <p><strong>Status:</strong> Approved</p>
-                </div>
-            </div>
-            <div class="attachment-card">
-                <div class="attachment-image">
-                    <img src="#" alt="Document Image Preview">
-                </div>
-                <div class="attachment-info">
-                    <p><strong>Document Title:</strong> Form 2: Line-Item-Budget</p>
-                    <p><strong>Status:</strong> Approved</p>
-                </div>
-            </div>
-            <div class="attachment-card">
-                <div class="attachment-image">
-                    <img src="#" alt="Document Image Preview">
-                </div>
-                <div class="attachment-info">
-                    <p><strong>Document Title:</strong> Form 3: Schedule-of-Outputs</p>
-                    <p><strong>Status:</strong> Approved</p>
-                </div>
-            </div>
-            <div class="attachment-card">
-                <div class="attachment-image">
-                    <img src="#" alt="Document Image Preview">
-                </div>
-                <div class="attachment-info">
-                    <p><strong>Document Title:</strong> Form 4: Workplan</p>
-                    <p><strong>Status:</strong> Approved</p>
-                </div>
-            </div>
+            @if(archivedApplication != null && archivedApplication.Any())
+            {
+                @foreach (var research in archivedApplication)
+                {
+                    <div class="attachment-card">
+                        <div class="attachment-info">
+                            <p><strong>Research Title:</strong> @research.research_Title</p>
+                            <p><strong>Research Status:</strong>
+                                @if(research.application_Status == "Proceed")
+                                {
+                                    @if (research.FundedResearch.isArchive == true)
+                                    {
+                                        @research.FundedResearch.status
+                                    }
+                                    else
+                                    {
+                                        @research.application_Status
+                                    }
+                                }  
+                                else
+                                {
+                                    @research.application_Status
+                                }
+                            </p>
+                            <p>
+                                <strong>Documentary Requirements:</strong> <a href="@Url.Action("ApplicationStatus", "FundedResearchApplication",
+                                    new {id = research.fra_Id})" style="color: #850000;">View</a>
+                            </p>
+                            @if(research.fra_Type == "University Funded Research" && research.application_Status != "Withdrawn")
+                            {
+                                <p>
+                                    <strong>Evaluation Results:</strong> <a href="@Url.Action("EvaluationResult", "FundedResearchApplication",
+                                        new {id = research.fra_Id})" style="color: #850000;">View</a>
+                                </p>
+
+                                @if (research.application_Status == "Proceed")
+                                {
+                                    @if (research.FundedResearch.isArchive == true)
+                                    {
+                                        <p>
+                                            <strong>Progress Reports:</strong> <a href="@Url.Action("ProgressReportStatus", "ProgressReport",
+                                                new {id = research.FundedResearch.fr_Id})" style="color: #850000;">View</a>
+                                        </p>
+                                    }
+                                }
+                            }
+                            else if((research.fra_Type == "Externally Funded Research" || research.fra_Type == "University Funded Research Load") &&
+                                research.application_Status != "Withdrawn")
+                            {
+                                @if (research.FundedResearch.isArchive == true)
+                                {
+                                    <p>
+                                        <strong>Progress Reports:</strong> <a href="@Url.Action("ProgressReportStatus", "ProgressReport",
+                                    new {id = research.FundedResearch.fr_Id})" style="color: #850000;">View</a>
+                                    </p>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No funded research yet.</p>   
+            }
     </div>
-</div> *@
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>

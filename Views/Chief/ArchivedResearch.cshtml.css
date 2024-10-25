@@ -137,7 +137,7 @@
     font-weight: 500;
     margin-bottom: 10px;
     background-color: #0D6B4A;
-    width: 80%;
+    width: 90%;
     color: #FFF;
 }
 
@@ -148,8 +148,19 @@
     font-weight: 500;
     margin-bottom: 10px;
     background-color: #850000;
-    width: 80%;
+    width: 90%;
     color: #FFF;
+}
+
+.completed {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    background-color: gold;
+    width: 90%;
+    color: black;
 }
 
 button {

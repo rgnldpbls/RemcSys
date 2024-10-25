@@ -405,5 +405,24 @@ namespace RemcSys.Controllers
             }
             return File(file.data, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", file.file_Name);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> NewApplication(string frId)
+        {
+            var fr = await _context.FundedResearches.FindAsync(frId);
+            if(fr == null)
+            {
+                return NotFound();
+            }
+
+            fr.isArchive = true;
+            var genForms = await _context.GeneratedForms.Where(f => f.fra_Id == fr.fra_Id).ToListAsync();
+            foreach(var form in genForms)
+            {
+                _context.GeneratedForms.Remove(form);
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Forms", "Home");
+        }
     }
 }

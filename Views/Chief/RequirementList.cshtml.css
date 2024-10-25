@@ -1,0 +1,416 @@
+﻿body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent body from scrolling outside of the container */
+}
+
+.document-management-container {
+    margin-top: 20px;
+}
+
+.dts-container {
+    display: flex;
+    align-items: center;
+}
+
+.dts-input {
+    margin-left: 10px;
+    width: 200px;
+}
+
+dts_edit-button {
+    background-color: transparent;
+    border: none;
+    color: #000;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dts_edit-button:focus {
+    outline: 2px solid #850000;
+}
+
+.dts_edit-button:hover {
+    background-color: #850000;
+    color: #FFF;
+}
+
+.withdraw-btn {
+    float: right;
+    margin-bottom: 20px;
+    width: auto;
+    font-weight: 500;
+}
+
+.document-table {
+    margin-top: 20px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+    .document-table th,
+    .document-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .document-table th {
+        background-color: #850000;
+        color: white;
+        font-weight: bold;
+    }
+
+.status-button {
+    background-color: transparent;
+    border: none;
+    color: #FFFFFF;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .status-button:focus {
+        outline: 2px solid #F2F2F2;
+    }
+
+    .status-button:hover {
+        color: #F2F2F2;
+    }
+
+.dropdown-container {
+    position: relative;
+    width: 90%;
+}
+
+.custom-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: white;
+    color: #333;
+    padding-right: 30px;
+}
+
+.arrow-down {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #333;
+}
+
+button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.view-btn {
+    font-size: 20px;
+    background-color: transparent;
+    color: #000000;
+    padding: 5px 15px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.comment-btn {
+    font-size: 20px;
+    background-color: transparent;
+    color: #000000;
+    padding: 5px 15px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn {
+    background-color: #FFDB89;
+    color: #850000;
+    float: right;
+    width: 100px;
+    height: 40px;
+    font-weight: 500;
+    border: 1px #FFDB89;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+
+.back-btn {
+    background-color: #850000;
+    color: #FFF;
+    margin-top: 20px;
+    float: right;
+    margin-bottom: 100px;
+    width: 100px;
+    height: 40px;
+    font-weight: 500;
+}
+
+/*Popup Styles*/
+.feedback {
+    display: none;
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+}
+
+.card1 {
+    overflow: hidden;
+    position: relative;
+    background-color: #850000;
+    text-align: center;
+    border-color: #000;
+    border-radius: 1rem;
+    width: 520px;
+    height: 450px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.card2 {
+    overflow: hidden;
+    position: relative;
+    left: 45%;
+    transform: translateX(-50%);
+    background-color: #420000;
+    border-color: #000;
+    border-radius: 1rem;
+    width: 470px;
+    height: 320px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    margin-top: 20px;
+    margin-bottom: 5px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.fdismiss {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background-color: #850000;
+    color: white;
+    border: 2px solid #D1D5DB;
+    font-size: 25px;
+    font-weight: 300;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    transition: .3s ease;
+}
+
+    .fdismiss:hover {
+        background-color: #420000;
+        border: 2px solid #420000;
+        color: #fff;
+    }
+
+
+.title {
+    padding: 1.25rem 1rem 1rem 1rem;
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.send-btn {
+    text-align: center;
+    width: 100px;
+    height: 50px;
+    font-size: 18px;
+    background-color: #FFDB89;
+    color: #850000;
+    font-weight: bold;
+}
+
+.status_tag {
+    display: none;
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+}
+
+.card3 {
+    overflow: hidden;
+    position: relative;
+    background-color: #850000;
+    text-align: center;
+    border-color: #000;
+    border-radius: 1rem;
+    width: 520px;
+    height: 350px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.card4 {
+    overflow: hidden;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #420000;
+    text-align: left;
+    border-color: #000;
+    border-radius: 1rem;
+    width: 470px;
+    height: 250px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+    .card4 li {
+        padding: 6px 12px;
+        font-weight: 500;
+    }
+
+.sstatus.pending, .sstatus.compliance, .sstatus.approved {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    height: 30px;
+    color: #FFF;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.sstatus.pending {
+    margin-top: 5px;
+    background-color: #727272;
+}
+
+.sstatus.compliance {
+    background-color: #DBBF1B;
+}
+
+.sstatus.approved {
+    background-color: #0D6B4A;
+}
+
+
+.sdismiss {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background-color: #850000;
+    color: white;
+    border: 2px solid #D1D5DB;
+    font-size: 25px;
+    font-weight: 300;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    transition: .3s ease;
+}
+
+    .sdismiss:hover {
+        background-color: #420000;
+        border: 2px solid #420000;
+        color: #fff;
+    }
+
+
+.warning_section {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+}
+
+.card {
+    display: relative;
+    overflow: hidden;
+    position: relative;
+    background-color: #ffffff;
+    text-align: left;
+    border: 2px solid #000;
+    border-radius: 1rem;
+    width: 400px;
+    height: 350px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.wtitle {
+    background-color: #ffffff;
+    color: #000;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.wsubmit-btn {
+    position: absolute;
+    background-color: #FFDB89;
+    color: #850000;
+    bottom: 10px;
+    right: 40px;
+    font-size: 16px;
+    width: 150px;
+    height: 40px;
+    font-weight: 500;
+    border: 1px #FFDB89;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.wback-btn {
+    position: absolute;
+    background-color: #850000;
+    color: #FFF;
+    bottom: 10px;
+    left: 40px;
+    font-size: 16px;
+    width: 150px;
+    height: 40px;
+    font-weight: 500;
+    border: 1px #850000;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}

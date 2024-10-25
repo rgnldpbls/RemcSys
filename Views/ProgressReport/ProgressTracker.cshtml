@@ -6,7 +6,21 @@
 
 <div class="container">
     <h1>Progress Report Tracker</h1>
-    <button class="extend-btn" id="extendBtn">Request Extension</button><br />
+    @if (ViewBag.Status == "Completed")
+    {
+        <form method="post" asp-action="NewApplication">
+            <input type="hidden" name="frId" value="@ViewBag.Id" />
+            <button type="submit" class="extend-btn">New Application</button> 
+            
+            <br />
+        </form>
+    }
+    else
+    {
+        <button class="extend-btn" id="extendBtn">Request Extension</button>
+
+        <br />
+    }
     <h6><b>NOTE:</b> To upload your report, simply click upload button below.</h6>
     <!-- Progress Steps -->
     <div class="step-container">
