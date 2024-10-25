@@ -39,27 +39,22 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> ChiefDashboard()
         {
-            var UFRCount = await _context.FundedResearches.Where(f => f.fr_Type == "University Funded Research").CountAsync();
-            var EFRCount = await _context.FundedResearches.Where(f => f.fr_Type == "Externally Funded Research").CountAsync();
-            var UFRLCount = await _context.FundedResearches.Where(f => f.fr_Type == "University Funded Research Load").CountAsync();
+            var fundedResearch = await _context.FundedResearches.ToListAsync();
 
-            ViewBag.UFR = UFRCount;
-            ViewBag.EFR = EFRCount;
-            ViewBag.UFRL = UFRLCount;
-
-            var rankedColleges = _context.FundedResearches
-                .Where(fr => fr.fr_Type != "University Funded Research Load")
-                .GroupBy(r => r.college)
+            var rankedBranch = _context.FundedResearches
+                .GroupBy(r => r.branch)
                 .Select(g => new
                 {
-                    CollegeName = g.Key,
+                    BranchName = g.Key,
                     TotalResearch = g.Count(),
                 })
                 .OrderByDescending(g => g.TotalResearch)
                 .Take(3)
                 .ToList();
 
-            return View(rankedColleges);
+            var model = new Tuple<IEnumerable<FundedResearch>, IEnumerable<dynamic>>(fundedResearch, rankedBranch);
+
+            return View(model);
         }
 
         [Authorize(Roles = "Chief")]

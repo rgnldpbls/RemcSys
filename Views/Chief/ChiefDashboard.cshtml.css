@@ -10,7 +10,7 @@
 .UFR, .EFR, .UFRL {
     display: flex;
     justify-content: center;
-    align-items: center;
+    text-align: center;
     font-weight: 600;
     font-size: 20px;
     padding: 10px;
@@ -35,23 +35,67 @@
 .content-row {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     margin-top: 20px;
 }
 
-.chart, .quick-access, .top-research, .top-branches {
+.left-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-basis: 40%;
+}
+
+.chart-section {
+    flex-basis: 60%;
+}
+
+.chart, .quick-access, .top-research {
     background-color: #f5f5f5;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.chart {
-    width: 60%;
+.card {
+    background-color: white;
+    border: 1px solid black;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin-left: 5%;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-footer {
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 0 0 10px 10px;
 }
 
 .pie-chart {
     max-width: 400px;
     margin: 0 auto;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 40px auto;
+}
+
+#calendar {
+    width: 80%; 
+    max-width: 800px;
+    background-color: #f8f9fa; 
+    border-radius: 8px;
+    border: 2px solid #850000;
+    padding: 10px;
+    margin-right: 20px;
 }
 
 .quick-access {
@@ -143,7 +187,8 @@
         }
 
 .top-research-section, .top-branches {
-    width: 45%;
+    width: 48%;
+    margin-bottom: 10%;
 }
 
 .top-research-section {
@@ -157,8 +202,8 @@
 .heading-container {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Center both headings horizontally */
-    gap: 0px; /* Add some space between the h2 and h3 */
+    justify-content: space-between;
+    gap: 0px;
 }
 
 .top-research-section h2 {
@@ -189,28 +234,6 @@
     padding: 0;
     margin: 0;
 }
-
-    .top-research-list li {
-        display: flex;
-        align-items: center;
-        background-color: #fff;
-        border-radius: 20px;
-        padding: 10px 15px;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        font-size: 1rem;
-    }
-
-        .top-research-list li:first-child {
-            background-color: #850000;
-            color: #FFDB89;
-        }
-
-        .top-research-list li .rank {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-right: 10px;
-        }
 
 .rank-group {
     margin-bottom: 10px;
@@ -246,12 +269,12 @@
     margin-right: 10px;
 }
 
-.college-info {
+.branch-info {
     display: flex;
     flex-direction: column;
 }
 
-.college-name {
+.branch-name {
     font-size: 1rem;
     margin-bottom: 4px;
 }
@@ -266,12 +289,13 @@
     margin-top: 5px;
 }
 
+
 ol li, ul li {
     margin: 5px 0;
 }
 
 .top-branches {
-    background-color: #f5f5f5;
+    height: 400px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -335,3 +359,4 @@ hr {
     border-top: 3px solid #ddd;
     margin: 12px 0;
 }
+

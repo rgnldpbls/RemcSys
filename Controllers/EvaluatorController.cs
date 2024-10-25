@@ -27,9 +27,22 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Evaluator")]
-        public IActionResult EvaluatorDashboard()
+        public async Task<IActionResult> EvaluatorDashboard()
         {
-            return View();
+            var user = await _userManager.GetUserAsync(User);
+            var evaluator = await _context.Evaluator.FirstOrDefaultAsync(f => f.UserId == user.Id);
+            ViewBag.Pending = await _context.Evaluations.Where(e => e.evaluation_Status == "Pending" && e.evaluator_Id == evaluator.evaluator_Id).CountAsync();
+            ViewBag.Missed = await _context.Evaluations.Where(e => e.evaluation_Status == "Missed" && e.evaluator_Id == evaluator.evaluator_Id).CountAsync();
+            ViewBag.Evaluated = await _context.Evaluations.Where(e => (e.evaluation_Status == "Approved" || e.evaluation_Status == "Rejected")
+                && e.evaluator_Id == evaluator.evaluator_Id).CountAsync();
+
+            var pendingEvals = await _context.Evaluations
+                .Include(e => e.fundedResearchApplication)
+                .Where(e => e.evaluation_Status == "Pending" && e.evaluator_Id == evaluator.evaluator_Id)
+                .OrderBy(e => e.evaluation_Deadline)
+                .ToListAsync();
+            
+            return View(pendingEvals);
         }
 
         [Authorize(Roles ="Evaluator")]

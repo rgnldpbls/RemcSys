@@ -1,6 +1,7 @@
 ﻿@model Tuple<List<ViewChiefEvaluationVM>, List<FileRequirement>>
 @{
     ViewData["Title"] = "Research Evaluation Result";
+    ViewBag.IsFunded = false;
     Layout = "_NavTeamLeader2";
 
     bool allApproved = Model.Item1.All(item => item.evaluation_Grade >= 70 && item.remarks == "Approved");

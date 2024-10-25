@@ -24,13 +24,37 @@
             </div>
             <nav class="nav nav-pills nav-fill">
                 <a class="nav-link active" href="/Home/Faculty">Home</a>
-                @if(ViewBag.Type == "University Funded Research")
+                <a class="nav-link active" href="/FundedResearchApplication/TeamLeaderDashboard">Dashboard</a>
+                @if (ViewBag.Type == "University Funded Research")
                 {
-                    <a class="nav-link active" href="/FundedResearchApplication/ApplicationTracker">Application</a>
+                    @if (ViewBag.IsFunded)
+                    {
+                        <a class="nav-link active" href="/ProgressReport/ProgressTracker">Progress Report</a>
+                    }
+                    else if (ViewBag.Status == "Submitted" || ViewBag.Status == "UnderEvaluation" || ViewBag.Status == "Approved" ||
+                       ViewBag.Status == "Rejected" || ViewBag.Status == "Proceed")
+                    {
+                        <a class="nav-link active" href="/FundedResearchApplication/ApplicationTracker">Application</a>
+                    }
+                    else if(ViewBag.Status == "Pending")
+                    {
+                        <a class="nav-link active" href="/FundedResearchApplication/GeneratedDocuments">Application</a>
+                    }
                 }
-                else
+                else if(ViewBag.Type == "Externally Funded Research" || ViewBag.Type == "University Funded Research Load")
                 {
-                    <a class="nav-link active" href="/FundedResearchApplication/ApplicationTrackerII">Application</a>
+                    @if (ViewBag.IsFunded)
+                    {
+                        <a class="nav-link active" href="/ProgressReport/ProgressTracker">Progress Report</a>
+                    }
+                    else if(ViewBag.Status == "Submitted" || ViewBag.Status == "Approved" || ViewBag.Status == "Proceed")
+                    {
+                        <a class="nav-link active" href="/FundedResearchApplication/ApplicationTrackerII">Application</a>
+                    }
+                    else if(ViewBag.Status == "Pending")
+                    {
+                        <a class="nav-link active" href="/FundedResearchApplication/GeneratedDocuments">Application</a>
+                    }
                 }
             </nav>
             <!-- New container for profile -->
@@ -40,7 +64,7 @@
                     var user = await UserManager.GetUserAsync(User);
                     <span>Welcome, @user.Name!</span>
                 }
-                <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expnaded="false">
+                <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi-person-circle" style="font-size: 25px;"></i>
                 </button>
                 <ul class="dropdown-menu">

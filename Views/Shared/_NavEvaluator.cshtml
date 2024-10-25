@@ -26,7 +26,6 @@
                 <nav class="nav nav-pills nav-fill">
                     <a class="nav-link active" href="/Home/Evaluator">Home</a>
                     <a class="nav-link active" href="/Evaluator/EvaluatorDashboard">Dashboard</a>
-                    <a class="nav-link active" href="/Evaluator/EvaluatorPending">Evaluations</a>
                 </nav>
                 <div class="profile">
                     @if (SignInManager.IsSignedIn(User))
@@ -37,7 +36,7 @@
                     <a asp-controller="Evaluator" asp-action="EvaluatorNotif" class="btn-outline-light">
                         <i class="bi bi-bell-fill" style="font-size: 30px;"></i>
                     </a>
-                    <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expnaded="false">
+                    <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi-person-circle" style="font-size: 25px;"></i>
                     </button>
                     <ul class="dropdown-menu">

@@ -53,7 +53,7 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Faculty")]
         public async Task<IActionResult> Faculty()
         {
-            var user = await _userManager.GetUserAsync(User);
+            /*var user = await _userManager.GetUserAsync(User);
             if(user == null)
             {
                 return  NotFound();
@@ -94,7 +94,7 @@ namespace RemcSys.Controllers
 
             var ongoingFR = await _context.FundedResearches.AnyAsync(f => f.UserId == user.Id);
 
-            ViewBag.OngoingFR = ongoingFR;
+            ViewBag.OngoingFR = ongoingFR;*/
 
             return View();
         }

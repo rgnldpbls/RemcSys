@@ -179,6 +179,23 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Faculty")]
+        public async Task<IActionResult> TeamLeaderDashboard()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound();
+            }
+
+            var fra = await _context.FundedResearchApplication
+                .Include(f => f.FundedResearch)
+                .Where(f => f.UserId == user.Id)
+                .ToListAsync();
+
+            return View(fra);
+        }
+
+        [Authorize(Roles = "Faculty")]
         public async Task<IActionResult> FormFill(string type)
         {
             var user = await _userManager.GetUserAsync(User);
