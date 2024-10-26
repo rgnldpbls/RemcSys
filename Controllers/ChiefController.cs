@@ -39,6 +39,11 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> ChiefDashboard()
         {
+            if (_context.Settings.First().isMaintenance)
+            {
+                return RedirectToAction("UnderMaintenance", "Home");
+            }
+
             var fundedResearch = await _context.FundedResearches.ToListAsync();
 
             var rankedBranch = _context.FundedResearches
@@ -60,6 +65,11 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> ChiefNotif()
         {
+            if (_context.Settings.First().isMaintenance)
+            {
+                return RedirectToAction("UnderMaintenance", "Home");
+            }
+
             var logs = await _context.ActionLogs
                 .Where(f => f.isChief == true)
                 .OrderByDescending(log => log.Timestamp)
@@ -2308,6 +2318,30 @@ namespace RemcSys.Controllers
 
                 return Json(new { success = true });
             }
+            return Json(new { success = false });
+        }
+
+        [Authorize(Roles ="Chief")]
+        [HttpGet]
+        public IActionResult Settings()
+        {
+            var settings = _context.Settings.First();
+            return View(settings);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateMaintenanceMode(bool isMaintenanceMode)
+        {
+            var maintenance = await _context.Settings.FirstAsync();
+            if (maintenance != null)
+            {
+                maintenance.isMaintenance = isMaintenanceMode;
+                await _context.SaveChangesAsync();
+
+                return Json(new {success  = true });
+            }
+
             return Json(new { success = false });
         }
     }

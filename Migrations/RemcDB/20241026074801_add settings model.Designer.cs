@@ -12,8 +12,8 @@ using RemcSys.Data;
 namespace RemcSys.Migrations.RemcDB
 {
     [DbContext(typeof(RemcDBContext))]
-    [Migration("20241025143701_add calendar events model")]
-    partial class addcalendareventsmodel
+    [Migration("20241026074801_add settings model")]
+    partial class addsettingsmodel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -550,6 +550,19 @@ namespace RemcSys.Migrations.RemcDB
                     b.HasIndex("fr_Id");
 
                     b.ToTable("ProgressReports");
+                });
+
+            modelBuilder.Entity("RemcSys.Models.Settings", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("isMaintenance")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Settings");
                 });
 
             modelBuilder.Entity("RemcSys.Models.ActionLog", b =>

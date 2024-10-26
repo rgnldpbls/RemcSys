@@ -12,8 +12,8 @@ using RemcSys.Data;
 namespace RemcSys.Migrations.RemcDB
 {
     [DbContext(typeof(RemcDBContext))]
-    [Migration("20241019100916_add isExtension attri in FundedResearch model")]
-    partial class addisExtensionattriinFundedResearchmodel
+    [Migration("20241026072221_Initial Create")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,6 +60,34 @@ namespace RemcSys.Migrations.RemcDB
                     b.HasIndex("FraId");
 
                     b.ToTable("ActionLogs");
+                });
+
+            modelBuilder.Entity("RemcSys.Models.CalendarEvent", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("End")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CalendarEvents");
                 });
 
             modelBuilder.Entity("RemcSys.Models.Evaluation", b =>
@@ -318,7 +346,7 @@ namespace RemcSys.Migrations.RemcDB
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("total_project_Cost")
+                    b.Property<double?>("total_project_Cost")
                         .HasColumnType("float");
 
                     b.HasKey("fra_Id");
@@ -350,6 +378,110 @@ namespace RemcSys.Migrations.RemcDB
                         .IsUnique();
 
                     b.ToTable("FundedResearchEthics");
+                });
+
+            modelBuilder.Entity("RemcSys.Models.GAWADWinners", b =>
+                {
+                    b.Property<string>("gw_Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("file_Uploaded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("gw_Data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("gw_fileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("gw_fileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("gw_Id");
+
+                    b.ToTable("GAWADWinners");
+                });
+
+            modelBuilder.Entity("RemcSys.Models.GenerateGAWADNominees", b =>
+                {
+                    b.Property<string>("gn_Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("generateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("gn_Data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("gn_fileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("gn_fileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("gn_type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isArchived")
+                        .HasColumnType("bit");
+
+                    b.HasKey("gn_Id");
+
+                    b.ToTable("GenerateGAWADNominees");
+                });
+
+            modelBuilder.Entity("RemcSys.Models.GenerateReport", b =>
+                {
+                    b.Property<string>("gr_Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("generateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("gr_Data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime>("gr_endDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("gr_fileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("gr_fileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("gr_startDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("gr_typeofReport")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isArchived")
+                        .HasColumnType("bit");
+
+                    b.HasKey("gr_Id");
+
+                    b.ToTable("GenerateReports");
                 });
 
             modelBuilder.Entity("RemcSys.Models.GeneratedForm", b =>

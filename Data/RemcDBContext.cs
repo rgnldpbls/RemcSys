@@ -27,6 +27,7 @@ namespace RemcSys.Data
         public DbSet<GenerateGAWADNominees> GenerateGAWADNominees { get; set; }
         public DbSet<GAWADWinners> GAWADWinners { get; set; }
         public DbSet<CalendarEvent> CalendarEvents { get; set; }
+        public DbSet<Settings> Settings { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

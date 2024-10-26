@@ -12,6 +12,22 @@ namespace RemcSys.Migrations.RemcDB
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "CalendarEvents",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Start = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    End = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Visibility = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CalendarEvents", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Evaluator",
                 columns: table => new
                 {
@@ -46,13 +62,67 @@ namespace RemcSys.Migrations.RemcDB
                     submission_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     dts_No = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     project_Duration = table.Column<int>(type: "int", nullable: false),
-                    total_project_Cost = table.Column<double>(type: "float", nullable: false),
+                    total_project_Cost = table.Column<double>(type: "float", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     isArchive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FundedResearchApplication", x => x.fra_Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GAWADWinners",
+                columns: table => new
+                {
+                    gw_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    gw_fileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    gw_fileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    gw_Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    file_Uploaded = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GAWADWinners", x => x.gw_Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GenerateGAWADNominees",
+                columns: table => new
+                {
+                    gn_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    gn_fileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    gn_fileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    gn_Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    gn_type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    generateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    isArchived = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GenerateGAWADNominees", x => x.gn_Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GenerateReports",
+                columns: table => new
+                {
+                    gr_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    gr_fileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    gr_fileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    gr_Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    gr_startDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    gr_endDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    gr_typeofReport = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    generateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    isArchived = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GenerateReports", x => x.gr_Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -155,6 +225,8 @@ namespace RemcSys.Migrations.RemcDB
                     dts_No = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     project_Duration = table.Column<int>(type: "int", nullable: false),
                     total_project_Cost = table.Column<double>(type: "float", nullable: true),
+                    isExtension1 = table.Column<bool>(type: "bit", nullable: false),
+                    isExtension2 = table.Column<bool>(type: "bit", nullable: false),
                     fra_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     isArchive = table.Column<bool>(type: "bit", nullable: false)
@@ -287,6 +359,9 @@ namespace RemcSys.Migrations.RemcDB
                 name: "ActionLogs");
 
             migrationBuilder.DropTable(
+                name: "CalendarEvents");
+
+            migrationBuilder.DropTable(
                 name: "Evaluations");
 
             migrationBuilder.DropTable(
@@ -296,7 +371,16 @@ namespace RemcSys.Migrations.RemcDB
                 name: "FundedResearchEthics");
 
             migrationBuilder.DropTable(
+                name: "GAWADWinners");
+
+            migrationBuilder.DropTable(
                 name: "GeneratedForms");
+
+            migrationBuilder.DropTable(
+                name: "GenerateGAWADNominees");
+
+            migrationBuilder.DropTable(
+                name: "GenerateReports");
 
             migrationBuilder.DropTable(
                 name: "ProgressReports");

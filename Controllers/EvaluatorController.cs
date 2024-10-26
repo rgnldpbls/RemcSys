@@ -29,6 +29,11 @@ namespace RemcSys.Controllers
         [Authorize(Roles ="Evaluator")]
         public async Task<IActionResult> EvaluatorDashboard()
         {
+            if (_context.Settings.First().isMaintenance)
+            {
+                return RedirectToAction("UnderMaintenance", "Home");
+            }
+
             var user = await _userManager.GetUserAsync(User);
             var evaluator = await _context.Evaluator.FirstOrDefaultAsync(f => f.UserId == user.Id);
             ViewBag.Pending = await _context.Evaluations.Where(e => e.evaluation_Status == "Pending" && e.evaluator_Id == evaluator.evaluator_Id).CountAsync();
@@ -48,6 +53,11 @@ namespace RemcSys.Controllers
         [Authorize(Roles ="Evaluator")]
         public async Task<IActionResult> EvaluatorNotif()
         {
+            if (_context.Settings.First().isMaintenance)
+            {
+                return RedirectToAction("UnderMaintenance", "Home");
+            }
+
             var user = await _userManager.GetUserAsync(User);
             var logs = await _context.ActionLogs
                 .Where(f => f.Name == user.Name && f.isEvaluator == true)

@@ -58,4 +58,23 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<RemcDBContext>();
+
+    var existingSettings = dbContext.Settings.FirstOrDefault(s => s.Id == "MainOption");
+    if(existingSettings == null)
+    {
+        var settings = new Settings
+        {
+            Id = "MainOption",
+            isMaintenance = false
+        };
+
+        dbContext.Settings.Add(settings);
+        dbContext.SaveChanges();
+    }
+}
+
 app.Run();

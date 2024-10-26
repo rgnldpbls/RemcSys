@@ -549,6 +549,19 @@ namespace RemcSys.Migrations.RemcDB
                     b.ToTable("ProgressReports");
                 });
 
+            modelBuilder.Entity("RemcSys.Models.Settings", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("isMaintenance")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Settings");
+                });
+
             modelBuilder.Entity("RemcSys.Models.ActionLog", b =>
                 {
                     b.HasOne("RemcSys.Models.FundedResearchApplication", "fundedResearchApplication")

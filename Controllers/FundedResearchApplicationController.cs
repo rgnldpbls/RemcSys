@@ -181,6 +181,11 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Faculty")]
         public async Task<IActionResult> TeamLeaderDashboard()
         {
+            if (_context.Settings.First().isMaintenance)
+            {
+                return RedirectToAction("UnderMaintenance", "Home");
+            }
+
             var user = await _userManager.GetUserAsync(User);
             if(user == null)
             {

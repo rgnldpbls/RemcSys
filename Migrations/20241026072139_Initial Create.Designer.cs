@@ -12,15 +12,15 @@ using RemcSys.Data;
 namespace RemcSys.Migrations
 {
     [DbContext(typeof(RemcSysDBContext))]
-    [Migration("20240915154919_Additional Attributes")]
-    partial class AdditionalAttributes
+    [Migration("20241026072139_Initial Create")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
