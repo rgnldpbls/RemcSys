@@ -38,31 +38,38 @@
 
 <!-- Archive section -->
 <h2 class="archive-title">Archive:</h2>
-<div class="archive-container">
-    <table id="archiveTable" class="document-table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>File Uploaded</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var item in Model)
-            {
+@if(Model != null && Model.Any())
+{
+    <div class="archive-container">
+        <table id="archiveTable" class="document-table">
+            <thead>
                 <tr>
-                    <td>@item.gw_fileName</td>
-                    <td>@ActionLog.GetTimeAgo(item.file_Uploaded)</td>
-                    <td>
-                        <a href="@Url.Action("PreviewFile", new {id = item.gw_Id})" style="color: #850000;">
-                            <i class="bi bi-eye-fill" style="font-size: 30px;"></i>
-                        </a>
-                    </td>
+                    <th>Name</th>
+                    <th>File Uploaded</th>
+                    <th>Action</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.gw_fileName</td>
+                        <td>@ActionLog.GetTimeAgo(item.file_Uploaded)</td>
+                        <td>
+                            <a href="@Url.Action("PreviewFile", new {id = item.gw_Id})" style="color: #850000;">
+                                <i class="bi bi-eye-fill" style="font-size: 30px;"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>No Archived GAWAD Winners yet.</p>
+}
 
 @section Scripts {
     <script>

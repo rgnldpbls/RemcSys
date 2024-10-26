@@ -50,6 +50,21 @@ namespace RemcSys.Controllers
             return View();
         }
 
+        public IActionResult UFRAppClosed()
+        {
+            return View();
+        }
+
+        public IActionResult EFRAppClosed()
+        {
+            return View();
+        }
+
+        public IActionResult UFRLAppClosed()
+        {
+            return View();
+        }
+
         [Authorize(Roles = "Faculty")]
         public IActionResult Faculty()
         {
@@ -87,6 +102,25 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Faculty")]
         public IActionResult Eligibility(string type)
         {
+            var isUFRApp = _context.Settings.First().isUFRApplication;
+            if(!isUFRApp && type == "University Funded Research")
+            {
+                return RedirectToAction("UFRAppClosed", "Home");
+            }
+
+            var isEFRApp = _context.Settings.First().isEFRApplication;
+            if(!isEFRApp && type == "Externally Funded Research")
+            {
+                return RedirectToAction("EFRAppClosed", "Home");
+            }
+
+            var isUFRLApp = _context.Settings.First().isUFRLApplication;
+            if(!isUFRLApp && type == "University Funded Research Load")
+            {
+                return RedirectToAction("UFRLAppClosed", "Home");
+
+            }
+
             ViewBag.Type = type;
             return View();
         }

@@ -40,100 +40,107 @@
     <h2 class="title">UNIVERSITY FUNDED RESEARCH APPLICATIONS - EVALUATION</h2>
     <hr />
 
-    <div class="search-section">
-        <!-- Search Form -->
-        <form asp-controller="Chief" asp-action="UEResearchApp" method="get" class="form-inline mb-3">
-            <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
-            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
-        </form>
-    </div>
+    @if(Model.Item1 != null && Model.Item1.Any())
+    {
+        <div class="search-section">
+            <!-- Search Form -->
+            <form asp-controller="Chief" asp-action="UEResearchApp" method="get" class="form-inline mb-3">
+                <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
+                <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
 
-    <table class="document-table">
-        <thead>
-            <tr>
-                <th>DTS No.</th>
-                <th>Application Details</th>
-                <th>
-                    Assign Evaluators
-                    <button class="status-button"><i class="bi bi-question-circle-fill"></i></button>
-                </th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var app in Model.Item1)
-            {
+        <table class="document-table">
+            <thead>
                 <tr>
-                    <td>
-                        @(app.dts_No != null ? app.dts_No : "-")
-                    </td>
-                    <td class="research-details">
-                        <b>Research Title:</b> @app.research_Title<br />
-                        <b>Field of Study:</b> @app.field_of_Study
-                    </td>
-                    <td>
-                        @{
-                            //Filter the evaluations list by the current application ID (fra_Id)
+                    <th>DTS No.</th>
+                    <th>Application Details</th>
+                    <th>
+                        Assign Evaluators
+                        <button class="status-button"><i class="bi bi-question-circle-fill"></i></button>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var app in Model.Item1)
+                {
+                    <tr>
+                        <td>
+                            @(app.dts_No != null ? app.dts_No : "-")
+                        </td>
+                        <td class="research-details">
+                            <b>Research Title:</b> @app.research_Title<br />
+                            <b>Field of Study:</b> @app.field_of_Study
+                        </td>
+                        <td>
+                            @{
+                                //Filter the evaluations list by the current application ID (fra_Id)
 
-                            var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
-                        }
-                        @if (assignedEvaluators.Count > 0)
+                                var assignedEvaluators = Model.Item2.Where(e => e.fra_Id == app.fra_Id).ToList();
+                            }
+                            @if (assignedEvaluators.Count > 0)
 
-                        {
-                            foreach (var eval in assignedEvaluators)
                             {
-
-                                if(eval.evaluation_Status == "Pending")
-
+                                foreach (var eval in assignedEvaluators)
                                 {
-                                    <button class="assign wevaluator"
-                                            data-evaluation-id="@eval.evaluation_Id">
-                                        @eval.evaluator_Name
-                                    </button>
+
+                                    if (eval.evaluation_Status == "Pending")
+
+                                    {
+                                        <button class="assign wevaluator"
+                                                data-evaluation-id="@eval.evaluation_Id">
+                                            @eval.evaluator_Name
+                                        </button>
+                                    }
+
+                                    else if (eval.evaluation_Status == "Approved")
+
+                                    {
+                                        <button class="approved">
+                                            @eval.evaluator_Name
+                                        </button>
+                                    }
+
+                                    else if (eval.evaluation_Status == "Rejected")
+
+                                    {
+                                        <button class="rejected">
+                                            @eval.evaluator_Name
+                                        </button>
+                                    }
                                 }
 
-                                else if(eval.evaluation_Status == "Approved")
-
-                                {
-                                    <button class="approved">
-                                        @eval.evaluator_Name
-                                    </button>
-                                }
-
-                                else if(eval.evaluation_Status == "Rejected")
-
-                                {
-                                    <button class="rejected">
-                                        @eval.evaluator_Name
-                                    </button>
-                                }
                             }
 
-                        }
+                            else
 
-                        else
-
-                        {
-                            <span class="assign noevaluator">No Evaluator yet</span>
-                        }
-                    </td>
-                    <td>
-                        <button class="manageevaluator-btn"
-                                data-fra-id="@app.fra_Id"
-                                data-field-of-study="@app.field_of_Study">
-                            <i class="bi bi-people-fill" style="color:#000;"></i>
-                        </button>
-                        <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
-                            <i class="bi bi-file-pdf" style=" color:#000;"></i>
-                        </a>
-                        <a asp-action="ChiefResearchEvaluation" asp-controller="Chief" asp-route-id="@app.fra_Id" class="edit-btn">
-                            <i class="bi bi-pencil-square" style="color:#000;"></i>
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                            {
+                                <span class="assign noevaluator">No Evaluator yet</span>
+                            }
+                        </td>
+                        <td>
+                            <button class="manageevaluator-btn"
+                                    data-fra-id="@app.fra_Id"
+                                    data-field-of-study="@app.field_of_Study">
+                                <i class="bi bi-people-fill" style="color:#000;"></i>
+                            </button>
+                            <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
+                                <i class="bi bi-file-pdf" style=" color:#000;"></i>
+                            </a>
+                            <a asp-action="ChiefResearchEvaluation" asp-controller="Chief" asp-route-id="@app.fra_Id" class="edit-btn">
+                                <i class="bi bi-pencil-square" style="color:#000;"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No University Funded Research Application yet.</p>
+    }
 </div>
 
 

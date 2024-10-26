@@ -25,15 +25,22 @@
 
     <div class="recent-reports">
         <h4>Recent Generated GAWAD Nominees</h4>
-        <ul>
-            @foreach(var report in Model)
-            {
-                <li>
-                    <span>@report.gn_fileName - Generated @ActionLog.GetTimeAgo(report.generateDate)</span>
-                    <a href="@Url.Action("PreviewFile", new {id = report.gn_Id})">[Download]</a>
-                </li>
-            }
-        </ul>
+        @if(Model != null && Model.Any())
+        {
+            <ul>
+                @foreach (var report in Model)
+                {
+                    <li>
+                        <span>@report.gn_fileName - Generated @ActionLog.GetTimeAgo(report.generateDate)</span>
+                        <a href="@Url.Action("PreviewFile", new {id = report.gn_Id})">[Download]</a>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No recent generated nominees yet.</p>
+        }
     </div>
 </div>
 

@@ -10,64 +10,72 @@
         <h1>Notifications</h1>
         <hr />
     </div>
-    @foreach (var log in Model)
 
+    @if(Model != null && Model.Any())
     {
-
-        string linkUrl = "";
-
-
-
-        // Determine the URL based on the ResearchType
-
-        if (log.ResearchType == "University Funded Research" && log.Action.Contains("submitted"))
+        @foreach (var log in Model)
 
         {
-            linkUrl = "UFResearchApp";
-        }
 
-        else if (log.ResearchType == "Externally Funded Research" && log.Action.Contains("submitted"))
+            string linkUrl = "";
 
-        {
-            linkUrl = "EFResearchApp";
-        }
 
-        else if (log.ResearchType == "University Funded Research Load" && log.Action.Contains("submitted"))
 
-        {
-            linkUrl = "UFRLApp";
-        }
+            // Determine the URL based on the ResearchType
 
-        else if (log.ResearchType == "University Funded Research" && (log.Action.Contains("uploaded the Progress Report") ||
+            if (log.ResearchType == "University Funded Research" && log.Action.Contains("submitted"))
+
+            {
+                linkUrl = "UFResearchApp";
+            }
+
+            else if (log.ResearchType == "Externally Funded Research" && log.Action.Contains("submitted"))
+
+            {
+                linkUrl = "EFResearchApp";
+            }
+
+            else if (log.ResearchType == "University Funded Research Load" && log.Action.Contains("submitted"))
+
+            {
+                linkUrl = "UFRLApp";
+            }
+
+            else if (log.ResearchType == "University Funded Research" && (log.Action.Contains("uploaded the Progress Report") ||
             log.Action.Contains("uploaded the Terminal Report") || log.Action.Contains("uploaded the Liquidation Report")))
-        {
-            linkUrl = "UniversityFundedResearch";
-        }
+            {
+                linkUrl = "UniversityFundedResearch";
+            }
 
-        else if (log.ResearchType == "Externally Funded Research" && (log.Action.Contains("uploaded the Progress Report") ||
+            else if (log.ResearchType == "Externally Funded Research" && (log.Action.Contains("uploaded the Progress Report") ||
             log.Action.Contains("uploaded the Terminal Report") || log.Action.Contains("uploaded the Liquidation Report")))
-        {
-            linkUrl = "ExternallyFundedResearch";
-        }
+            {
+                linkUrl = "ExternallyFundedResearch";
+            }
 
-        else if (log.ResearchType == "University Funded Research Load" && (log.Action.Contains("uploaded the Progress Report") ||
+            else if (log.ResearchType == "University Funded Research Load" && (log.Action.Contains("uploaded the Progress Report") ||
             log.Action.Contains("uploaded the Terminal Report") || log.Action.Contains("uploaded the Liquidation Report")))
-        {
-            linkUrl = "UniversityFundedResearchLoad";
-        }
+            {
+                linkUrl = "UniversityFundedResearchLoad";
+            }
 
-        else if (log.ResearchType == "University Funded Research" && log.Action.Contains("already evaluated"))
-        {
-            linkUrl = "UEResearchApp";
-        }
+            else if (log.ResearchType == "University Funded Research" && log.Action.Contains("already evaluated"))
+            {
+                linkUrl = "UEResearchApp";
+            }
 
-        <a href="@linkUrl" class="notification-link">
-            <div class="notification-card">
-                <span class="notification-text">
-                    <b>@log.ResearchType:</b> @log.Action
-                </span>
-                <span class="notification-time">@ActionLog.GetTimeAgo(log.Timestamp)</span>
-            </div>
-        </a>
+            <a href="@linkUrl" class="notification-link">
+                <div class="notification-card">
+                    <span class="notification-text">
+                        <b>@log.ResearchType:</b> @log.Action
+                    </span>
+                    <span class="notification-time">@ActionLog.GetTimeAgo(log.Timestamp)</span>
+                </div>
+            </a>
+        }
+    }
+    else
+    {
+        <p>No Notification yet.</p>
     }
 </div>

@@ -7,63 +7,77 @@
     <h2 class="title">ARCHIVED RESEARCH</h2>
     <hr />
 
-    <div class="search-section">
-        <!-- Search Form -->
-        <form asp-controller="Chief" asp-action="ArchivedResearch" method="get" class="form-inline mb-3">
-            <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
-            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
-        </form>
-    </div>
+    @if(Model != null && Model.Any())
+    {
+        <div class="search-section">
+            <!-- Search Form -->
+            <form asp-controller="Chief" asp-action="ArchivedResearch" method="get" class="form-inline mb-3">
+                <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title" value="@ViewData["currentFilter"]" />
+                <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
 
-    <table class="document-table">
-        <thead>
-            <tr>
-                <th>Research Details</th>
-                <th>Research Type</th>
-                <th>Research Status</th>
-                <th>Files</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var app in Model)
-            {
+        <table class="document-table">
+            <thead>
                 <tr>
-                    <td class="research-details">
-                        <b>Research Title:</b> @app.research_Title<br />
-                        <b>Field of Study:</b> @app.field_of_Study
-                    </td>
-                    <td>
-                        @app.fra_Type
-                    </td>
-                    <td>
-                        @if(app.application_Status == "Proceed")
-                        {
-                            @if(app.FundedResearch.isArchive == true)
+                    <th>Research Details</th>
+                    <th>Research Type</th>
+                    <th>Research Status</th>
+                    <th>Files</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var app in Model)
+                {
+                    <tr>
+                        <td class="research-details">
+                            <b>Research Title:</b> @app.research_Title<br />
+                            <b>Field of Study:</b> @app.field_of_Study
+                        </td>
+                        <td>
+                            @app.fra_Type
+                        </td>
+                        <td>
+                            @if (app.application_Status == "Proceed")
                             {
-                                <p class="completed">@app.FundedResearch.status</p>
+                                @if (app.FundedResearch.isArchive == true)
+                                {
+                                    <p class="completed">@app.FundedResearch.status</p>
+                                }
+                                else
+                                {
+                                    <p class="approved">@app.application_Status</p>
+                                }
                             }
-                            else
+                            else if (app.application_Status == "Rejected" || app.application_Status == "Withdrawn")
                             {
-                                <p class="approved">@app.application_Status</p>
+                                <p class="rejected">@app.application_Status</p>
                             }
-                        }
-                        else if(app.application_Status == "Rejected" || app.application_Status == "Withdrawn")
-                        {
-                            <p class="rejected">@app.application_Status</p>
-                        }
-                    </td>
-                    <td>
-                        <a asp-action="RequirementList" asp-route-id="@app.fra_Id" style="color: #850000">
-                            Application
-                        </a>
-                        @if (app.fra_Type == "University Funded Research" && app.application_Status != "Withdrawn")
-                        {
-                            <br />
-                            <a asp-action="ChiefEvaluationResult" asp-route-id="@app.fra_Id" style="color: #850000">
-                                Evaluation
+                        </td>
+                        <td>
+                            <a asp-action="RequirementList" asp-route-id="@app.fra_Id" style="color: #850000">
+                                Application
                             </a>
+                            @if (app.fra_Type == "University Funded Research" && app.application_Status != "Withdrawn")
+                            {
+                                <br />
+                                <a asp-action="ChiefEvaluationResult" asp-route-id="@app.fra_Id" style="color: #850000">
+                                    Evaluation
+                                </a>
 
-                            @if(app.application_Status == "Proceed")
+                                @if (app.application_Status == "Proceed")
+                                {
+                                    @if (app.FundedResearch.isArchive == true)
+                                    {
+                                        <br />
+                                        <a asp-action="ProgressReportList" asp-route-id="@app.FundedResearch.fr_Id" style="color: #850000">
+                                            Reports
+                                        </a>
+                                    }
+                                }
+                            }
+                            else if ((app.fra_Type == "Externally Funded Research" || app.fra_Type == "University Funded Research Load") &&
+                            app.application_Status != "Withdrawn")
                             {
                                 @if (app.FundedResearch.isArchive == true)
                                 {
@@ -73,21 +87,14 @@
                                     </a>
                                 }
                             }
-                        }
-                        else if((app.fra_Type == "Externally Funded Research" || app.fra_Type == "University Funded Research Load") &&
-                            app.application_Status != "Withdrawn")
-                        {
-                            @if (app.FundedResearch.isArchive == true)
-                            {
-                                <br />
-                                <a asp-action="ProgressReportList" asp-route-id="@app.FundedResearch.fr_Id" style="color: #850000">
-                                    Reports
-                                </a>
-                            }
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No Archived Research yet.</p>
+    }
 </div>

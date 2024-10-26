@@ -202,22 +202,29 @@
                         .OrderByDescending(g => g.Key);
                     var curRank = 1;
                 }
-                @foreach(var group in groupedBranches)
+            @if(groupedBranches != null && groupedBranches.Any())
+            {
+                @foreach (var group in groupedBranches)
                 {
                     <div class="rank-group rank-@curRank">
-                        @foreach(var branch in group)
+                        @foreach (var branch in group)
                         {
-                            <li class="rank-item">
-                                <div class="rank">@curRank.</div>
-                                <div class="branch-info">
-                                    <span class="branch-name"> @branch.BranchName</span>
-                                    <span class="research-count">Total Research: @branch.TotalResearch</span>
-                                </div>
-                            </li>
+                        <li class="rank-item">
+                            <div class="rank">@curRank.</div>
+                            <div class="branch-info">
+                                <span class="branch-name"> @branch.BranchName</span>
+                                <span class="research-count">Total Research: @branch.TotalResearch</span>
+                            </div>
+                        </li>
                         }
                     </div>
                     curRank++;
                 }
+            }
+            else
+            {
+                <li>No top performing branches yet.</li>   
+            }
             </ol>
         </div>
     </div>

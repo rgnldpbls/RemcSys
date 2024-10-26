@@ -2344,5 +2344,53 @@ namespace RemcSys.Controllers
 
             return Json(new { success = false });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUFRMode(bool isUFRMode)
+        {
+            var ufrApp = await _context.Settings.FirstAsync();
+            if (ufrApp != null)
+            {
+                ufrApp.isUFRApplication = isUFRMode;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateEFRMode(bool isEFRMode)
+        {
+            var efrApp = await _context.Settings.FirstAsync();
+            if (efrApp != null)
+            {
+                efrApp.isEFRApplication = isEFRMode;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUFRLMode(bool isUFRLMode)
+        {
+            var ufrlApp = await _context.Settings.FirstAsync();
+            if (ufrlApp != null)
+            {
+                ufrlApp.isUFRLApplication = isUFRLMode;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false });
+        }
     }
 }

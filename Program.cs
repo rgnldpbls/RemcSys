@@ -69,7 +69,10 @@ using (var scope = app.Services.CreateScope())
         var settings = new Settings
         {
             Id = "MainOption",
-            isMaintenance = false
+            isMaintenance = false,
+            isUFRApplication = false,
+            isEFRApplication = false,
+            isUFRLApplication = false,
         };
 
         dbContext.Settings.Add(settings);

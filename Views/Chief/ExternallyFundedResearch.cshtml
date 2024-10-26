@@ -27,18 +27,18 @@
     </div>
     <h2 class="title">EXTERNALLY FUNDED RESEARCHES</h2>
     <hr />
-
-    <div class="search-section">
-        <!-- Search Form -->
-        <form asp-controller="Chief" asp-action="ExternallyFundedResearch" method="get" class="form-inline mb-3">
-            <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title"
-                   value="@ViewData["currentFilter"]" />
-            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
-        </form>
-    </div>
-
+    
     @if(Model != null && Model.Any())
     {
+        <div class="search-section">
+            <!-- Search Form -->
+            <form asp-controller="Chief" asp-action="ExternallyFundedResearch" method="get" class="form-inline mb-3">
+                <input type="text" name="searchString" class="search-box" placeholder="Search by Research Title"
+                       value="@ViewData["currentFilter"]" />
+                <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+
         <table class="document-table">
             <thead>
                 <tr>
@@ -78,15 +78,6 @@
     }
     else
     {
-        <table class="document-table">
-            <thead>
-                <tr>
-                    <th>Research Work No.</th>
-                    <th>Research Work Details</th>
-                    <th>Start Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-        </table>
+        <p>No Externally Funded Research yet.</p>
     }
 </div>

@@ -4,24 +4,46 @@
     Layout = "_NavChief1";
 }
 
-<h2>Settings</h2>
-
-<p>Here you can configure your application settings.</p>
+<h1 style="color: #850000; margin-top: 10px;">SETTINGS</h1>
+<hr />
 @Html.AntiForgeryToken()
 
-<h5>Maintenance Mode</h5>
-<div class="form-group">
-    <label class="switch">
-        <input type="checkbox" id="maintenanceSwitch" asp-for="isMaintenance" onchange="updateSwitchStatus(this)">
-        <span class="slider" id="slider">
-            <span class="slider-text" id="status"></span>
+<div class="form-group d-flex align-items-center">
+    <label for="maintenanceSwitch" class="mx-3"><b>UNDER MAINTENANCE</b></label>
+    <div class="switch">
+        <input type="checkbox" id="maintenanceSwitch" asp-for="isMaintenance" onchange="updateSwitchStatus(this, 'maintenance')">
+        <span class="slider" id="maintenance-slider">
+            <span class="slider-text" id="maintenance-status"></span>
         </span>
-    </label>
+    </div>
+    <label for="ufrAppSwitch" class="mx-3"><b>UFR APPLICATION</b></label>
+    <div class="switch">
+        <input type="checkbox" id="ufrAppSwitch" asp-for="isUFRLApplication" onchange="updateSwitchStatus(this, 'ufrApp')">
+        <span class="slider" id="ufrApp-slider">
+            <span class="slider-text" id="ufrApp-status"></span>
+        </span>
+    </div>
+    <label for="efrAppSwitch" class="mx-3"><b>EFR APPLICATION</b></label>
+    <div class="switch">
+        <input type="checkbox" id="efrAppSwitch" onchange="updateSwitchStatus(this, 'efrApp')">
+        <span class="slider" id="efrApp-slider">
+            <span class="slider-text" id="efrApp-status"></span>
+        </span>
+    </div>
+    <label for="ufrlAppSwitch" class="mx-3"><b>UFRL APPLICATION</b></label>
+    <div class="switch">
+        <input type="checkbox" id="ufrlAppSwitch" onchange="updateSwitchStatus(this, 'ufrlApp')">
+        <span class="slider" id="ufrlApp-slider">
+            <span class="slider-text" id="ufrlApp-status"></span>
+        </span>
+    </div>
 </div>
+<hr />
 
 <script>
-    function updateSwitchStatus(element) {
-        var statusText = document.getElementById("status");
+    function updateSwitchStatus(element, switchType) {
+        var statusText = document.getElementById(`${switchType}-status`);
+        var slider = document.getElementById(`${switchType}-slider`);
         if (element.checked) {
             statusText.textContent = "ON";
             statusText.style.color = "#fff";
@@ -36,14 +58,29 @@
 
 <script>
     const maintenanceSwitch = document.getElementById('maintenanceSwitch');
-    const status = document.getElementById('status');
+    const maintenanceStatus = document.getElementById('maintenance-status');
+    const maintenanceSlider = document.getElementById('maintenance-slider');
+
+    const ufrAppSwitch = document.getElementById('ufrAppSwitch');
+    const ufrAppStatus = document.getElementById('ufrApp-status');
+    const ufrAppSlider = document.getElementById('ufrApp-slider');
+
+    const efrAppSwitch = document.getElementById('efrAppSwitch');
+    const efrAppStatus = document.getElementById('efrApp-status');
+    const efrAppSlider = document.getElementById('efrApp-slider');
+
+    const ufrlAppSwitch = document.getElementById('ufrlAppSwitch');
+    const ufrlAppStatus = document.getElementById('ufrlApp-status');
+    const ufrlAppSlider = document.getElementById('ufrlApp-slider');
+
     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-    const slider = document.getElementById('slider');
 
     maintenanceSwitch.addEventListener('change', async function (event) {
         event.preventDefault();
 
         const newState = this.checked;
+        const currentState = !newState;
+        const checkbox = this;
         const message = newState ?
             'Are you sure you want to put in Maintenance Mode the system?' :
             'Are you sure you want to turn off the Maintenance Mode in the system?';
@@ -59,32 +96,173 @@
                     isMaintenanceMode: newState
                 },
                 success: function (response) {
-                    this.checked = newState
-                    status.textContent = newState ? 'ON' : 'OFF';
+                    checkbox.checked = newState
+                    maintenanceStatus.textContent = newState ? 'ON' : 'OFF';
                 },
                 error: function (xhr, status, error) {
                     alert('Error updating status. Please try again.');
                 }
             });
-        };
+        } else {
+            checkbox.checked = currentState;
+            updateSwitchStatus(checkbox, 'maintenance');
+        }
+    });
+
+    ufrAppSwitch.addEventListener('change', async function (event) {
+        event.preventDefault();
+
+        const newState = this.checked;
+        const currentState = !newState;
+        const checkbox = this;
+        const message = newState ?
+            'Are you sure you want to open the application for University Funded Research?' :
+            'Are you sure you want to close the application for University Funded Research?';
+
+        if (confirm(message)) {
+            $.ajax({
+                url: '@Url.Action("UpdateUFRMode", "Chief")',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: {
+                    isUFRMode: newState
+                },
+                success: function (response) {
+                    checkbox.checked = newState
+                    ufrAppStatus.textContent = newState ? 'ON' : 'OFF';
+                },
+                error: function (xhr, status, error) {
+                    alert('Error updating status. Please try again.');
+                }
+            });
+        } else {
+            checkbox.checked = currentState;
+            updateSwitchStatus(checkbox, 'ufrApp');
+        }
+    });
+
+    efrAppSwitch.addEventListener('change', async function (event) {
+        event.preventDefault();
+
+        const newState = this.checked;
+        const currentState = !newState;
+        const checkbox = this;
+        const message = newState ?
+            'Are you sure you want to open the application for Externally Funded Research?' :
+            'Are you sure you want to close the application for Externally Funded Research?';
+
+        if (confirm(message)) {
+            $.ajax({
+                url: '@Url.Action("UpdateEFRMode", "Chief")',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: {
+                    isEFRMode: newState
+                },
+                success: function (response) {
+                    checkbox.checked = newState
+                    efrAppStatus.textContent = newState ? 'ON' : 'OFF';
+                },
+                error: function (xhr, status, error) {
+                    alert('Error updating status. Please try again.');
+                }
+            });
+        } else {
+            checkbox.checked = currentState;
+            updateSwitchStatus(checkbox, 'efrApp');
+        }
+    });
+
+    ufrlAppSwitch.addEventListener('change', async function (event) {
+        event.preventDefault();
+
+        const newState = this.checked;
+        const currentState = !newState;
+        const checkbox = this;
+        const message = newState ?
+            'Are you sure you want to open the application for University Funded Research Load?' :
+            'Are you sure you want to close the application for University Funded Research Load?';
+
+        if (confirm(message)) {
+            $.ajax({
+                url: '@Url.Action("UpdateUFRLMode", "Chief")',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: {
+                    isUFRLMode: newState
+                },
+                success: function (response) {
+                    checkbox.checked = newState
+                    ufrlAppStatus.textContent = newState ? 'ON' : 'OFF';
+                },
+                error: function (xhr, status, error) {
+                    alert('Error updating status. Please try again.');
+                }
+            });
+        } else {
+            checkbox.checked = currentState;
+            updateSwitchStatus(checkbox, 'ufrlApp');
+        }
     });
 
     window.addEventListener('load', function () {
         const initialState = @Json.Serialize(Model.isMaintenance);
         maintenanceSwitch.checked = initialState;
-        status.textContent = initialState ? 'ON' : 'OFF';
-        status.style.color = initialState ? '#fff' : '#fff';
-        slider.style.backgroundColor = initialState ? '#4CAF50' : '#f44336';
+        maintenanceStatus.textContent = initialState ? 'ON' : 'OFF';
+        maintenanceStatus.style.color = initialState ? '#fff' : '#fff';
+        maintenanceSlider.style.backgroundColor = initialState ? '#4CAF50' : '#f44336';
+
+        const ufrInitialState = @Json.Serialize(Model.isUFRApplication);
+        ufrAppSwitch.checked = ufrInitialState;
+        ufrAppStatus.textContent = ufrInitialState ? 'ON' : 'OFF';
+        ufrAppStatus.style.color = ufrInitialState ? '#fff' : '#fff';
+        ufrAppSlider.style.backgroundColor = ufrInitialState ? '#4CAF50' : '#f44336';
+
+        const efrInitialState = @Json.Serialize(Model.isEFRApplication);
+        efrAppSwitch.checked = efrInitialState;
+        efrAppStatus.textContent = efrInitialState ? 'ON' : 'OFF';
+        efrAppStatus.style.color = efrInitialState ? '#fff' : '#fff';
+        efrAppSlider.style.backgroundColor = efrInitialState ? '#4CAF50' : '#f44336';
+
+        const ufrlInitialState = @Json.Serialize(Model.isUFRLApplication);
+        ufrlAppSwitch.checked = ufrlInitialState;
+        ufrlAppStatus.textContent = ufrlInitialState ? 'ON' : 'OFF';
+        ufrlAppStatus.style.color = ufrlInitialState ? '#fff' : '#fff';
+        ufrlAppSlider.style.backgroundColor = ufrlInitialState ? '#4CAF50' : '#f44336';
     });
 </script>
 
 
 <style>
+    .form-group {
+        margin-top: 20px;
+    }
+
+    .app-switch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 20px;
+    }
+
+        .app-switch h5 {
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
     .switch {
         position: relative;
         display: inline-block;
         width: 120px;
         height: 34px;
+        margin-right: 20px;
     }
 
         .switch input {
