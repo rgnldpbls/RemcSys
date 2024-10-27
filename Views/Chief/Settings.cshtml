@@ -9,29 +9,29 @@
 @Html.AntiForgeryToken()
 
 <div class="form-group d-flex align-items-center">
-    <label for="maintenanceSwitch" class="mx-3"><b>UNDER MAINTENANCE</b></label>
-    <div class="switch">
-        <input type="checkbox" id="maintenanceSwitch" asp-for="isMaintenance" onchange="updateSwitchStatus(this, 'maintenance')">
+    <label class="mx-3"><b>UNDER MAINTENANCE</b></label>
+    <label for="maintenanceSwitch" class="switch">
+        <input type="checkbox" id="maintenanceSwitch" onchange="updateSwitchStatus(this, 'maintenance')">
         <span class="slider" id="maintenance-slider">
             <span class="slider-text" id="maintenance-status"></span>
         </span>
-    </div>
-    <label for="ufrAppSwitch" class="mx-3"><b>UFR APPLICATION</b></label>
-    <div class="switch">
-        <input type="checkbox" id="ufrAppSwitch" asp-for="isUFRLApplication" onchange="updateSwitchStatus(this, 'ufrApp')">
+    </label>
+    <label class="mx-3"><b>UFR APPLICATION</b></label>
+    <label for="ufrAppSwitch" class="switch">
+        <input type="checkbox" id="ufrAppSwitch" onchange="updateSwitchStatus(this, 'ufrApp')">
         <span class="slider" id="ufrApp-slider">
             <span class="slider-text" id="ufrApp-status"></span>
         </span>
-    </div>
-    <label for="efrAppSwitch" class="mx-3"><b>EFR APPLICATION</b></label>
-    <div class="switch">
+    </label>
+    <label class="mx-3"><b>EFR APPLICATION</b></label>
+    <label for="efrAppSwitch" class="switch">
         <input type="checkbox" id="efrAppSwitch" onchange="updateSwitchStatus(this, 'efrApp')">
         <span class="slider" id="efrApp-slider">
             <span class="slider-text" id="efrApp-status"></span>
         </span>
-    </div>
-    <label for="ufrlAppSwitch" class="mx-3"><b>UFRL APPLICATION</b></label>
-    <div class="switch">
+    </label>
+    <label class="mx-3"><b>UFRL APPLICATION</b></label>
+    <label for="ufrlAppSwitch" class="switch">
         <input type="checkbox" id="ufrlAppSwitch" onchange="updateSwitchStatus(this, 'ufrlApp')">
         <span class="slider" id="ufrlApp-slider">
             <span class="slider-text" id="ufrlApp-status"></span>

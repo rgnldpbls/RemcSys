@@ -140,8 +140,7 @@ namespace RemcSys.Controllers
                 {
                     evaluator_Name = user.Name,
                     evaluator_Email = user.Email,
-                    field_of_Interest = ["Science",
-                        "Engineering, Architecture, Design, and Built Environment"],
+                    field_of_Interest = ["Engineering, Architecture, Design, and Built Environment", "Science"],
                     UserId = user.Id,
                     UserType = null,
                     center = ["REMC"]

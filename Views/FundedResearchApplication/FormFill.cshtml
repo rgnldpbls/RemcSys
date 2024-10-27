@@ -61,7 +61,7 @@
             <div class="form-group">
                 <label asp-for="ProjectDuration">Project Duration: [in months]</label>
                 <div class="input-group">
-                    <input asp-for="ProjectDuration" type="number" class="form-control" placeholder="Project Duration..." max="36" />
+                    <input asp-for="ProjectDuration" type="number" class="form-control" placeholder="Project Duration..." min="1" max="36" />
                     <span class="input-group-text">month/s</span>
                 </div>
                 <span asp-validation-for="ProjectDuration" class="text-danger"></span>
