@@ -415,29 +415,6 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
 
-            var manuscriptFile = files.Files["manuscript"];
-            if (manuscriptFile != null && manuscriptFile.Length > 0)
-            {
-                using (var ms = new MemoryStream())
-                {
-                    await manuscriptFile.CopyToAsync(ms);
-                    var manuscriptReq = new FileRequirement
-                    {
-                        fr_Id = Guid.NewGuid().ToString(),
-                        file_Name = manuscriptFile.FileName,
-                        file_Type = Path.GetExtension(manuscriptFile.FileName),
-                        data = ms.ToArray(),
-                        file_Status = "Pending",
-                        document_Type = "Manuscript",
-                        file_Feedback = null,
-                        file_Uploaded = DateTime.Now,
-                        fra_Id = fra.fra_Id
-                    };
-
-                    _context.FileRequirement.Add(manuscriptReq);
-                }
-            }
-
             foreach (var file in files.Files)
             {
                 if (file.Name != "manuscript" && file.Length > 0)

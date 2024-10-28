@@ -194,7 +194,8 @@ namespace RemcSys.Controllers
             ViewBag.exec = exec;
 
             // File Requirement - Manuscript
-            var fileRequirement = _context.FileRequirement.Where(f => f.fra_Id == id && f.document_Type == "Manuscript")
+            var fileRequirement = _context.FileRequirement.Where(f => f.fra_Id == id && f.document_Type == "Forms")
+                .OrderBy(f => f.file_Name)
                 .ToList();
             ViewBag.Id = id;
             return View(fileRequirement);
