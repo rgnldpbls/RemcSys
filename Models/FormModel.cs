@@ -14,6 +14,7 @@
         public string Scope { get; set; }
         public string Methodology { get; set; }
         public string StudyField {  get; set; }
+        public string? NameOfExternalFundingAgency { get; set; }
     }
 
     public class ViewEvaluationVM

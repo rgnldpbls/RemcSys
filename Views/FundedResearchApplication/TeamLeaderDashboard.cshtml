@@ -2,13 +2,14 @@
 @{
     if (Model != null && Model.Any())
     {
-        ViewBag.Type = Model.First().fra_Type;
-        ViewBag.Status = Model.First().application_Status;
-        ViewBag.IsFraArchived = Model.First().isArchive;
-    @if(Model.First().FundedResearch != null)
+        ViewBag.Type = Model.Last().fra_Type;
+        ViewBag.Status = Model.Last().application_Status;
+        ViewBag.IsFraArchived = Model.Last().isArchive;
+        
+        @if(Model.Last().FundedResearch != null)
         {
             ViewBag.IsFunded = true;
-            ViewBag.IsFrArchived = Model.First().FundedResearch.isArchive;
+            ViewBag.IsFrArchived = Model.Last().FundedResearch.isArchive;
         }
         else
         {

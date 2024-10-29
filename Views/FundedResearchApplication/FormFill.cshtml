@@ -10,7 +10,7 @@
 
         <hr />
 
-        <form asp-action="FormFill" method="post">
+        <form asp-action="FormFill" method="post" id="generateForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="ResearchType">Funded Research Type:</label>
@@ -35,7 +35,8 @@
             </div>
             <div class="form-group">
                 <label asp-for="ProjectTitle">Program/Project Title:</label>
-                <input asp-for="ProjectTitle" type="text" class="form-control" placeholder="Research Title..." />
+                <input asp-for="ProjectTitle" type="text" class="form-control" id="projectTitle" placeholder="Research Title..." />
+                <span id="titleError" class="text-danger"></span>
                 <span asp-validation-for="ProjectTitle" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -58,6 +59,14 @@
                 @Html.TextAreaFor(m => m.CollaboratingInstitution, new { @class = "form-control", @placeholder = "Collaborating Institution...", @rows = "3" })
                 <span asp-validation-for="CollaboratingInstitution" class="text-danger"></span>
             </div>
+            @if(ViewBag.Type == "Externally Funded Research")
+            {
+                <div class="form-group">
+                    <label asp-for="NameOfExternalFundingAgency">External Funding Agency:</label>
+                    @Html.TextAreaFor(m => m.NameOfExternalFundingAgency, new { @class = "form-control", @placeholder = "External Funding Agency...", @rows = "3" })
+                    <span asp-validation-for="NameOfExternalFundingAgency" class="text-danger"></span>
+                </div>
+            }
             <div class="form-group">
                 <label asp-for="ProjectDuration">Project Duration: [in months]</label>
                 <div class="input-group">
@@ -120,7 +129,53 @@
     }
 }
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    $(document).ready(function () {
+        var isDuplicateTitle = false;
+
+        // Listen for changes to the Project Title field
+        $('#projectTitle').on('input', function () {
+            var title = $(this).val();
+
+            if (title.length > 2) { // Only check if the title length is greater than 2 characters
+                // Make an AJAX request to check for similar research titles
+                $.ajax({
+                    url: '@Url.Action("CheckResearchTitle", "FundedResearchApplication")', // Replace 'YourController' with your actual controller name
+                    type: 'POST',
+                    data: { projectTitle: title },
+                    success: function (response) {
+                        if (response.exists) {
+                            // If a similar title exists, show a warning
+                            $('#titleError').text("A similar research title already exists. Please consider revising your title.");
+                            isDuplicateTitle = true;
+                        } else {
+                            // Clear the warning if no similar title exists
+                            $('#titleError').text("");
+                            isDuplicateTitle = false;
+                        }
+                    },
+                    error: function () {
+                        // Handle server errors
+                        $('#titleError').text("Error occurred while checking the title.");
+                        isDuplicateTitle = true;
+                    }
+                });
+            } else {
+                // Clear the warning if the title is too short
+                $('#titleError').text("");
+                isDuplicateTitle = false;
+            }
+        });
+
+        $('#generateForm').on('submit', function (e) {
+            if (isDuplicateTitle) {
+                e.preventDefault(); // Prevent form submission
+                alert("A duplicate research title exists. Please revise the title before submitting.");
+            }
+        });
+    });
+
     function formatCurrency(input) {
         // Remove any non-digit characters (except for commas)
         let value = input.value.replace(/,/g, '');

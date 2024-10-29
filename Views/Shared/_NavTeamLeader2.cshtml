@@ -38,12 +38,12 @@
                             <a class="nav-link active" href="/Home/Forms">Application</a>
                         }
                     }
-                    else if (ViewBag.Status == "Submitted" || ViewBag.Status == "UnderEvaluation" || ViewBag.Status == "Approved" ||
-                       ViewBag.Status == "Rejected" || ViewBag.Status == "Proceed")
+                    else if ((ViewBag.Status == "Submitted" || ViewBag.Status == "UnderEvaluation" || ViewBag.Status == "Approved" ||
+                    ViewBag.Status == "Rejected" || ViewBag.Status == "Proceed") && ViewBag.IsFraArchived == false)
                     {
                         <a class="nav-link active" href="/FundedResearchApplication/ApplicationTracker">Application</a>
                     }
-                    else if(ViewBag.Status == "Pending")
+                    else if (ViewBag.Status == "Pending" && ViewBag.IsFraArchived == false)
                     {
                         <a class="nav-link active" href="/FundedResearchApplication/GeneratedDocuments">Application</a>
                     }
@@ -65,11 +65,12 @@
                             <a class="nav-link active" href="/Home/Forms">Application</a>
                         }
                     }
-                    else if(ViewBag.Status == "Submitted" || ViewBag.Status == "Approved" || ViewBag.Status == "Proceed")
+                    else if ((ViewBag.Status == "Submitted" || ViewBag.Status == "Approved" || ViewBag.Status == "Proceed") 
+                        && ViewBag.IsFraArchived == false)
                     {
                         <a class="nav-link active" href="/FundedResearchApplication/ApplicationTrackerII">Application</a>
                     }
-                    else if(ViewBag.Status == "Pending")
+                    else if (ViewBag.Status == "Pending" && ViewBag.IsFraArchived == false)
                     {
                         <a class="nav-link active" href="/FundedResearchApplication/GeneratedDocuments">Application</a>
                     }
