@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.1.1" />
     <PackageReference Include="DocX" Version="3.0.1" />
-    <PackageReference Include="EPPlus" Version="7.4.1" />
+    <PackageReference Include="EPPlus" Version="7.4.2" />
     <PackageReference Include="MailKit" Version="4.8.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.10" />
@@ -18,6 +18,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.ML" Version="3.0.1" />
+    <PackageReference Include="Microsoft.ML.TimeSeries" Version="3.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.6" />
   </ItemGroup>
 

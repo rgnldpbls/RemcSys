@@ -20,12 +20,25 @@ namespace RemcSys.Models
         public string dts_No { get; set; }
         public int project_Duration { get; set; }
         public double? total_project_Cost { get; set; }
-        public bool isExtension1 {  get; set; }
+        public bool isExtension1 { get; set; }
         public bool isExtension2 { get; set; }
         public string fra_Id { get; set; }
         public FundedResearchApplication FundedResearchApplication { get; set; }
         public string UserId { get; set; }
         public bool isArchive { get; set; }
         public ICollection<ProgressReport> ProgressReports { get; set; }
+    }
+
+    public class UFRProjectCost
+    {
+        public float ProjectCosts { get; set; }
+        public int Year {  get; set; }
+    }
+
+    public class ForecastOutput
+    {
+        public float[] ForecastedCosts { get; set; }
+        public float[] LowerBoundCosts {  get; set; }
+        public float[] UpperBoundCosts { get; set; }
     }
 }

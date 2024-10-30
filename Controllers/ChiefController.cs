@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML;
+using Microsoft.ML.Transforms.TimeSeries;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MimeKit;
 using MimeKit.Utils;
@@ -25,6 +27,7 @@ namespace RemcSys.Controllers
         private readonly UserManager<SystemUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly MLContext _mlContext;
 
         public ChiefController(RemcDBContext context, ActionLoggerService actionLogger, UserManager<SystemUser> userManager,
             RoleManager<IdentityRole> roleManager, IWebHostEnvironment webHostEnvironment)
@@ -34,6 +37,7 @@ namespace RemcSys.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
             _webHostEnvironment = webHostEnvironment;
+            _mlContext = new MLContext();
         }
 
         [Authorize(Roles = "Chief")]
@@ -2018,6 +2022,105 @@ namespace RemcSys.Controllers
 
                     return RedirectToAction("GenerateReport");
                 }
+            }
+            else if (reportType == "ForecastedUFRFunds")
+            {
+                var data = new List<UFRProjectCost>
+                {
+                    new UFRProjectCost {ProjectCosts = 575000, Year = 2020},
+                    new UFRProjectCost {ProjectCosts = 615000, Year = 2020},
+                    new UFRProjectCost {ProjectCosts = 595000, Year = 2020},
+                    new UFRProjectCost {ProjectCosts = 713500, Year = 2021},
+                    new UFRProjectCost {ProjectCosts = 546000, Year = 2021},
+                    new UFRProjectCost {ProjectCosts = 145000, Year = 2021},
+                    new UFRProjectCost {ProjectCosts = 560000, Year = 2021},
+                    new UFRProjectCost {ProjectCosts = 737000, Year = 2021},
+                    new UFRProjectCost {ProjectCosts = 831000, Year = 2022},
+                    new UFRProjectCost {ProjectCosts = 378000, Year = 2022},
+                    new UFRProjectCost {ProjectCosts = 512000, Year = 2022},
+                    new UFRProjectCost {ProjectCosts = 498000, Year = 2022},
+                    new UFRProjectCost {ProjectCosts = 585000, Year = 2023},
+                    new UFRProjectCost {ProjectCosts = 488000, Year = 2023},
+                    new UFRProjectCost {ProjectCosts = 698000, Year = 2023},
+                    new UFRProjectCost {ProjectCosts = 541000, Year = 2023},
+                    new UFRProjectCost {ProjectCosts = 713000, Year = 2023},
+                    new UFRProjectCost {ProjectCosts = 564000, Year = 2024},
+                    new UFRProjectCost {ProjectCosts = 491000, Year = 2024},
+                    new UFRProjectCost {ProjectCosts = 575000, Year = 2024},
+                    new UFRProjectCost {ProjectCosts = 582000, Year = 2024},
+                    new UFRProjectCost {ProjectCosts = 543000, Year = 2024},
+                    new UFRProjectCost {ProjectCosts = 612000, Year = 2024}
+                };
+                
+                var yearlyCosts = data.GroupBy(d => d.Year)
+                    .Select(g => new UFRProjectCost {Year = g.Key, ProjectCosts = g.Sum(x => x.ProjectCosts)})
+                    .OrderBy(x => x.Year)
+                    .ToList();
+
+                var dataView = _mlContext.Data.LoadFromEnumerable(yearlyCosts);
+
+                var forecastingPipeline = _mlContext.Forecasting.ForecastBySsa(
+                    outputColumnName: nameof(ForecastOutput.ForecastedCosts),
+                    inputColumnName: nameof(UFRProjectCost.ProjectCosts),
+                    windowSize: 2,
+                    seriesLength: yearlyCosts.Count,
+                    trainSize: yearlyCosts.Count,
+                    horizon: 2,
+                    confidenceLevel: 0.95f,
+                    confidenceLowerBoundColumn: nameof(ForecastOutput.LowerBoundCosts),
+                    confidenceUpperBoundColumn: nameof(ForecastOutput.UpperBoundCosts));
+
+                var model = forecastingPipeline.Fit(dataView);
+                var forecastEngine = model.CreateTimeSeriesEngine<UFRProjectCost, ForecastOutput>(_mlContext);
+                var forecast = forecastEngine.Predict();
+
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using var package = new ExcelPackage();
+                var worksheet = package.Workbook.Worksheets.Add("Forecast");
+
+                worksheet.Cells[1, 1].Value = "Year";
+                worksheet.Cells[1, 2].Value = "Total Cost";
+                worksheet.Cells[1, 3].Value = "Forecasted Cost";
+
+                int row = 2;
+                foreach(var item in yearlyCosts)
+                {
+                    worksheet.Cells[row, 1].Value = item.Year;
+                    worksheet.Cells[row, 2].Value = item.ProjectCosts;
+                    row++;
+                }
+
+                int forecastYear = data.Max(d => d.Year) + 1;
+                for(int i = 0; i < forecast.ForecastedCosts.Length; i++)
+                {
+                    worksheet.Cells[row, 1].Value = forecastYear + i;
+                    worksheet.Cells[row, 3].Value = forecast.ForecastedCosts[i];
+                    row++;
+                }
+
+                worksheet.Cells["A1:C1"].Style.Font.Bold = true;
+                worksheet.Cells.AutoFitColumns();
+
+                var excelData = package.GetAsByteArray();
+
+                var genRep = new GenerateReport
+                {
+                    gr_Id = Guid.NewGuid().ToString(),
+                    gr_fileName = $"UFRFundsReport.xlsx",
+                    gr_fileType = ".xlsx",
+                    gr_Data = excelData,
+                    gr_startDate = startDate,
+                    gr_endDate = endDate,
+                    gr_typeofReport = "Research Production",
+                    generateDate = DateTime.Now,
+                    UserId = user.Id,
+                    isArchived = false
+                };
+                _context.GenerateReports.Add(genRep);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("GenerateReport");
+
             }
             return NotFound("Invalid selected report type");
         }
