@@ -29,6 +29,11 @@ namespace RemcSys.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly MLContext _mlContext;
 
+        private readonly string _smtpServer = "smtp.gmail.com";
+        private readonly int _smtpPort = 587;
+        private readonly string _smtpUser;
+        private readonly string _smtpPass;
+
         public ChiefController(RemcDBContext context, ActionLoggerService actionLogger, UserManager<SystemUser> userManager,
             RoleManager<IdentityRole> roleManager, IWebHostEnvironment webHostEnvironment)
         {
@@ -38,10 +43,12 @@ namespace RemcSys.Controllers
             _roleManager = roleManager;
             _webHostEnvironment = webHostEnvironment;
             _mlContext = new MLContext();
+            _smtpUser = Environment.GetEnvironmentVariable("SMTP_USER") ?? "remc.rmo2@gmail.com";
+            _smtpPass = Environment.GetEnvironmentVariable("SMTP_PASS") ?? "rhmh oyge mwky ozzx";
         }
 
         [Authorize(Roles = "Chief")]
-        public async Task<IActionResult> ChiefDashboard()
+        public async Task<IActionResult> ChiefDashboard() // Dashboard of the Chief
         {
             if (_context.Settings.First().isMaintenance)
             {
@@ -67,7 +74,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Chief")]
-        public async Task<IActionResult> ChiefNotif()
+        public async Task<IActionResult> ChiefNotif() // Notification of the Chief
         {
             if (_context.Settings.First().isMaintenance)
             {
@@ -82,9 +89,9 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Chief")]
-        public async Task<IActionResult> UFResearchApp(string searchString)
+        public async Task<IActionResult> UFResearchApp(string searchString) // List of University Funded Research Application
         {
-            await CheckMissedEvaluations();
+            /*await CheckMissedEvaluations();*/
             ViewData["currentFilter"] = searchString;
             var appQuery = _context.FundedResearchApplication
                 .Where(f => f.fra_Type == "University Funded Research");
@@ -106,7 +113,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Chief")]
-        public async Task<IActionResult> EFResearchApp(string searchString)
+        public async Task<IActionResult> EFResearchApp(string searchString) // List of Externally Funded Research Application
         {
             ViewData["currentFilter"] = searchString;
             var application = _context.FundedResearchApplication
@@ -128,7 +135,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Chief")]
-        public async Task<IActionResult> UFRLApp(string searchString)
+        public async Task<IActionResult> UFRLApp(string searchString) // List of University Funded Research Load Application
         {
             ViewData["currentFilter"] = searchString;
             var application = _context.FundedResearchApplication
@@ -149,17 +156,17 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Chief")]
-        public async Task<IActionResult> DocuList(string id)
+        public async Task<IActionResult> DocuList(string id) // Documentary Requirements per Application
         {
             if (id == null)
             {
-                return NotFound();
+                return NotFound("No Funded Research Application ID found!");
             }
 
             var fra = await _context.FundedResearchApplication.FindAsync(id);
             if(fra == null)
             {
-                return NotFound();
+                return NotFound("No Funded Research Application Found!");
             }
             ViewBag.FraId = fra.fra_Id;
             ViewBag.DTSNo = fra.dts_No;
@@ -173,50 +180,22 @@ namespace RemcSys.Controllers
             var fileRequirement = await _context.FileRequirement.Where(f => f.fra_Id == id && f.file_Type == ".pdf")
                 .OrderBy(fr => fr.file_Name)
                 .ToListAsync();
-            if (fileRequirement == null)
-            {
-                return NotFound();
-            }
-            return View(fileRequirement);
-        }
-
-        [Authorize(Roles = "Chief")]
-        public async Task<IActionResult> RequirementList(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var fra = await _context.FundedResearchApplication.FindAsync(id);
-            if (fra == null)
-            {
-                return NotFound();
-            }
-            ViewBag.FraId = fra.fra_Id;
-            ViewBag.DTSNo = fra.dts_No;
-            ViewBag.Research = fra.research_Title;
-            ViewBag.Field = fra.field_of_Study;
-            ViewBag.Lead = fra.applicant_Name;
-            ViewBag.Member = fra.team_Members;
-            ViewBag.Type = fra.fra_Type;
-            ViewBag.Status = fra.application_Status;
-
-            var fileRequirement = await _context.FileRequirement.Where(f => f.fra_Id == id && f.file_Type == ".pdf")
-                .OrderBy(fr => fr.file_Name)
-                .ToListAsync();
-            if (fileRequirement == null)
-            {
-                return NotFound();
-            }
             return View(fileRequirement);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveFeedback(string fileId, string fileStatus, string fileFeedback)
+        public async Task<IActionResult> SaveFeedback(string fileId, string fileStatus, string fileFeedback) // Saving Feedback of the Chief on each Documentary Requirements
         {
             var fileReq = _context.FileRequirement.Find(fileId);
+            if(fileReq == null)
+            {
+                return NotFound("No File Requirement found!");
+            }
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fileReq.fra_Id).FirstOrDefaultAsync();
+            if(fra == null)
+            {
+                return NotFound("No Funded Research Application found!");
+            }
             if (fileReq != null)
             {
                 fileReq.file_Status = fileStatus;
@@ -231,7 +210,7 @@ namespace RemcSys.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateStatus(string fr_Id, string newStatus)
+        public async Task<IActionResult> UpdateStatus(string fr_Id, string newStatus) //Updating the File Status into Checked on each Documentary Requirements
         {
             var file = _context.FileRequirement.FirstOrDefault(f => f.fr_Id == fr_Id);
             if(file == null)
@@ -246,13 +225,6 @@ namespace RemcSys.Controllers
             {
                 return Json(new { success = false, message = "Funded Research Application not found" });
             }
-
-            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
-            if (user == null)
-            {
-                return Json(new { success = false, message = "User not found" });
-            }
-
 
             file.file_Status = newStatus;
             _context.SaveChanges();
@@ -280,7 +252,7 @@ namespace RemcSys.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SetDTS(string DTSNo, string fraId)
+        public async Task<IActionResult> SetDTS(string DTSNo, string fraId) // Set DTS No of each Application
         {
             var fra = await _context.FundedResearchApplication
                 .FirstOrDefaultAsync(f => f.fra_Id == fraId);
@@ -297,7 +269,7 @@ namespace RemcSys.Controllers
             return RedirectToAction("DocuList", "Chief", new {id = fraId});
         }
 
-        public async Task<IActionResult> PreviewFile(string id)
+        public async Task<IActionResult> PreviewFile(string id) // Preview of each PDF File while Download if not PDF file
         {
             var fileRequirement = await _context.FileRequirement.FindAsync(id);
             if (fileRequirement != null)
@@ -343,10 +315,19 @@ namespace RemcSys.Controllers
                 return File(gawadFiles.gw_Data, contentType, gawadFiles.gw_fileName);
             }
 
+            var guidelines = await _context.Guidelines.FindAsync(id);
+            if(guidelines != null)
+            {
+                if(guidelines.file_Type == ".pdf")
+                {
+                    return File(guidelines.data, "application/pdf");
+                }
+            }
+
             return BadRequest("Only PDF files can be previewed.");
         }
 
-        private string GetContentType(string fileType)
+        private string GetContentType(string fileType) // Get the specific file type for download
         {
             switch (fileType)
             {
@@ -363,29 +344,25 @@ namespace RemcSys.Controllers
             }
         }
 
-        public async Task AssignEvaluators(string fraId)
+        public async Task AssignEvaluators(string fraId) // Automated Assign of Evaluators for University Funded Research
         {
+            int evaluatorCount = _context.Settings.First().evaluatorNum;
+            int daysEvaluation = _context.Settings.First().daysEvaluation;
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
-            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
+            if (fra == null)
+            {
+                throw new Exception("No Funded Research Application found!");
+            }
 
             var eligibleEvaluators = await GetEligibleEvaluators(fraId);
-            if (eligibleEvaluators.Count == 0)
-            {
-                throw new Exception("No eligible evaluators found for this research application.");
-            }
 
             var alreadyAssignedEvaluatorIds = _context.Evaluations.Where(e => e.fra_Id == fraId)
                 .Select(e => e.evaluator_Id).ToList();
 
             eligibleEvaluators = eligibleEvaluators.Where(e => !alreadyAssignedEvaluatorIds.Contains(e.evaluator_Id)).ToList();
 
-            if(eligibleEvaluators.Count == 0)
-            {
-                throw new Exception("All eligible evaluators are already assigned.");
-            }
-
             var assignedEvaluators = new List<Evaluation>();
-            int totalEvaluatorsToAssign = Math.Min(5, eligibleEvaluators.Count);
+            int totalEvaluatorsToAssign = Math.Min(evaluatorCount, eligibleEvaluators.Count);
             int evaluatorIndex = 0;
 
             for (int i = 0; i < totalEvaluatorsToAssign; i++)
@@ -400,24 +377,24 @@ namespace RemcSys.Controllers
                     fra_Id = fraId,
                     evaluation_Grade = null,
                     assigned_Date = DateTime.Now,
-                    evaluation_Deadline = DateTime.Now.AddDays(7),
+                    evaluation_Deadline = DateTime.Now.AddDays(daysEvaluation),
                     evaluation_Date = null
                 };
 
                 assignedEvaluators.Add(newEvaluation);
-                await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "The chief assign you to evaluate the " + fra.research_Title + ".", 
+                await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "The chief assign you to evaluate the " + fra.research_Title + ".",
                     false, false, true, fra.fra_Id);
-                /*await SendEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, DateTime.Now.AddDays(7).ToString("MMMM d, yyyy"));*/
+                await SendEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, DateTime.Now.AddDays(daysEvaluation).ToString("MMMM d, yyyy"));
                 evaluatorIndex = (evaluatorIndex + 1) % eligibleEvaluators.Count;
             }
             _context.Evaluations.AddRange(assignedEvaluators);
             fra.application_Status = "UnderEvaluation";
             await _context.SaveChangesAsync();
-            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " already under techical evaluation.", 
+            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " already under techical evaluation.",
                 true, false, false, fra.fra_Id);
         }
 
-        public async Task<List<Evaluator>> GetEligibleEvaluators(string fraId)
+        public async Task<List<Evaluator>> GetEligibleEvaluators(string fraId) // Assess if the Evaluators is eligible based on their field of interests
         {
             var researchApp = await _context.FundedResearchApplication
                     .FirstOrDefaultAsync(fra => fra.fra_Id == fraId);
@@ -428,26 +405,26 @@ namespace RemcSys.Controllers
             }
 
             var evaluators = await _context.Evaluator.ToListAsync();
-            var eligibleEvaluators = evaluators.Where(e => e.field_of_Interest.Contains(researchApp.field_of_Study) && 
+            var eligibleEvaluators = evaluators.Where(e => e.field_of_Interest.Contains(researchApp.field_of_Study) &&
                 e.evaluator_Name != researchApp.applicant_Name && !researchApp.team_Members.Contains(e.evaluator_Name)).ToList();
             return eligibleEvaluators;
         }
 
-        public async Task SendEvaluatorEmail(string email, string researchTitle, string name, string deadline) //Add Footer
+
+        private async Task SendEmailAsync(string email, string subject, string htmlBody) // Email Configuration
         {
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com"));
+                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", _smtpUser));
 
                 string recipientName = email.Split('@')[0];
                 message.To.Add(new MailboxAddress(recipientName, email));
-
-                message.Subject = "Assigned as Evaluator in " + researchTitle;
+                message.Subject = subject;
 
                 var bodyBuilder = new BodyBuilder();
 
-                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
+                /*string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
                 if (!System.IO.File.Exists(footerImagePath))
                 {
                     throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
@@ -456,8 +433,33 @@ namespace RemcSys.Controllers
                 var image = bodyBuilder.LinkedResources.Add(footerImagePath);
                 image.ContentId = MimeUtils.GenerateMessageId();
 
+                htmlBody = htmlBody.Replace("{{footerImageContentId}}", image.ContentId);*/
 
-                var htmlBody = $@"
+                bodyBuilder.HtmlBody = htmlBody;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync(_smtpServer, _smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync(_smtpUser, _smtpPass); //Email & App Password
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (SmtpCommandException ex)
+            {
+                throw new Exception($"SMTP Error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error occured while sending email: {ex.Message}");
+            }
+        }
+
+        public async Task SendEvaluatorEmail(string email, string researchTitle, string name, string deadline) // Email for Assigned Evaluators
+        {
+            var subject = "Assigned as Evaluator in " + researchTitle;
+            var htmlBody = $@"
                 <html>
                     <body style='font-family: Arial, sans-serif;'  font-size: 20px>
                         <br>
@@ -496,33 +498,18 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
 
                     </body>
                 </html>";
-
-
-                bodyBuilder.HtmlBody = htmlBody;
-                message.Body = bodyBuilder.ToMessageBody();
-
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
-            }catch (Exception ex)
-            {
-                throw new Exception($"Error occurred while sending email: {ex.Message}");
-            }
+            await SendEmailAsync(email, subject, htmlBody);
         }
 
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> UEResearchApp(string searchString)
         {
-            await CheckMissedEvaluations();
+            /*await CheckMissedEvaluations();*/
             ViewData["currentFilter"] = searchString;
             var appQuery = _context.FundedResearchApplication
                 .Where(f => f.fra_Type == "University Funded Research");
@@ -556,6 +543,8 @@ namespace RemcSys.Controllers
             var research = await _context.FundedResearchApplication
                 .FirstOrDefaultAsync(f => f.fra_Id == fraId);
 
+            var evaluatorCount = _context.Settings.First().evaluatorNum;
+
             if (research == null)
             {
                 return NotFound();
@@ -587,7 +576,7 @@ namespace RemcSys.Controllers
                 IsDisabled = e.evaluator_Name == research.applicant_Name ||
                              research.team_Members.Contains(e.evaluator_Name) ||
                              assignedEvaluators.Contains(e.evaluator_Id) ||
-                             assignedCount.Count >= 5
+                             assignedCount.Count >= evaluatorCount
             }).OrderBy(f => f.evaluator_Name);
 
             return Json(evaluatorData);
@@ -596,12 +585,27 @@ namespace RemcSys.Controllers
         [HttpPost]
         public async Task<IActionResult> DeclineEvaluator(string evaluationId)
         {
-            var evals = _context.Evaluations.Where(e => e.evaluation_Id == evaluationId).FirstOrDefault();
-            var evaluator = _context.Evaluator.Where(e => e.evaluator_Id == evals.evaluator_Id).FirstOrDefault();
-            var fra = _context.FundedResearchApplication.Where(f => f.fra_Id == evals.fra_Id).FirstOrDefault();
-            await _actionLogger.LogActionAsync(evals.evaluator_Name, fra.fra_Type, "The chief remove you to evaluate the " + fra.research_Title + ".", 
+            var evals = _context.Evaluations.Find(evaluationId);
+            if(evals == null)
+            {
+                return NotFound("Evaluation not found!");
+            }
+
+            var evaluator = _context.Evaluator.FirstOrDefault(e => e.evaluator_Id == evals.evaluator_Id);
+            if(evaluator == null)
+            {
+                return NotFound("Evaluator not found!");
+            }
+
+            var fra = _context.FundedResearchApplication.FirstOrDefault(f => f.fra_Id == evals.fra_Id);
+            if(fra == null)
+            {
+                return NotFound("Funded Research Application not found!");
+            }
+
+            await _actionLogger.LogActionAsync(evals.evaluator_Name, fra.fra_Type, "The chief remove you to evaluate the " + fra.research_Title + ".",
                 false, false, true, fra.fra_Id);
-            /*await SendRemoveEmail(evaluator.evaluator_Email, fra.research_Title, evals.evaluator_Name);*/
+            await SendRemoveEmail(evaluator.evaluator_Email, fra.research_Title, evals.evaluator_Name);
             evals.evaluation_Status = "Decline";
             await _context.SaveChangesAsync();
 
@@ -610,28 +614,8 @@ namespace RemcSys.Controllers
 
         public async Task SendRemoveEmail(string email, string researchTitle, string name)
         {
-            try
-            {
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
-
-                string recipientName = email.Split('@')[0];
-                message.To.Add(new MailboxAddress(recipientName, email));
-
-                message.Subject = "Approval of Your Request for Evaluator Role Removal in " + researchTitle;
-
-                var bodyBuilder = new BodyBuilder();
-
-                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
-                if (!System.IO.File.Exists(footerImagePath))
-                {
-                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
-                }
-
-                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
-                image.ContentId = MimeUtils.GenerateMessageId();
-
-                var htmlBody = $@"
+            var subject = "Approval of Your Request for Evaluator Role Removal in " + researchTitle;
+            var htmlBody = $@"
                 <html>
                     <body style='font-family: Arial, sans-serif;'  font-size: 20px>
                         <br>
@@ -654,35 +638,24 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
                
                     </body>
                 </html>";
-
-
-                bodyBuilder.HtmlBody = htmlBody;
-                message.Body = bodyBuilder.ToMessageBody();
-
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error occurred while sending email: {ex.Message}");
-            }
+            await SendEmailAsync(email, subject, htmlBody);
         }
 
         [HttpPost]
         public async Task<IActionResult> AssignEvaluator(int evaluatorId, string fraId)
         {
-            var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
-            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
+            var fra = await _context.FundedResearchApplication.FirstOrDefaultAsync(f => f.fra_Id == fraId);
+            if(fra == null)
+            {
+                return NotFound("Funded Research Application not found!");
+            }
+            var evaluatorCount = _context.Settings.First().evaluatorNum;
+            var daysEvaluation = _context.Settings.First().daysEvaluation;
 
             var existingEvaluation = await _context.Evaluations
             .FirstOrDefaultAsync(e => e.evaluator_Id == evaluatorId && e.fra_Id == fraId);
@@ -693,21 +666,25 @@ namespace RemcSys.Controllers
             }
 
             int existingEvals = await _context.Evaluations.CountAsync(e => e.fra_Id == fraId && e.evaluation_Status != "Decline");
-            if(existingEvals > 5)
+            if(existingEvals > evaluatorCount)
             {
-                return Json(new { success = false, message = "Maximum 5 evaluators can be assigned." });
+                return Json(new { success = false, message = $"Maximum {evaluatorCount} evaluators can be assigned." });
             }
 
             var evaluators = _context.Evaluator.Find(evaluatorId);
+            if (evaluators == null)
+            {
+                return NotFound("Evaluator not found!");
+            }
 
             var evaluation = new Evaluation
             {
                 evaluation_Id = Guid.NewGuid().ToString(),
                 evaluation_Status = "Pending",
-                evaluator_Name = _context.Evaluator.Find(evaluatorId).evaluator_Name,
+                evaluator_Name = evaluators.evaluator_Name,
                 evaluation_Grade = null,
                 assigned_Date = DateTime.Now,
-                evaluation_Deadline = DateTime.Now.AddDays(7),
+                evaluation_Deadline = DateTime.Now.AddDays(daysEvaluation),
                 evaluation_Date = null,
                 evaluator_Id = evaluatorId,
                 fra_Id = fraId
@@ -715,14 +692,14 @@ namespace RemcSys.Controllers
 
             await _actionLogger.LogActionAsync(evaluators.evaluator_Name, fra.fra_Type, "The chief assign you to evaluate the " + fra.research_Title + ".", 
                 false, false, true, fra.fra_Id);
-            /*await SendEvaluatorEmail(evaluators.evaluator_Email, fra.research_Title, evaluators.evaluator_Name, DateTime.Now.AddDays(7).ToString("MMMM d, yyyy"));*/
+            await SendEvaluatorEmail(evaluators.evaluator_Email, fra.research_Title, evaluators.evaluator_Name, DateTime.Now.AddDays(daysEvaluation).ToString("MMMM d, yyyy"));
             _context.Evaluations.Add(evaluation);
             await _context.SaveChangesAsync();
 
             return Json(new { success = true });
         }
         
-        public async Task CheckMissedEvaluations()
+        public async Task RemindEvaluations()
         {
             var today = DateTime.Today;
 
@@ -772,7 +749,6 @@ namespace RemcSys.Controllers
                         + fra.research_Title + " is approaching, with 3 days remaining until deadline.", false, false, true, fra.fra_Id);
                 }
             }
-
         }
 
         public async Task SendRemindEvaluatorEmail(string email, string researchTitle, string name, string content)
@@ -856,7 +832,7 @@ namespace RemcSys.Controllers
             var fra = await _context.FundedResearchApplication.FindAsync(id);
             if (fra == null)
             {
-                return NotFound();
+                return NotFound("Funded Research Application not found!");
             }
             ViewBag.Id = fra.fra_Id;
             ViewBag.DTSNo = fra.dts_No;
@@ -900,7 +876,7 @@ namespace RemcSys.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Download(string id)
+        public async Task<IActionResult> Download(string id) // Download Files
         {
             var document = await _context.FileRequirement.FindAsync(id);
 
@@ -920,7 +896,7 @@ namespace RemcSys.Controllers
             {
                 fra.application_Status = appStatus;
                 await _context.SaveChangesAsync();
-                /*await SendApproveEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);*/
+                await SendApproveEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);
                 await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " is approved in technical evaluation.", 
                     true, false, false, fra.fra_Id);
             } 
@@ -928,7 +904,7 @@ namespace RemcSys.Controllers
             {
                 fra.application_Status = appStatus;
                 await _context.SaveChangesAsync();
-                /*await SendRejectEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);*/
+                await SendRejectEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name, addComment);
                 await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " is rejected in technical evaluation.", 
                     true, false, false, fra.fra_Id);
             }
@@ -937,28 +913,8 @@ namespace RemcSys.Controllers
 
         public async Task SendApproveEmail(string email, string researchTitle, string name, string comment)
         {
-            try
-            {
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
-
-                string recipientName = email.Split('@')[0];
-                message.To.Add(new MailboxAddress(recipientName, email));
-
-                message.Subject = "Research Technical Evaluation Results - " + researchTitle;
-
-                var bodyBuilder = new BodyBuilder();
-
-                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
-                if (!System.IO.File.Exists(footerImagePath))
-                {
-                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
-                }
-
-                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
-                image.ContentId = MimeUtils.GenerateMessageId();
-
-                var htmlBody = $@"
+            var subject = "Research Technical Evaluation Results - " + researchTitle;
+            var htmlBody = $@"
                 <html>
                     <body style='font-family: Arial, sans-serif;'  font-size: 20px>
                         <br>
@@ -990,53 +946,17 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>                
                     </body>
                 </html>";
-
-
-                bodyBuilder.HtmlBody = htmlBody;
-                message.Body = bodyBuilder.ToMessageBody();
-
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error occurred while sending email: {ex.Message}");
-            }
+            await SendEmailAsync(email, subject, htmlBody);
         }
 
         public async Task SendRejectEmail(string email, string researchTitle, string name, string comment)
         {
-            try
-            {
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
-
-                string recipientName = email.Split('@')[0];
-                message.To.Add(new MailboxAddress(recipientName, email));
-
-                message.Subject = "Research Technical Evaluation Results - " + researchTitle;
-
-                var bodyBuilder = new BodyBuilder();
-
-                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
-                if (!System.IO.File.Exists(footerImagePath))
-                {
-                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
-                }
-
-                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
-                image.ContentId = MimeUtils.GenerateMessageId();
-
-                var htmlBody = $@"
+            var subject = "Research Technical Evaluation Results - " + researchTitle;
+            var htmlBody = $@"
                 <html>
                     <body style='font-family: Arial, sans-serif;'  font-size: 20px>
                         <br>
@@ -1066,27 +986,12 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
                     
                     </body>
                 </html>";
-
-                bodyBuilder.HtmlBody = htmlBody;
-                message.Body = bodyBuilder.ToMessageBody();
-
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error occurred while sending email: {ex.Message}");
-            }
+            await SendEmailAsync(email, subject, htmlBody);
         }
 
         [Authorize (Roles = "Chief")]
@@ -1131,7 +1036,6 @@ namespace RemcSys.Controllers
             {
                 return NotFound();
             }
-            var user = await _userManager.FindByEmailAsync(fra.applicant_Email);
             if(file == null || file.Length == 0)
             {
                 return NotFound("There is no uploaded file. Please upload the file and try to submit again.");
@@ -1160,35 +1064,15 @@ namespace RemcSys.Controllers
             await _context.SaveChangesAsync();
             await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + "'s Notice to proceed already uploaded.", 
                 true, false, false, fra.fra_Id);
-            /*await SendProceedEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);*/
+            await SendProceedEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
 
             return RedirectToAction("UploadNTP", "Chief");
         }
 
         public async Task SendProceedEmail(string email, string researchTitle, string name)
         {
-            try
-            {
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
-
-                string recipientName = email.Split('@')[0];
-                message.To.Add(new MailboxAddress(recipientName, email));
-
-                message.Subject = "Notice to Proceed - " + researchTitle;
-
-                var bodyBuilder = new BodyBuilder();
-
-                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
-                if (!System.IO.File.Exists(footerImagePath))
-                {
-                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
-                }
-
-                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
-                image.ContentId = MimeUtils.GenerateMessageId();
-
-                var htmlBody = $@"
+            var subject = "Notice to Proceed - " + researchTitle;
+            var htmlBody = $@"
                 <html>
                     <body style='font-family: Arial, sans-serif;'  font-size: 20px>
                         <br>
@@ -1216,26 +1100,60 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>                  
                     </body>
                 </html>";
+            await SendEmailAsync(email, subject, htmlBody);
+        }
 
-                bodyBuilder.HtmlBody = htmlBody;
-                message.Body = bodyBuilder.ToMessageBody();
+        [Authorize(Roles ="Chief")]
+        public async Task<IActionResult> ArchivedResearch(string searchString)
+        {
+            ViewData["currentFilter"] = searchString;
+            var appQuery = _context.FundedResearchApplication
+                .Where(f => new[] { "University Funded Research", "Externally Funded Research", "University Funded Research Load" }.Contains(f.fra_Type));
 
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
-            }
-            catch (Exception ex)
+            if (!String.IsNullOrEmpty(searchString))
             {
-                throw new Exception($"Error occurred while sending email: {ex.Message}");
+                appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
             }
+
+            var researchAppList = await appQuery
+                .Include(f => f.FundedResearch)
+                .Where(f => f.isArchive == true)
+                .OrderByDescending(f => f.submission_Date)
+                .ToListAsync();
+
+            return View(researchAppList);
+        }
+
+        [Authorize(Roles = "Chief")]
+        public async Task<IActionResult> RequirementList(string id) // Documentary Requirements per Application in Archived Research
+        {
+            if (id == null)
+            {
+                return NotFound("No Application ID found!");
+            }
+
+            var fra = await _context.FundedResearchApplication.FindAsync(id);
+            if (fra == null)
+            {
+                return NotFound("No Application found!");
+            }
+            ViewBag.FraId = fra.fra_Id;
+            ViewBag.DTSNo = fra.dts_No;
+            ViewBag.Research = fra.research_Title;
+            ViewBag.Field = fra.field_of_Study;
+            ViewBag.Lead = fra.applicant_Name;
+            ViewBag.Member = fra.team_Members;
+            ViewBag.Type = fra.fra_Type;
+            ViewBag.Status = fra.application_Status;
+
+            var fileRequirement = await _context.FileRequirement.Where(f => f.fra_Id == id && f.file_Type == ".pdf")
+                .OrderBy(fr => fr.file_Name)
+                .ToListAsync();
+            return View(fileRequirement);
         }
 
         [Authorize(Roles = "Chief")]
@@ -1275,27 +1193,6 @@ namespace RemcSys.Controllers
                 (evaluationsList, evalFormList);
 
             return View(model);
-        }
-
-        [Authorize(Roles ="Chief")]
-        public async Task<IActionResult> ArchivedResearch(string searchString)
-        {
-            ViewData["currentFilter"] = searchString;
-            var appQuery = _context.FundedResearchApplication
-                .Where(f => new[] { "University Funded Research", "Externally Funded Research", "University Funded Research Load" }.Contains(f.fra_Type));
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                appQuery = appQuery.Where(s => s.research_Title.Contains(searchString));
-            }
-
-            var researchAppList = await appQuery
-                .Include(f => f.FundedResearch)
-                .Where(f => f.isArchive == true)
-                .OrderByDescending(f => f.submission_Date)
-                .ToListAsync();
-
-            return View(researchAppList);
         }
 
         [Authorize(Roles ="Chief")]
@@ -2429,7 +2326,10 @@ namespace RemcSys.Controllers
         public IActionResult Settings()
         {
             var settings = _context.Settings.First();
-            return View(settings);
+            var guidelines = _context.Guidelines.OrderBy(f => f.file_Uploaded).ToList();
+
+            var model = new Tuple<Settings, List<Guidelines>>(settings, guidelines);
+            return View(model);
         }
 
         [HttpPost]
@@ -2494,6 +2394,90 @@ namespace RemcSys.Controllers
             }
 
             return Json(new { success = false });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateEvaluatorNum(int count)
+        {
+            if (count < 1 || count > 10)
+            {
+                return BadRequest("Invalid number of evaluators");
+            }
+
+            var settings = await _context.Settings.FirstAsync();
+            if (settings != null)
+            {
+                settings.evaluatorNum = count;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateEvaluationDays(int days)
+        {
+            if(days < 1 || days > 30)
+            {
+                return BadRequest("Invalid number of days");
+            }
+
+            var settings = await _context.Settings.FirstAsync();
+            if(settings != null)
+            {
+                settings.daysEvaluation = days;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadGuidelines(IFormFile file, string documentType)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return Json(new { success = false, message = "Invalid file." });
+            }
+
+            byte[] pdfData;
+            using (var ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                pdfData = ms.ToArray();
+                var guidelines = new Guidelines
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    file_Name = file.FileName,
+                    file_Type = Path.GetExtension(file.FileName),
+                    data = pdfData,
+                    document_Type = documentType,
+                    file_Uploaded = DateTime.Now
+                };
+                _context.Guidelines.Add(guidelines);
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, fileName = file.FileName, fileId = guidelines.Id });
+            }
+        }
+
+        public IActionResult RemoveFile(string id)
+        {
+            var guideline = _context.Guidelines.Find(id);
+            if(guideline == null)
+            {
+                return NotFound("No file found!");
+            }
+
+            _context.Guidelines.Remove(guideline);
+            _context.SaveChanges();
+
+            return RedirectToAction("Settings");
         }
     }
 }

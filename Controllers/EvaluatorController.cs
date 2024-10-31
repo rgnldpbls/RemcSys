@@ -27,7 +27,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Evaluator")]
-        public async Task<IActionResult> EvaluatorDashboard()
+        public async Task<IActionResult> EvaluatorDashboard() // Dashboard of the Evaluator
         {
             if (_context.Settings.First().isMaintenance)
             {
@@ -35,7 +35,15 @@ namespace RemcSys.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
             var evaluator = await _context.Evaluator.FirstOrDefaultAsync(f => f.UserId == user.Id);
+            if(evaluator == null)
+            {
+                return NotFound("Evaluator not found!");
+            }
             ViewBag.Pending = await _context.Evaluations.Where(e => e.evaluation_Status == "Pending" && e.evaluator_Id == evaluator.evaluator_Id).CountAsync();
             ViewBag.Missed = await _context.Evaluations.Where(e => e.evaluation_Status == "Missed" && e.evaluator_Id == evaluator.evaluator_Id).CountAsync();
             ViewBag.Evaluated = await _context.Evaluations.Where(e => (e.evaluation_Status == "Approved" || e.evaluation_Status == "Rejected")
@@ -51,7 +59,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Evaluator")]
-        public async Task<IActionResult> EvaluatorNotif()
+        public async Task<IActionResult> EvaluatorNotif() // Notification of the Evaluator
         {
             if (_context.Settings.First().isMaintenance)
             {
@@ -59,6 +67,10 @@ namespace RemcSys.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
             var logs = await _context.ActionLogs
                 .Where(f => f.Name == user.Name && f.isEvaluator == true)
                 .OrderByDescending(log => log.Timestamp)
@@ -66,7 +78,7 @@ namespace RemcSys.Controllers
             return View(logs);
         }
 
-        public async Task CheckMissedEvaluations()
+        /*public async Task CheckMissedEvaluations()
         {
             var today = DateTime.Today;
 
@@ -80,14 +92,18 @@ namespace RemcSys.Controllers
             }
 
             await _context.SaveChangesAsync();
-        }
+        }*/
 
         [Authorize(Roles ="Evaluator")]
-        public async Task<IActionResult> EvaluatorPending()
+        public async Task<IActionResult> EvaluatorPending() // List of Pending Evaluation
         {
-            await CheckMissedEvaluations();
+            /*await CheckMissedEvaluations();*/
 
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
             var evaluator = _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefault();
 
             if(evaluator != null)
@@ -106,6 +122,7 @@ namespace RemcSys.Controllers
                             evaluation_deadline =  evaluation.evaluation_Deadline,
                             fra_Id =  researchApp.fra_Id
                         })
+                    .OrderBy(e => e.evaluation_deadline)
                     .ToListAsync();
 
                 return View(pendingEvaluations);
@@ -114,9 +131,13 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Evaluator")]
-        public async Task<IActionResult> EvaluatorMissed()
+        public async Task<IActionResult> EvaluatorMissed() // List of Missed Evaluation
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
             var evaluator = _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefault();
 
             if (evaluator != null)
@@ -135,6 +156,7 @@ namespace RemcSys.Controllers
                             evaluation_deadline = evaluation.evaluation_Deadline,
                             fra_Id = researchApp.fra_Id
                         })
+                    .OrderBy(e => e.evaluation_deadline)
                     .ToListAsync();
 
                 return View(missedEvaluations);
@@ -143,9 +165,13 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Evaluator")]
-        public async Task<IActionResult> EvaluatorEvaluated()
+        public async Task<IActionResult> EvaluatorEvaluated() // List of Done Evaluation
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
             var evaluator = _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefault();
 
             if (evaluator != null)
@@ -164,6 +190,7 @@ namespace RemcSys.Controllers
                             evaluation_deadline = evaluation.evaluation_Date,
                             fra_Id = researchApp.fra_Id
                         })
+                    .OrderBy(e => e.evaluation_deadline)
                     .ToListAsync();
 
                 return View(doneEvaluations);
@@ -172,28 +199,13 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Evaluator")]
-        public IActionResult EvaluationForm(string id)
+        public IActionResult EvaluationForm(string id) // Evaluation Form
         {
+            var guidelines = _context.Guidelines.Where(g => g.document_Type == "UFREvalsForm")
+                .OrderBy(g => g.file_Name).ToList();
+            ViewBag.exec = guidelines;
 
-            //IR Form Preview
-            string folderPath = Path.Combine(_hostingEnvironment.WebRootPath, "evals");
-            string extension = "*.pdf";
-            List<InternalDocument> files = new List<InternalDocument>();
-
-            foreach (var file in Directory.GetFiles(folderPath, extension, SearchOption.AllDirectories))
-            {
-                string fileExtension = Path.GetExtension(file).ToLower();
-                files.Add(new InternalDocument
-                {
-                    FileName = Path.GetFileName(file),
-                    FilePath = Path.GetRelativePath(_hostingEnvironment.WebRootPath, file).Replace('\\', '/'),
-                    FileType = fileExtension
-                });
-            }
-            var exec = files.OrderBy(f => f.FileName).ToList();
-            ViewBag.exec = exec;
-
-            // File Requirement - Manuscript
+            // File Requirement
             var fileRequirement = _context.FileRequirement.Where(f => f.fra_Id == id && f.document_Type == "Forms")
                 .OrderBy(f => f.file_Name)
                 .ToList();
@@ -206,6 +218,10 @@ namespace RemcSys.Controllers
             double lcScore, string lcComment, double rdScore, string rdComment, double ffScore, string ffComment, string genComment, string fraId)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found!");
+            }
             var evaluator = await _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefaultAsync();
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
 
@@ -333,7 +349,17 @@ namespace RemcSys.Controllers
             {
                 return File(file.data, "application/pdf");
             }
-            return NotFound();
+
+            var guidelines = _context.Guidelines.FirstOrDefault(f => f.Id == id);
+            if (guidelines != null)
+            {
+                if (guidelines.file_Type == ".pdf")
+                {
+                    return File(guidelines.data, "application/pdf");
+                }
+            }
+
+            return BadRequest("Only PDF files can be previewed.");
         }
 
         [HttpPost]

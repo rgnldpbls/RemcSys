@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RemcSys.Data;
 
@@ -11,9 +12,11 @@ using RemcSys.Data;
 namespace RemcSys.Migrations.RemcDB
 {
     [DbContext(typeof(RemcDBContext))]
-    partial class RemcDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241030152317_add evaluatoNum in Settings model")]
+    partial class addevaluatoNuminSettingsmodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -508,35 +511,6 @@ namespace RemcSys.Migrations.RemcDB
                     b.ToTable("GeneratedForms");
                 });
 
-            modelBuilder.Entity("RemcSys.Models.Guidelines", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<byte[]>("data")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("document_Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("file_Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("file_Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("file_Uploaded")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Guidelines");
-                });
-
             modelBuilder.Entity("RemcSys.Models.ProgressReport", b =>
                 {
                     b.Property<string>("pr_Id")
@@ -582,9 +556,6 @@ namespace RemcSys.Migrations.RemcDB
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("daysEvaluation")
-                        .HasColumnType("int");
 
                     b.Property<int>("evaluatorNum")
                         .HasColumnType("int");

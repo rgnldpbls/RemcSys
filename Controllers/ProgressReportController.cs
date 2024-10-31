@@ -31,7 +31,9 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
 
-            var fr = await _context.FundedResearches.Where(f => f.UserId == user.Id).FirstOrDefaultAsync();
+            var fr = await _context.FundedResearches
+                .Where(f => f.UserId == user.Id && f.isArchive == false)
+                .FirstOrDefaultAsync();
             if (fr == null)
             {
                 return NotFound();
@@ -71,7 +73,7 @@ namespace RemcSys.Controllers
 
 
             var logs = await _context.ActionLogs
-                    .Where(f => f.Name == fr.team_Leader && f.isTeamLeader == true)
+                    .Where(f => f.Name == fr.team_Leader && f.isTeamLeader == true && f.FraId == fr.fra_Id)
                     .OrderByDescending(log => log.Timestamp)
                     .ToListAsync();
             
