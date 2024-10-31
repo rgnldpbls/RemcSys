@@ -73,6 +73,8 @@ using (var scope = app.Services.CreateScope())
             isUFRApplication = false,
             isEFRApplication = false,
             isUFRLApplication = false,
+            evaluatorNum = 5,
+            daysEvaluation = 7
         };
 
         dbContext.Settings.Add(settings);

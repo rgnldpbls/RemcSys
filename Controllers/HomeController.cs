@@ -16,7 +16,8 @@ namespace RemcSys.Controllers
         private readonly UserManager<SystemUser> _userManager;
         private readonly RemcDBContext _context;
 
-        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostingEnvironment, UserManager<SystemUser> userManager, RemcDBContext context)
+        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostingEnvironment, UserManager<SystemUser> userManager, 
+            RemcDBContext context)
         {
             _logger = logger;
             _hostingEnvironment = hostingEnvironment;
@@ -24,12 +25,12 @@ namespace RemcSys.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index() // Index Page
         {
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult Privacy() // Privacy Page
         {
             return View();
         }
@@ -40,67 +41,68 @@ namespace RemcSys.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public IActionResult AccessDenied()
+        public IActionResult AccessDenied() // Access Denied Page
         {
             return View();
         }
 
-        public IActionResult UnderMaintenance()
+        public IActionResult UnderMaintenance() // UnderMaintenance Page
         {
             return View();
         }
 
-        public IActionResult UFRAppClosed()
+        public IActionResult UFRAppClosed() // UniversityFundedResearch Application closed Page
         {
             return View();
         }
 
-        public IActionResult EFRAppClosed()
+        public IActionResult EFRAppClosed() // ExternallyFundedResearch Application closed Page
         {
             return View();
         }
 
-        public IActionResult UFRLAppClosed()
-        {
-            return View();
-        }
-
-        [Authorize(Roles = "Faculty")]
-        public IActionResult Faculty()
+        public IActionResult UFRLAppClosed() // UniversityFundedResearchLoad Application closed Page
         {
             return View();
         }
 
         [Authorize(Roles = "Faculty")]
-        public IActionResult Forms()
+        public IActionResult Faculty() // Faculty HomePage
         {
-            string folderPath = Path.Combine(_hostingEnvironment.WebRootPath, "forms");
-            string extension = "*.pdf";
-            List<InternalDocument> files = new List<InternalDocument>();
+            return View();
+        }
 
-            foreach (var file in Directory.GetFiles(folderPath, extension, SearchOption.AllDirectories))
+        [Authorize(Roles = "Faculty")]
+        public IActionResult Forms() // Memorandums
+        {
+            var guidelines = _context.Guidelines.Where(g => g.document_Type == "Memorandum")
+                .OrderBy(g => g.file_Name).ToList();
+
+            return View(guidelines);
+        }
+
+        public IActionResult PreviewFile(string id) // Preview PDF Files
+        {
+            var guidelines = _context.Guidelines.FirstOrDefault(g => g.Id == id);
+            if (guidelines != null)
             {
-                string fileExtension = Path.GetExtension(file).ToLower();
-                files.Add(new InternalDocument
+                if (guidelines.file_Type == ".pdf")
                 {
-                    FileName = Path.GetFileName(file),
-                    FilePath = Path.GetRelativePath(_hostingEnvironment.WebRootPath, file).Replace('\\', '/'),
-                    FileType = fileExtension
-                });
+                    return File(guidelines.data, "application/pdf");
+                }
             }
-            var exec = files.OrderBy(f => f.FileName).ToList();
-            ViewBag.exec = exec;
-            return View();
+
+            return BadRequest("Only PDF files can be previewed.");
         }
 
         [Authorize(Roles = "Faculty")]
-        public IActionResult FRType()
+        public IActionResult FRType() // Select Funded Research Type
         {
            return View();
         }
 
         [Authorize(Roles = "Faculty")]
-        public IActionResult Eligibility(string type)
+        public IActionResult Eligibility(string type) // Eligibility based on Funded Research Type
         {
             var isUFRApp = _context.Settings.First().isUFRApplication;
             if(!isUFRApp && type == "University Funded Research")
@@ -126,7 +128,7 @@ namespace RemcSys.Controllers
         }
         
         [Authorize(Roles = "Evaluator")]
-        public async Task<IActionResult> Evaluator()
+        public async Task<IActionResult> Evaluator() // Evaluator HomePage
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -153,7 +155,7 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Chief")]
-        public IActionResult Chief()
+        public IActionResult Chief() // Chief HomePage
         {
             return View();
         }

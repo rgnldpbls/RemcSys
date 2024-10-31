@@ -37,7 +37,8 @@
                     @foreach (var file in ViewBag.exec)
                     {
                         <li>
-                            <a onclick="showDocument('@file.FilePath')">@file.FileName</a>
+                            <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank"
+                                style="color: #850000; text-decoration: none;">@file.file_Name</a>
                         </li>
                     }
                 }
@@ -212,11 +213,6 @@
                 defaultTab.click();
             }
         });
-
-        function showDocument(filePath) {
-            const newTab = window.open("/" + filePath, '_blank');
-            newTab.focus();
-        }
     </script>
     <script>
         function validateSelects() {

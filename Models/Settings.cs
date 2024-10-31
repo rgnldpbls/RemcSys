@@ -7,5 +7,7 @@
         public bool isUFRApplication { get; set; }
         public bool isEFRApplication { get; set; }
         public bool isUFRLApplication { get; set; }
+        public int evaluatorNum { get; set; }
+        public int daysEvaluation { get; set; }
     }
 }

@@ -2,20 +2,38 @@
 @{
     if (Model != null && Model.Any())
     {
-        ViewBag.Type = Model.Last().fra_Type;
-        ViewBag.Status = Model.Last().application_Status;
-        ViewBag.IsFraArchived = Model.Last().isArchive;
-        
-        @if(Model.Last().FundedResearch != null)
+        if(Model.First().isArchive == false)
         {
-            ViewBag.IsFunded = true;
-            ViewBag.IsFrArchived = Model.Last().FundedResearch.isArchive;
+            ViewBag.Type = Model.First().fra_Type;
+            ViewBag.Status = Model.First().application_Status;
+            ViewBag.IsFraArchived = false;
+            if(Model.First().FundedResearch != null)
+            {
+                ViewBag.IsFunded = true;
+                ViewBag.IsFrArchived = Model.First().FundedResearch.isArchive;
+            }
+            else
+            {
+                ViewBag.IsFunded = false;
+            }
+            Layout = "_NavTeamLeader2";
         }
-        else
+        else if(Model.First().isArchive == true)
         {
-            ViewBag.IsFunded = false;
+            ViewBag.Type = Model.First().fra_Type;
+            ViewBag.Status = Model.First().application_Status;
+            ViewBag.IsFraArchived = true;
+            if (Model.First().FundedResearch != null)
+            {
+                ViewBag.IsFunded = true;
+                ViewBag.IsFrArchived = Model.First().FundedResearch.isArchive;
+            }
+            else
+            {
+                ViewBag.IsFunded = false;
+            }
+            Layout = "_NavTeamLeader2";
         }
-        Layout = "_NavTeamLeader2";
     }
     else
     {

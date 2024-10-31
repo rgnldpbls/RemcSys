@@ -1,4 +1,4 @@
-﻿@model Settings
+﻿@model Tuple<Settings, List<Guidelines>>
 @{
     ViewData["Title"] = "Settings";
     Layout = "_NavChief1";
@@ -36,6 +36,116 @@
         <span class="slider" id="ufrlApp-slider">
             <span class="slider-text" id="ufrlApp-status"></span>
         </span>
+    </label>
+</div>
+<hr />
+<div class="form-group d-flex align-items-center mt-4">
+    <label class="mx-3"><b>NUMBER OF EVALUATORS</b></label>
+    <div class="input-group" style="width: 200px;">
+        <input type="number"
+                id="evaluatorCount"
+                class="form-control"
+                min="1"
+                max="10"
+                value="@Model.Item1.evaluatorNum"
+                style="border-radius: 4px;"/>
+        <button class="btn btn-primary ms-2"
+                onclick="updateEvaluatorCount()"
+                style="border-radius: 4px;">
+            Save
+        </button>
+    </div>
+    <label class="mx-3"><b>NUMBER OF EVALUATION DAYS</b></label>
+    <div class="input-group" style="width: 200px;">
+        <input type="number"
+               id="evaluationDays"
+               class="form-control"
+               min="1"
+               max="30"
+               value="@Model.Item1.daysEvaluation"
+               style="border-radius: 4px;" />
+        <button class="btn btn-primary ms-2"
+                onclick="updateDaysEvaluation()"
+                style="border-radius: 4px;">
+            Save
+        </button>
+    </div>
+</div>
+<hr />
+<div class="d-flex justify-content-between align-items-start mt-4" style="gap: 20px;">
+    <div class="flex-fill">
+        <label class="mx-3"><b>MANAGED MEMORANDUMS</b></label>
+        <div id="uploadFiles" class="mt-2">
+            @if (Model.Item2 != null && Model.Item2.Any())
+            {
+                <ul>
+                    @foreach (var file in Model.Item2)
+                    {
+                        if (file.document_Type == "Memorandum")
+                        {
+                            <li>
+                                @file.file_Name
+                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
+                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
+                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
+                            </li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No file have been uploaded yet.</p>
+            }
+        </div>
+        <div class="input-group mt-3" style="width: 400px;">
+            <input type="file" id="memorandumFile" class="form-control" accept=".pdf" />
+            <button class="btn btn-info ms-2"
+                    onclick="previewFile('memorandumFile')"
+                    style="border-radius: 4px;">
+                Preview
+            </button>
+            <button class="btn btn-primary ms-2"
+                    onclick="submitFile('memorandumFile', 'Memorandum')"
+                    style="border-radius: 4px;">
+                Submit
+            </button>
+        </div>
+    </div>
+    <div class="flex-fill">
+        <label class="mx-3"><b>MANAGED UFR EVALUATION FORMS</b></label>
+        <div id="uploadFilesUFR" class="mt-2">
+            @if (Model.Item2 != null && Model.Item2.Any())
+            {
+                <ul>
+                    @foreach(var file in Model.Item2)
+                    {
+                        if(file.document_Type == "UFREvalsForm")
+                        {
+                            <li>
+                                @file.file_Name
+                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
+                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
+                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
+                            </li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No file have been uploaded yet.</p>
+            }
+        </div>
+        <div class="input-group mt-3" style="width: 400px;">
+            <input type="file" id="ufrEvaluationFile" class="form-control" accept=".pdf"/>
+            <button class="btn btn-info ms-2"
+                    onclick="previewFile('ufrEvaluationFile')"
+                    style="border-radius: 4px;">Preview</button>
+            <button class="btn btn-primary ms-2"
+                    onclick="submitFile('ufrEvaluationFile', 'UFREvalsForm')"
+                    style="border-radius: 4px;">Submit</button>
+        </div>
     </div>
 </div>
 <hr />
@@ -52,6 +162,128 @@
             statusText.textContent = "OFF";
             statusText.style.color = "#fff";
             element.parentElement.querySelector(".slider").style.backgroundColor = "#f44336"; // Red
+        }
+    }
+
+    function updateEvaluatorCount(){
+        const count = document.getElementById('evaluatorCount').value;
+
+        if (count < 1 || count > 10) {
+            alert('Please enter a Number of Evaluator between 1 and 10');
+            return;
+        }
+
+        if (confirm('Are you sure you want to change the Number of Evaluators in University Funded Research?')) {
+            $.ajax({
+                url: '@Url.Action("UpdateEvaluatorNum", "Chief")',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: {
+                    count: count
+                },
+                success: function (response) {
+                    alert('Number of evaluators updated successfully');
+                },
+                error: function (xhr, status, error) {
+                    alert('Error updating number of evaluators. Please try again.');
+                }
+            });
+        } else {
+            count = @Model.Item1.evaluatorNum;
+        }
+    }
+
+    function updateDaysEvaluation(){
+        const days = document.getElementById('evaluationDays').value;
+
+        if (days < 1 || days > 30) {
+            alert('Please enter a Number of Days between 1 and 30');
+            return;
+        }
+
+        if (confirm('Are you sure you want to change the Number of Days of Evaluation in University Funded Research?')) {
+            $.ajax({
+                url: '@Url.Action("UpdateEvaluationDays", "Chief")',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: {
+                    days: days
+                },
+                success: function (response) {
+                    alert('Number of days updated successfully');
+                },
+                error: function (xhr, status, error) {
+                    alert('Error updating number of days. Please try again.');
+                }
+            });
+        } else {
+            count = @Model.Item1.daysEvaluation;
+        }
+    }
+
+    function previewFile(fileInputId){
+        const fileInput = document.getElementById(fileInputId);
+        if (fileInput.files.length === 0) {
+            alert('Please select a file to preview.');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const fileURL = URL.createObjectURL(file);
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+
+        if (fileExtension === 'pdf') {
+            // If it's a PDF, open in a new tab for preview
+            window.open(fileURL, '_blank');
+        } else {
+            // For other file types, prompt download
+            const link = document.createElement('a');
+            link.href = fileURL;
+            link.download = file.name;
+            link.click();
+        }
+    }
+
+    function submitFile(fileInputId, documentType) {
+        const token = $('input[name="__RequestVerificationToken"]').val();
+        const fileInput = document.getElementById(fileInputId);
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select a file.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('documentType', documentType);
+
+        if (confirm('Are you sure you want to add the file?')) {
+            $.ajax({
+                url: '@Url.Action("UploadGuidelines", "Chief")',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    // Clear the file input
+                    fileInput.value = '';
+                    window.location.href = '/Chief/Settings';
+                },
+                error: function (xhr, status, error) {
+                    alert('Error uploading file. Please try again.');
+                }
+            });
+        }
+        else {
+            return;
         }
     }
 </script>
@@ -212,29 +444,35 @@
     });
 
     window.addEventListener('load', function () {
-        const initialState = @Json.Serialize(Model.isMaintenance);
+        const initialState = @Json.Serialize(Model.Item1.isMaintenance);
         maintenanceSwitch.checked = initialState;
         maintenanceStatus.textContent = initialState ? 'ON' : 'OFF';
         maintenanceStatus.style.color = initialState ? '#fff' : '#fff';
         maintenanceSlider.style.backgroundColor = initialState ? '#4CAF50' : '#f44336';
 
-        const ufrInitialState = @Json.Serialize(Model.isUFRApplication);
+        const ufrInitialState = @Json.Serialize(Model.Item1.isUFRApplication);
         ufrAppSwitch.checked = ufrInitialState;
         ufrAppStatus.textContent = ufrInitialState ? 'ON' : 'OFF';
         ufrAppStatus.style.color = ufrInitialState ? '#fff' : '#fff';
         ufrAppSlider.style.backgroundColor = ufrInitialState ? '#4CAF50' : '#f44336';
 
-        const efrInitialState = @Json.Serialize(Model.isEFRApplication);
+        const efrInitialState = @Json.Serialize(Model.Item1.isEFRApplication);
         efrAppSwitch.checked = efrInitialState;
         efrAppStatus.textContent = efrInitialState ? 'ON' : 'OFF';
         efrAppStatus.style.color = efrInitialState ? '#fff' : '#fff';
         efrAppSlider.style.backgroundColor = efrInitialState ? '#4CAF50' : '#f44336';
 
-        const ufrlInitialState = @Json.Serialize(Model.isUFRLApplication);
+        const ufrlInitialState = @Json.Serialize(Model.Item1.isUFRLApplication);
         ufrlAppSwitch.checked = ufrlInitialState;
         ufrlAppStatus.textContent = ufrlInitialState ? 'ON' : 'OFF';
         ufrlAppStatus.style.color = ufrlInitialState ? '#fff' : '#fff';
         ufrlAppSlider.style.backgroundColor = ufrlInitialState ? '#4CAF50' : '#f44336';
+
+        const initialEvaluatorCount = @Json.Serialize(Model.Item1.evaluatorNum);
+        document.getElementById('evaluatorCount').value = initialEvaluatorCount;
+
+        const initialEvaluationDays = @Json.Serialize(Model.Item1.daysEvaluation);
+        document.getElementById('evaluationDays').value = initialEvaluationDays;
     });
 </script>
 
@@ -307,5 +545,60 @@
 
     input:checked + .slider:before {
         transform: translateX(86px);
+    }
+
+    .input-group input[type="number"] {
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        border: 1px solid #ced4da;
+    }
+
+        .input-group input[type="number"]:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+    .input-group .btn-primary {
+        background-color: #850000;
+        border-color: #850000;
+    }
+
+        .input-group .btn-primary:hover {
+            background-color: #6a0000;
+            border-color: #6a0000;
+        }
+
+    .input-group input[type="file"] {
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        border: 1px solid #ced4da;
+    }
+
+    .input-group .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    li {
+        margin-bottom: 10px;
+    }
+
+        li a {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+    .text-info {
+        color: #17a2b8;
+    }
+
+    .text-danger {
+        color: #dc3545;
     }
 </style>

@@ -1,4 +1,4 @@
-﻿@model List<InternalDocument>
+﻿@model List<Guidelines>
 @{
     Layout = "_NavTeamLeader";
 }
@@ -8,25 +8,17 @@
         <h5>List of Executive Orders</h5><hr />
         <p>These documents should be read if you’re applying Funded Research Work.</p>
         <ul class="doc-list">
-            @if (ViewBag.exec != null)
+            @if (Model != null)
             {
-                @foreach (var file in ViewBag.exec)
+                @foreach (var file in Model)
                 {
                     <li>
-                        <a class="btn" onclick="showDocument('@file.FilePath')"><i class="bi bi-file-pdf" style="margin-right: 10px;"></i>@file.FileName</a>
+                        <a class="btn" href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank"><i class="bi bi-file-pdf" style="margin-right: 10px;"></i>@file.file_Name</a>
                     </li>
                 }
-
             }
         </ul>
     </div>
 </div>
 
 <a class="proceed-btn" href="@Url.Action("FRType", "Home")">Proceed</a>
-
-<script type="text/javascript">
-    function showDocument(filePath) {
-        const newTab = window.open("/" + filePath, '_blank');
-        newTab.focus();
-    }
-</script>
