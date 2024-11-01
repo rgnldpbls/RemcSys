@@ -205,12 +205,15 @@ namespace RemcSys.Controllers
                 .OrderBy(g => g.file_Name).ToList();
             ViewBag.exec = guidelines;
 
+            var criteria = _context.Criterias.Include(c => c.subCategory).OrderBy(c => c.Id).ToList();
             // File Requirement
             var fileRequirement = _context.FileRequirement.Where(f => f.fra_Id == id && f.document_Type == "Forms")
                 .OrderBy(f => f.file_Name)
                 .ToList();
             ViewBag.Id = id;
-            return View(fileRequirement);
+
+            var model = new Tuple<IEnumerable<FileRequirement>, IEnumerable<Criteria>>(fileRequirement, criteria);
+            return View(model);
         }
 
         [HttpPost]

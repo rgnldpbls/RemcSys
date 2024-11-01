@@ -1,4 +1,4 @@
-﻿@model Tuple<Settings, List<Guidelines>>
+﻿@model Tuple<Settings, List<Guidelines>, List<Criteria>, List<SubCategory>>
 @{
     ViewData["Title"] = "Settings";
     Layout = "_NavChief1";
@@ -296,7 +296,65 @@
     </div>
 </div>
 <hr />
+<div class="d-flex justify-content-between align-items-start mt-4">
+    <div class="flex-fill">
+        <h4><b>MANAGE EVALUATION CRITERIA</b></h4>
+        <label class="mx-3"><b>ADD NEW CRITERIA</b></label>
+        <form method="post" action="@Url.Action("AddCriteria", "Chief")">
+            <div class="form-group" style="width: 500px;">
+                <label for="criteriaName">Criteria Name</label>
+                <input type="text" class="form-control" id="criteriaName" name="criteriaName" required style="border-radius: 4px;" />
+            </div>
+            <div class="form-group" style="width: 500px;">
+                <label for="criteriaWeight">Weight (%)</label>
+                <input type="number" class="form-control" id="criteriaWeight" name="criteriaWeight" min="0" max="100" required style="border-radius: 4px;" />
+            </div>
+            <br />
+            <button type="submit" class="btn ms-2" style="border-radius: 4px; background-color: #850000; color: #fff;">Add Criteria</button>
+        </form>
+    </div>
+</div>
+<hr />
+<div class="d-flex justify-content-between align-items-start mt-4">
+    <div class="flex-fill">
+        <h5 class="mx-3"><b>MANAGE EXISTING CRITERIA</b></h5>
+        @foreach (var criteria in Model.Item3)
+        {
+            <div class="criteria">
+                <label class="mx-3"><b>@criteria.Name (Weight: @criteria.Weight%)</b></label>
+                <a href="@Url.Action("RemoveCriteria", "Chief", new {id = criteria.Id})" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Are you sure you want to remove this sub-category?');">Remove</a>
 
+                <h6>Sub-Categories: </h6>
+                <ul>
+                    @foreach (var subcategory in Model.Item4.Where(s => s.CriteriaId == criteria.Id))
+                    {
+                        <li>
+                            [@subcategory.Id] @subcategory.Name (Max Score: @subcategory.MaxScore)
+                            <a href="@Url.Action("RemoveSubCategory", "Chief", new {id = subcategory.Id})" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Are you sure you want to remove this sub-category?');">Remove</a>
+                        </li>
+                    }
+                </ul>
+                <label class="mx-3"><b>ADD SUBCATEGORY</b></label>
+                <form method="post" action="@Url.Action("AddSubCategory", "Chief")">
+                    <input type="hidden" name="criteriaId" value="@criteria.Id" />
+                    <div class="form-group" style="width: 500px;">
+                        <label for="subcategoryName">Subcategory Name</label>
+                        <input type="text" class="form-control" id="subcategoryName" name="subcategoryName" required style="border-radius: 4px;" />
+                    </div>
+                    <div class="form-group" style="width: 500px;">
+                        <label for="subcategoryMaxScore">Max Score</label>
+                        <input type="number" class="form-control" id="subcategoryMaxScore" name="subcategoryMaxScore" min="1" max="10" required style="border-radius: 4px;" />
+                    </div>
+                    <br />
+                    <button type="submit" class="btn ms-2" style="border-radius: 4px; background-color: #850000; color: #fff;">Add Subcategory</button>
+                </form>
+            </div>
+            <hr />
+        }
+    </div>
+</div>
 
 <script>
     function updateSwitchStatus(element, switchType) {

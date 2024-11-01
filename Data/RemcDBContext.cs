@@ -29,6 +29,8 @@ namespace RemcSys.Data
         public DbSet<CalendarEvent> CalendarEvents { get; set; }
         public DbSet<Settings> Settings { get; set; }
         public DbSet<Guidelines> Guidelines { get; set; }
+        public DbSet<Criteria> Criterias { get; set; }
+        public DbSet<SubCategory> SubCategories { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -76,6 +78,11 @@ namespace RemcSys.Data
                 .HasMany(f => f.ProgressReports)
                 .WithOne(f => f.FundedResearch)
                 .HasForeignKey(g => g.fr_Id);
+
+            modelBuilder.Entity<Criteria>()
+                .HasMany(c => c.subCategory)
+                .WithOne(c => c.criteria)
+                .HasForeignKey(c => c.CriteriaId);
 
             base .OnModelCreating(modelBuilder);
         }

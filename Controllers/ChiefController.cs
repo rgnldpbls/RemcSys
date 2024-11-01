@@ -2336,8 +2336,10 @@ namespace RemcSys.Controllers
         {
             var settings = _context.Settings.First();
             var guidelines = _context.Guidelines.OrderBy(f => f.file_Uploaded).ToList();
+            var criteria = _context.Criterias.OrderBy(f => f.Id).ToList();
+            var subCategory = _context.SubCategories.OrderBy(f => f.Id).ToList();
 
-            var model = new Tuple<Settings, List<Guidelines>>(settings, guidelines);
+            var model = new Tuple<Settings, List<Guidelines>, List<Criteria>, List<SubCategory>>(settings, guidelines, criteria, subCategory);
             return View(model);
         }
 
@@ -2484,6 +2486,63 @@ namespace RemcSys.Controllers
             }
 
             _context.Guidelines.Remove(guideline);
+            _context.SaveChanges();
+
+            return RedirectToAction("Settings");
+        }
+
+        public IActionResult AddCriteria(string criteriaName, double criteriaWeight)
+        {
+            var criteria = new Criteria
+            {
+                Name = criteriaName,
+                Weight = criteriaWeight
+            };
+
+            _context.Criterias.Add(criteria);
+            _context.SaveChanges();
+
+            return RedirectToAction("Settings");
+        }
+
+        public IActionResult RemoveCriteria(int id)
+        {
+            var criteria = _context.Criterias.Find(id);
+            if(criteria == null)
+            {
+                return NotFound("Criteria not found!");
+            }
+
+            _context.Criterias.Remove(criteria);
+            _context.SaveChanges();
+
+            return RedirectToAction("Settings");
+        }
+
+        public IActionResult AddSubCategory(int criteriaId, string subcategoryName, int subcategoryMaxScore)
+        {
+            var subCategory = new SubCategory
+            {
+                CriteriaId = criteriaId,
+                Name = subcategoryName,
+                MaxScore = subcategoryMaxScore
+            };
+
+            _context.SubCategories.Add(subCategory);
+            _context.SaveChanges();
+
+            return RedirectToAction("Settings");
+        }
+
+        public IActionResult RemoveSubCategory(int id)
+        {
+            var subCategory = _context.SubCategories.Find(id);
+            if(subCategory == null)
+            {
+                return NotFound("Sub-Category not found!");
+            }
+
+            _context.SubCategories.Remove(subCategory);
             _context.SaveChanges();
 
             return RedirectToAction("Settings");
