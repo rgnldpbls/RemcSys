@@ -72,7 +72,7 @@
     </div>
 </div>
 <hr />
-<div class="d-flex justify-content-between align-items-start mt-4" style="gap: 20px;">
+<div class="d-flex justify-content-between align-items-start mt-4" style="gap: 10px;">
     <div class="flex-fill">
         <label class="mx-3"><b>MANAGED MEMORANDUMS</b></label>
         <div id="uploadFiles" class="mt-2">
@@ -113,6 +113,45 @@
         </div>
     </div>
     <div class="flex-fill">
+        <label class="mx-3"><b>GENERATED DOCUMENTARY FORMS</b></label>
+        <div class="mt-2">
+            @if (Model.Item2 != null && Model.Item2.Any())
+            {
+                <ul>
+                    @foreach (var file in Model.Item2)
+                    {
+                        if (file.document_Type == "DocumentaryForm")
+                        {
+                            <li>
+                                @file.file_Name
+                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" style="color: #850000; text-decoration: none;">[Preview]</a>
+                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
+                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
+                            </li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No file have been uploaded yet.</p>
+            }
+        </div>
+        <div class="input-group mt-3" style="width: 400px;">
+            <input type="file" id="docuFile" class="form-control" accept=".docx, .pdf" />
+            <button class="btn btn-info ms-2"
+                    onclick="previewFile('docuFile')"
+                    style="border-radius: 4px;">
+                Preview
+            </button>
+            <button class="btn btn-primary ms-2"
+                    onclick="submitFile('docuFile', 'DocumentaryForm')"
+                    style="border-radius: 4px;">
+                Submit
+            </button>
+        </div>
+    </div>
+    <div class="flex-fill">
         <label class="mx-3"><b>MANAGED UFR EVALUATION FORMS</b></label>
         <div id="uploadFilesUFR" class="mt-2">
             @if (Model.Item2 != null && Model.Item2.Any())
@@ -138,7 +177,7 @@
             }
         </div>
         <div class="input-group mt-3" style="width: 400px;">
-            <input type="file" id="ufrEvaluationFile" class="form-control" accept=".pdf"/>
+            <input type="file" id="ufrEvaluationFile" class="form-control" accept=".docx, .pdf"/>
             <button class="btn btn-info ms-2"
                     onclick="previewFile('ufrEvaluationFile')"
                     style="border-radius: 4px;">Preview</button>
@@ -149,6 +188,115 @@
     </div>
 </div>
 <hr />
+<div class="d-flex justify-content-between align-items-start mt-4" style="gap: 10px;">
+    <div class="flex-fill">
+        <label class="mx-3"><b>GENERATED PROGRESS REPORT</b></label>
+        <div class="mt-2">
+            @if (Model.Item2 != null && Model.Item2.Any())
+            {
+                <ul>
+                    @foreach (var file in Model.Item2)
+                    {
+                        if (file.document_Type == "ProgressReport")
+                        {
+                            <li>
+                                @file.file_Name
+                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
+                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
+                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
+                            </li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No file have been uploaded yet.</p>
+            }
+        </div>
+        <div class="input-group mt-3" style="width: 400px;">
+            <input type="file" id="progressReport" class="form-control" accept=".docx, .pdf" />
+            <button class="btn btn-info ms-2"
+                    onclick="previewFile('progressReport')"
+                    style="border-radius: 4px;">Preview</button>
+            <button class="btn btn-primary ms-2"
+                    onclick="submitFile('progressReport', 'ProgressReport')"
+                    style="border-radius: 4px;">Submit</button>
+        </div>
+    </div>
+    <div class="flex-fill">
+        <label class="mx-3"><b>GENERATED TERMINAL REPORT</b></label>
+        <div class="mt-2">
+            @if (Model.Item2 != null && Model.Item2.Any())
+            {
+                <ul>
+                    @foreach (var file in Model.Item2)
+                    {
+                        if (file.document_Type == "TerminalReport")
+                        {
+                            <li>
+                                @file.file_Name
+                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
+                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
+                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
+                            </li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No file have been uploaded yet.</p>
+            }
+        </div>
+        <div class="input-group mt-3" style="width: 400px;">
+            <input type="file" id="terminalReport" class="form-control" accept=".docx, .pdf" />
+            <button class="btn btn-info ms-2"
+                    onclick="previewFile('terminalReport')"
+                    style="border-radius: 4px;">Preview</button>
+            <button class="btn btn-primary ms-2"
+                    onclick="submitFile('terminalReport', 'TerminalReport')"
+                    style="border-radius: 4px;">Submit</button>
+        </div>
+    </div>
+    <div class="flex-fill">
+        <label class="mx-3"><b>GENERATED CERTIFICATE OF COMPLETION (1 file)</b></label>
+        <div class="mt-2">
+            @if (Model.Item2 != null && Model.Item2.Any())
+            {
+                <ul>
+                    @foreach (var file in Model.Item2)
+                    {
+                        if (file.document_Type == "CertificateCompletion")
+                        {
+                            <li>
+                                @file.file_Name
+                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
+                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
+                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
+                            </li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No file have been uploaded yet.</p>
+            }
+        </div>
+        <div class="input-group mt-3" style="width: 400px;">
+            <input type="file" id="certificateCompletion" class="form-control" accept=".docx, .pdf" />
+            <button class="btn btn-info ms-2"
+                    onclick="previewFile('certificateCompletion')"
+                    style="border-radius: 4px;">Preview</button>
+            <button class="btn btn-primary ms-2"
+                    onclick="submitFile('certificateCompletion', 'CertificateCompletion')"
+                    style="border-radius: 4px;">Submit</button>
+        </div>
+    </div>
+</div>
+<hr />
+
 
 <script>
     function updateSwitchStatus(element, switchType) {

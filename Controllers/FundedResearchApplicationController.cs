@@ -19,6 +19,7 @@ using RemcSys.Models;
 using Xceed.Words.NET;
 using MailKit.Net.Smtp;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.AspNetCore.Routing.Template;
 
 namespace RemcSys.Controllers
 {
@@ -244,7 +245,6 @@ namespace RemcSys.Controllers
                 return NotFound("No user found!");
             }
 
-            // Generate fra_Id with template "FRA" + current date + incremented number
             string currentDate = DateTime.Now.ToString("yyyyMMdd");
             var latestFra = await _context.FundedResearchApplication
                 .AsNoTracking()
@@ -256,7 +256,6 @@ namespace RemcSys.Controllers
 
             if (latestFra != null)
             {
-                // Extract the last number in the current date's fra_Id and increment it
                 string[] parts = latestFra.fra_Id.Split('-');
                 if (parts.Length == 3 && int.TryParse(parts[2], out int lastNumber))
                 {
@@ -264,7 +263,6 @@ namespace RemcSys.Controllers
                 }
             }
 
-            // Generate the unique fra_Id
             fundedResearchApp.fra_Id = $"FRA-{currentDate}-{nextNumber:D3}";
             var existingEntry = _context.Entry(fundedResearchApp);
             if (existingEntry != null)
@@ -289,59 +287,66 @@ namespace RemcSys.Controllers
             fundedResearchApp.total_project_Cost = Convert.ToDouble(model.TotalProjectCost);
             fundedResearchApp.UserId = user.Id;
             fundedResearchApp.isArchive = false;
-            _context.FundedResearchApplication.Add(fundedResearchApp);
-            _context.SaveChanges();
 
-            string[] templates = {"Capsule-Research-Proposal.docx","Form-1-Term-of-Reference.docx","Form-2-Line-Item-Budget.docx",
-                "Form-3-Schedule-of-Outputs.docx", "Form-4-Workplan.docx"};
-            string filledFolder = Path.Combine(_environment.WebRootPath, "content", "outputs");
+            _context.FundedResearchApplication.Add(fundedResearchApp);
+            await _context.SaveChangesAsync();
+
+            var templates = await _context.Guidelines
+                .Where(g => g.document_Type == "DocumentaryForm" && g.file_Type == ".docx")
+                .ToListAsync();
+
+            string filledFolder = Path.Combine(_environment.WebRootPath, "content", "docu_forms");
             Directory.CreateDirectory(filledFolder);
 
             foreach (var template in templates)
             {
-                string templatePath = Path.Combine(_environment.WebRootPath, "content", "templates", template);
-                string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{template}");
-
-                var teamMembers = fundedResearchApp.team_Members.Contains("N/A") ?
-                    string.Empty : string.Join(Environment.NewLine, fundedResearchApp.team_Members);
-                var externalFundingAgency = string.IsNullOrEmpty(model.NameOfExternalFundingAgency) ? string.Empty : model.NameOfExternalFundingAgency;
-
-                using (DocX document = DocX.Load(templatePath))
+                using (var templateStream = new MemoryStream(template.data))
                 {
-                    document.ReplaceText("{{ProjectTitle}}", model.ProjectTitle);
-                    document.ReplaceText("{{ProjectLead}}", model.ProjectLeader);
-                    document.ReplaceText("{{LeadEmail}}", user.Email);
-                    document.ReplaceText("{{ProjectStaff}}", teamMembers);
-                    document.ReplaceText("{{ImplementInsti}}", model.ImplementingInstitution);
-                    document.ReplaceText("{{CollabInsti}}", model.CollaboratingInstitution);
-                    document.ReplaceText("{{ExternalFundingAgency}}", externalFundingAgency);
-                    document.ReplaceText("{{ProjectDur}}", model.ProjectDuration + " month/s");
-                    document.ReplaceText("{{TotalProjectCost}}", "₱ " + model.TotalProjectCost);
-                    document.ReplaceText("{{Objectives}}", model.Objectives);
-                    document.ReplaceText("{{Scope}}", model.Scope);
-                    document.ReplaceText("{{Methodology}}", model.Methodology);
-                    document.ReplaceText("{{ProjectLeaderCaps}}", model.ProjectLeader.ToUpper());
+                    string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{template.file_Name}");
 
-                    document.SaveAs(filledDocumentPath);
+                    var teamMembers = fundedResearchApp.team_Members.Contains("N/A") ?
+                        string.Empty : string.Join(Environment.NewLine, fundedResearchApp.team_Members);
+                    var externalFundingAgency = string.IsNullOrEmpty(model.NameOfExternalFundingAgency) ? string.Empty : model.NameOfExternalFundingAgency;
+
+                    using (DocX document = DocX.Load(templateStream))
+                    {
+                        document.ReplaceText("{{ProjectTitle}}", model.ProjectTitle);
+                        document.ReplaceText("{{ProjectLead}}", model.ProjectLeader);
+                        document.ReplaceText("{{LeadEmail}}", user.Email);
+                        document.ReplaceText("{{ProjectStaff}}", teamMembers);
+                        document.ReplaceText("{{ImplementInsti}}", model.ImplementingInstitution);
+                        document.ReplaceText("{{CollabInsti}}", model.CollaboratingInstitution);
+                        document.ReplaceText("{{ExternalFundingAgency}}", externalFundingAgency);
+                        document.ReplaceText("{{ProjectDur}}", model.ProjectDuration + " month/s");
+                        document.ReplaceText("{{TotalProjectCost}}", "₱ " + model.TotalProjectCost);
+                        document.ReplaceText("{{Objectives}}", model.Objectives);
+                        document.ReplaceText("{{Scope}}", model.Scope);
+                        document.ReplaceText("{{Methodology}}", model.Methodology);
+                        document.ReplaceText("{{ProjectLeaderCaps}}", model.ProjectLeader.ToUpper());
+
+                        document.SaveAs(filledDocumentPath);
+                    }
+
+                    byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
+
+                    var doc = new GeneratedForm
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        FileName = $"Generated_{template.file_Name}",
+                        FileContent = fileBytes,
+                        GeneratedAt = DateTime.Now,
+                        fra_Id = fundedResearchApp.fra_Id
+                    };
+
+                    _context.GeneratedForms.Add(doc);
                 }
-
-                byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
-
-                var doc = new GeneratedForm
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    FileName = $"Generated_{template}",
-                    FileContent = fileBytes,
-                    GeneratedAt = DateTime.Now,
-                    fra_Id = fundedResearchApp.fra_Id
-                };
-
-                _context.GeneratedForms.Add(doc);
             }
             await _context.SaveChangesAsync();
             Directory.Delete(filledFolder, true);
+
             return RedirectToAction("GenerateInfo");
         }
+
 
         [Authorize(Roles = "Faculty")]
         public IActionResult GenerateInfo() // Generated Documents Instructions
@@ -957,43 +962,47 @@ namespace RemcSys.Controllers
             _context.FundedResearches.Add(fr);
             _context.SaveChanges();
 
-            string[] progreports = { "Progress-Report-Template.docx", "Terminal-Report-Template.docx" };
-            string filledFolder = Path.Combine(_environment.WebRootPath, "content", "output");
+            var templates = _context.Guidelines
+                .Where(g => (g.document_Type == "ProgressReport" || g.document_Type == "TerminalReport") && g.file_Type == ".docx")
+                .ToList();
+            string filledFolder = Path.Combine(_environment.WebRootPath, "content", "reports_forms");
             Directory.CreateDirectory(filledFolder);
 
-            foreach (var progreport in progreports)
+            foreach (var template in templates)
             {
-                string templatePath = Path.Combine(_environment.WebRootPath, "content", "progreport", progreport);
-                string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{progreport}");
-
-                var teamMembers = fra.team_Members.Contains("N/A")
-                    ? string.Empty : string.Join(Environment.NewLine, fra.team_Members);
-                
-                using (DocX document = DocX.Load(templatePath))
+                using (var templateStream = new MemoryStream(template.data))
                 {
-                    document.ReplaceText("{{ResearchWorkNum}}", frId);
-                    document.ReplaceText("{{ResearchWorkTitle}}", fra.research_Title);
-                    document.ReplaceText("{{TeamLeader}}", fra.applicant_Name);
-                    document.ReplaceText("{{TeamMembers}}", teamMembers);
-                    document.ReplaceText("{{Duration}}", DateTime.Now.ToString("MMMM d, yyyy") + " - " +
-                        DateTime.Now.AddMonths(fra.project_Duration).ToString("MMMM d, yyyy"));
-                    document.ReplaceText("{{TeamLeaderCaps}}", fra.applicant_Name.ToUpper());
-                    document.ReplaceText("{{TeamMembersCaps}}", string.Join(Environment.NewLine, fra.team_Members).ToUpper());
+                    string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{template.file_Name}");
 
-                    document.SaveAs(filledDocumentPath);
+                    var teamMembers = fra.team_Members.Contains("N/A")
+                        ? string.Empty : string.Join(Environment.NewLine, fra.team_Members);
+
+                    using (DocX document = DocX.Load(templateStream))
+                    {
+                        document.ReplaceText("{{ResearchWorkNum}}", frId);
+                        document.ReplaceText("{{ResearchWorkTitle}}", fra.research_Title);
+                        document.ReplaceText("{{TeamLeader}}", fra.applicant_Name);
+                        document.ReplaceText("{{TeamMembers}}", teamMembers);
+                        document.ReplaceText("{{Duration}}", DateTime.Now.ToString("MMMM d, yyyy") + " - " +
+                            DateTime.Now.AddMonths(fra.project_Duration).ToString("MMMM d, yyyy"));
+                        document.ReplaceText("{{TeamLeaderCaps}}", fra.applicant_Name.ToUpper());
+                        document.ReplaceText("{{TeamMembersCaps}}", string.Join(Environment.NewLine, fra.team_Members).ToUpper());
+
+                        document.SaveAs(filledDocumentPath);
+                    }
+
+                    byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
+                    var doc = new GeneratedForm
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        FileName = $"Generated_{template.file_Name}",
+                        FileContent = fileBytes,
+                        GeneratedAt = DateTime.Now,
+                        fra_Id = fra.fra_Id
+                    };
+
+                    _context.GeneratedForms.Add(doc);
                 }
-
-                byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
-                var doc = new GeneratedForm
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    FileName = $"{progreport}",
-                    FileContent = fileBytes,
-                    GeneratedAt = DateTime.Now,
-                    fra_Id = fra.fra_Id
-                };
-
-                _context.GeneratedForms.Add(doc);
             }
             Directory.Delete(filledFolder, true);
             await _context.SaveChangesAsync();

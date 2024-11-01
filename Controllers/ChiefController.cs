@@ -5,6 +5,7 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
 using Microsoft.ML.Transforms.TimeSeries;
@@ -321,6 +322,11 @@ namespace RemcSys.Controllers
                 if(guidelines.file_Type == ".pdf")
                 {
                     return File(guidelines.data, "application/pdf");
+                }
+                else
+                {
+                    var contentType = GetContentType(guidelines.file_Type);
+                    return File(guidelines.data, contentType, guidelines.file_Name);
                 }
             }
 
@@ -1365,38 +1371,41 @@ namespace RemcSys.Controllers
 
             if (allProgressReportChecked && terminalReportExist && liquidationReportExist)
             {
+                var template = _context.Guidelines
+                    .First(g => g.document_Type == "CertificateCompletion" && g.file_Type == ".docx");
                 string filledFolder = Path.Combine(_webHostEnvironment.WebRootPath, "content", "ceOutput");
                 Directory.CreateDirectory(filledFolder);
 
-                string templatePath = Path.Combine(_webHostEnvironment.WebRootPath, "content", "certofcomp", "Certificate-of-Completion.docx");
-                string filledDocumentPath = Path.Combine(filledFolder, $"Generated_Certificate-of-Completion.docx");
-
-                using (DocX document = DocX.Load(templatePath))
+                using (var templateStream = new MemoryStream(template.data))
                 {
-                    document.ReplaceText("{{ResearchTitle}}", fr.research_Title);
-                    document.ReplaceText("{{FundedType}}", fr.fr_Type);
-                    document.ReplaceText("{{DateToday}}", DateTime.Now.ToString("MMMM d, yyyy"));
+                    string filledDocumentPath = Path.Combine(filledFolder, $"Generated_{template.file_Name}");
+                    using (DocX document = DocX.Load(templateStream))
+                    {
+                        document.ReplaceText("{{ResearchTitle}}", fr.research_Title);
+                        document.ReplaceText("{{FundedType}}", fr.fr_Type);
+                        document.ReplaceText("{{DateToday}}", DateTime.Now.ToString("MMMM d, yyyy"));
 
-                    document.SaveAs(filledDocumentPath);
+                        document.SaveAs(filledDocumentPath);
+                    }
+
+                    byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
+                    var doc = new ProgressReport
+                    {
+                        pr_Id = Guid.NewGuid().ToString(),
+                        file_Name = "Certificate-of-Completion.docx",
+                        file_Type = ".docx",
+                        data = fileBytes,
+                        file_Status = "Checked",
+                        document_Type = "Certificate of Completion",
+                        file_Feedback = null,
+                        file_Uploaded = DateTime.Now,
+                        fr_Id = fr.fr_Id
+                    };
+                    _context.ProgressReports.Add(doc);
                 }
-
-                byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filledDocumentPath);
-                var doc = new ProgressReport
-                {
-                    pr_Id = Guid.NewGuid().ToString(),
-                    file_Name = "Certificate-of-Completion.docx",
-                    file_Type = ".docx",
-                    data = fileBytes,
-                    file_Status = "Checked",
-                    document_Type = "Certificate of Completion",
-                    file_Feedback = null,
-                    file_Uploaded = DateTime.Now,
-                    fr_Id = fr.fr_Id
-                };
 
                 fr.status = "Completed";
                 fr.end_Date = DateTime.Now;
-                _context.ProgressReports.Add(doc);
                 Directory.Delete(filledFolder, true);
                 await _context.SaveChangesAsync();
                 await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, fr.research_Title + " already uploaded the Certificate of Completion. Congratulations!",
