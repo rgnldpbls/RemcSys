@@ -56,6 +56,8 @@ namespace RemcSys.Controllers
                 return RedirectToAction("UnderMaintenance", "Home");
             }
 
+            await RemindEvaluations();
+
             var fundedResearch = await _context.FundedResearches.ToListAsync();
 
             var rankedBranch = _context.FundedResearches
@@ -711,76 +713,147 @@ namespace RemcSys.Controllers
 
             var evaluations = await _context.Evaluations
                 .Where(e => e.evaluation_Status == "Pending")
+                .Include(e => e.evaluator)
+                .Include(e => e.fundedResearchApplication)
                 .ToListAsync();
 
             foreach (var evaluation in evaluations)
             {
-                var evaluator = await _context.Evaluator
-                    .Where(e => e.evaluator_Id == evaluation.evaluator_Id)
-                    .FirstOrDefaultAsync();
-
-                var fra = await _context.FundedResearchApplication
-                    .Where(f => f.fra_Id == evaluation.fra_Id)
-                    .FirstOrDefaultAsync();
-
                 var daysLeft = (evaluation.evaluation_Deadline - today).Days;
                 if(daysLeft < 0)
                 {
                     evaluation.evaluation_Status = "Missed";
-                    await _context.SaveChangesAsync();
                 }
-                else if(daysLeft == 0)
+                else if(daysLeft == 0 && !evaluation.reminded_Today)
                 {
-                    var content = "This is an urgent reminder that the evaluation for the research titled " + fra.research_Title + " is due today.";
-                    await SendRemindEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, content);
-                    await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "This is an urgent reminder that the evaluation for the research titled "
-                        + fra.research_Title + " is due today.", false, false, true, fra.fra_Id);
+                    var content = $"This is an urgent reminder that the evaluation for the research titled {evaluation.fundedResearchApplication.research_Title} is due today.";
+                    
+                    await SendRemindEvaluatorEmail(
+                        evaluation.evaluator.evaluator_Email, 
+                        evaluation.fundedResearchApplication.research_Title, 
+                        evaluation.evaluator.evaluator_Name, 
+                        content);
+
+                    await _actionLogger.LogActionAsync(
+                        evaluation.evaluator.evaluator_Name, 
+                        evaluation.fundedResearchApplication.fra_Type, content, 
+                        false, false, true, 
+                        evaluation.fundedResearchApplication.fra_Id);
+
+                    evaluation.reminded_Today = true;
+                    _context.SaveChanges();
                 }
-                else if(daysLeft == 1)
+                else if(daysLeft == 1 && !evaluation.reminded_OneDayBefore)
                 {
-                    var content = "This is a reminder that your evaluation for the research titled " + fra.research_Title + 
-                        " is due tomorrow. We kindly request you to submit  the completed Grading and Comments forms before the deadline of " 
-                        + evaluation.evaluation_Deadline.ToString("MMMM d, yyyy") + ".";
-                    await SendRemindEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, content);
-                    await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "This is a reminder that your evaluation for the research titled "
-                        + fra.research_Title + " is due tomorrow.", false, false, true, fra.fra_Id);
+                    var content = $"This is a reminder that your evaluation for the research titled {evaluation.fundedResearchApplication.research_Title} is due tomorrow. We kindly request you to submit  the completed Grading and Comments forms before the deadline of {evaluation.evaluation_Deadline.ToString("MMMM d, yyyy")}.";
+                    
+                    await SendRemindEvaluatorEmail(
+                        evaluation.evaluator.evaluator_Email, 
+                        evaluation.fundedResearchApplication.research_Title, 
+                        evaluation.evaluator.evaluator_Name, 
+                        content);
+
+                    await _actionLogger.LogActionAsync(
+                        evaluation.evaluator.evaluator_Name, 
+                        evaluation.fundedResearchApplication.fra_Type, content, 
+                        false, false, true, 
+                        evaluation.fundedResearchApplication.fra_Id);
+
+                    evaluation.reminded_OneDayBefore = true;
+                    _context.SaveChanges();
                 }
-                else if(daysLeft == 3)
+                else if(daysLeft == 3 && !evaluation.reminded_ThreeDaysBefore)
                 {
-                    var content = "This is a gentle reminder that the deadline for submitting your evaluation of the research titled " + 
-                        fra.research_Title + " is approaching, with 3 days remaining until " + 
-                        evaluation.evaluation_Deadline.ToString("MMMM d, yyyy") + ".";
-                    await SendRemindEvaluatorEmail(evaluator.evaluator_Email, fra.research_Title, evaluator.evaluator_Name, content);
-                    await _actionLogger.LogActionAsync(evaluator.evaluator_Name, fra.fra_Type, "This is a gentle reminder that the deadline for submitting your evaluation of the research titled "
-                        + fra.research_Title + " is approaching, with 3 days remaining until deadline.", false, false, true, fra.fra_Id);
+                    var content = $"This is a gentle reminder that the deadline for submitting your evaluation of the research titled {evaluation.fundedResearchApplication.research_Title} is approaching, with 3 days remaining until {evaluation.evaluation_Deadline.ToString("MMMM d, yyyy")}.";
+                    
+                    await SendRemindEvaluatorEmail(
+                        evaluation.evaluator.evaluator_Email, 
+                        evaluation.fundedResearchApplication.research_Title, 
+                        evaluation.evaluator.evaluator_Name, 
+                        content);
+
+                    await _actionLogger.LogActionAsync(
+                        evaluation.evaluator.evaluator_Name, 
+                        evaluation.fundedResearchApplication.fra_Type, content, 
+                        false, false, true, 
+                        evaluation.fundedResearchApplication.fra_Id);
+
+                    evaluation.reminded_ThreeDaysBefore = true;
+                    _context.SaveChanges();
+                }
+            }
+
+            var overDueEvaluations = await _context.Evaluations.Where(e => e.evaluation_Status == "Missed" && e.evaluation_Deadline < today)
+                .Include(e => e.evaluator)
+                .Include(e => e.fundedResearchApplication)
+                .ToListAsync();
+            foreach (var evaluation in overDueEvaluations)
+            {
+                var daysPastDeadline = (today - evaluation.evaluation_Deadline).Days;
+                if(daysPastDeadline == 1 && !evaluation.reminded_OneDayOverdue)
+                {
+                    var content = $"This is a follow-up regarding the overdue evaluation for the research titled {evaluation.fundedResearchApplication.research_Title}. The deadline was on {evaluation.evaluation_Deadline.ToString("MMMM d, yyyy")}, and the submission is now 1 day overdue";
+
+                    await SendOverDueEvaluatorEmail(
+                        evaluation.evaluator.evaluator_Email,
+                        evaluation.fundedResearchApplication.research_Title,
+                        evaluation.evaluator.evaluator_Name,
+                        content);
+
+                    await _actionLogger.LogActionAsync(
+                        evaluation.evaluator.evaluator_Name,
+                        evaluation.fundedResearchApplication.fra_Type, content,
+                        false, false, true,
+                        evaluation.fundedResearchApplication.fra_Id);
+
+                    evaluation.reminded_OneDayOverdue = true;
+                    _context.SaveChanges();
+                }
+                else if(daysPastDeadline == 3 && !evaluation.reminded_ThreeDaysOverdue)
+                {
+                    var content = $"This is a follow-up regarding the overdue evaluation for the research titled {evaluation.fundedResearchApplication.research_Title}. The deadline was on {evaluation.evaluation_Deadline.ToString("MMMM d, yyyy")}, and the submission is now 3 day overdue";
+
+                    await SendOverDueEvaluatorEmail(
+                        evaluation.evaluator.evaluator_Email,
+                        evaluation.fundedResearchApplication.research_Title,
+                        evaluation.evaluator.evaluator_Name,
+                        content);
+
+                    await _actionLogger.LogActionAsync(
+                        evaluation.evaluator.evaluator_Name,
+                        evaluation.fundedResearchApplication.fra_Type, content,
+                        false, false, true,
+                        evaluation.fundedResearchApplication.fra_Id);
+
+                    evaluation.reminded_ThreeDaysOverdue = true;
+                    _context.SaveChanges();
+                }
+                else if(daysPastDeadline == 7 && !evaluation.reminded_SevenDaysOverdue)
+                {
+                    var content = $"We are reaching out again as the evaluation for the research titled {evaluation.fundedResearchApplication.research_Title} is now 7 days overdue. Your feedback is essential to the research's progress, and we kindly ask that you complete the Grading and Comments forms as soon as possible.";
+
+                    await SendOverDueEvaluatorEmail(
+                        evaluation.evaluator.evaluator_Email,
+                        evaluation.fundedResearchApplication.research_Title,
+                        evaluation.evaluator.evaluator_Name,
+                        content);
+
+                    await _actionLogger.LogActionAsync(
+                        evaluation.evaluator.evaluator_Name,
+                        evaluation.fundedResearchApplication.fra_Type, content,
+                        false, false, true,
+                        evaluation.fundedResearchApplication.fra_Id);
+
+                    evaluation.reminded_SevenDaysOverdue = true;
+                    _context.SaveChanges();
                 }
             }
         }
 
         public async Task SendRemindEvaluatorEmail(string email, string researchTitle, string name, string content)
         {
-            try
-            {
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Research Evaluation and Monitoring Center", "remc.rmo2@gmail.com")); //Name & Email
-
-                string recipientName = email.Split('@')[0];
-                message.To.Add(new MailboxAddress(recipientName, email));
-
-                message.Subject = "Research Evaluation Deadline - " + researchTitle;
-
-                var bodyBuilder = new BodyBuilder();
-
-                string footerImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "Footer.png");
-                if (!System.IO.File.Exists(footerImagePath))
-                {
-                    throw new FileNotFoundException($"Footer image not found at: {footerImagePath}");
-                }
-
-                var image = bodyBuilder.LinkedResources.Add(footerImagePath);
-                image.ContentId = MimeUtils.GenerateMessageId();
-
-                var htmlBody = $@"
+            var subject = "Research Evaluation Deadline - " + researchTitle;
+            var htmlBody = $@"
                 <html>
                     <body style='font-family: Arial, sans-serif;'  font-size: 20px>
                         <br>
@@ -809,28 +882,53 @@ namespace RemcSys.Controllers
                         <footer style='margin-top: 30px; font-size: 1em;'>
                             <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
                             For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
-                            <img src='cid:{image.ContentId}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
                         </footer>
                     </body>
                 </html>";
-
-                bodyBuilder.HtmlBody = htmlBody;
-                message.Body = bodyBuilder.ToMessageBody();
-
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("remc.rmo2@gmail.com", "rhmh oyge mwky ozzx"); //Email & App Password
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error occurred while sending email: {ex.Message}");
-            }
+            await SendEmailAsync(email, subject, htmlBody);
         }
 
+        public async Task SendOverDueEvaluatorEmail(string email, string researchTitle, string name, string content)
+        {
+            var subject = "Follow Up: Research Evaluation - " + researchTitle;
+            var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                        <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+                    
+                            Greetings! <br><br>
+                            <strong>{content}</strong>
+
+                        </div
+                        <div style='margin-bottom: 22px;'>
+                            <strong>Forms to be completed:</strong>
+                            <ol>
+                                <li><strong>Grading Form</strong>: Includes scoring per criterion and a section for comments and suggestions.</li>
+                                <li><strong>Comments Form</strong>: A form for providing detailed comments and suggestions only.</li>
+                            </ol>
+                        </div>
+
+                        <div style='margin-bottom: 22px;'>
+
+                            Please submit the Grading and Comments forms at your earliest convenience to ensure the research's timely progress. 
+                            If you need assistance, feel free to contact the REMC Chief.
+
+                        </div>
+                    
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
+                    </body>
+                </html>";
+            await SendEmailAsync(email, subject, htmlBody);
+        }
 
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> ChiefResearchEvaluation(string id)

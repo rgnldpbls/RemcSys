@@ -27,6 +27,12 @@ namespace RemcSys.Models
         public string UserId { get; set; }
         public bool isArchive { get; set; }
         public ICollection<ProgressReport> ProgressReports { get; set; }
+        public bool reminded_ThreeDaysBefore { get; set; }
+        public bool reminded_OneDayBefore { get; set; }
+        public bool reminded_Today { get; set; }
+        public bool reminded_OneDayOverdue { get; set; }
+        public bool reminded_ThreeDaysOverdue { get; set; }
+        public bool reminded_SevenDaysOverdue { get; set; }
     }
 
     public class UFRProjectCost

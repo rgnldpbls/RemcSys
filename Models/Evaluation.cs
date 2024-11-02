@@ -16,5 +16,11 @@ namespace RemcSys.Models
         public string fra_Id { get; set; }
         public FundedResearchApplication? fundedResearchApplication { get; set; }
         public Evaluator? evaluator { get; set; }
+        public bool reminded_ThreeDaysBefore { get; set; }
+        public bool reminded_OneDayBefore { get; set; }
+        public bool reminded_Today { get; set; }
+        public bool reminded_OneDayOverdue { get; set; }
+        public bool reminded_ThreeDaysOverdue { get; set; }
+        public bool reminded_SevenDaysOverdue { get; set; }
     }
 }

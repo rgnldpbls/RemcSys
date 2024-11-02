@@ -321,9 +321,9 @@
         @foreach (var criteria in Model.Item3)
         {
             <div class="criteria">
-                <label class="mx-3"><b>@criteria.Name (Weight: @criteria.Weight%)</b></label>
+                <label class="mx-3"><b>[@criteria.Id] @criteria.Name (Weight: @criteria.Weight%)</b></label>
                 <a href="@Url.Action("RemoveCriteria", "Chief", new {id = criteria.Id})" class="btn btn-sm btn-danger"
-                   onclick="return confirm('Are you sure you want to remove this sub-category?');">Remove</a>
+                   onclick="return confirm('Are you sure you want to remove this criteria?');">Remove</a>
 
                 <h6>Sub-Categories: </h6>
                 <ul>

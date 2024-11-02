@@ -226,7 +226,15 @@ namespace RemcSys.Controllers
                 return NotFound("User not found!");
             }
             var evaluator = await _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefaultAsync();
+            if(evaluator == null)
+            {
+                return NotFound("Evaluator not found!");
+            }
             var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fraId).FirstOrDefaultAsync();
+            if(fra == null)
+            {
+                return NotFound("Funded Research Application not found!");
+            }
 
             double tot1 = aqScore + reScore;
             double d1 = tot1 / 20;
@@ -302,6 +310,10 @@ namespace RemcSys.Controllers
             }
 
             var evals = _context.Evaluations.Where(e => e.fra_Id == fraId && e.evaluator_Id == evaluator.evaluator_Id).FirstOrDefault();
+            if(evals == null)
+            {
+                return NotFound("Evaluations not found!");
+            }
             evals.evaluation_Grade = g1;
             evals.evaluation_Status = g1 >= 70 ? "Approved" : "Rejected";
             evals.evaluation_Date = DateTime.Now;
@@ -318,12 +330,24 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles = "Evaluator")]
-        public async Task<IActionResult> GenerateEvalsForm(string id)
+        public async Task<IActionResult> GenerateEvalsForm(string id) // List of Generated Evaluation Form
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
             var evaluator = await _context.Evaluator.Where(e => e.UserId == user.Id).FirstOrDefaultAsync();
+            if(evaluator == null)
+            {
+                return NotFound("Evaluator not found!");
+            }
             var evaluations = await _context.Evaluations.Where(e => e.fra_Id == id && e.evaluator_Id == evaluator.evaluator_Id)
                 .FirstOrDefaultAsync();
+            if(evaluations == null)
+            {
+                return NotFound("Evaluation not found!");
+            }
             var fr = await _context.FileRequirement.Where(f => f.fra_Id == evaluations.fra_Id && f.document_Type == "EvaluationForms"
                 && f.file_Name.Contains(evaluator.evaluator_Name))
                 .OrderBy(f => f.file_Name)
@@ -333,18 +357,18 @@ namespace RemcSys.Controllers
             return View(fr);
         }
 
-        public async Task<IActionResult> Download(string id)
+        public async Task<IActionResult> Download(string id) // Download Non-PDF file
         {
             var document = await _context.FileRequirement.FindAsync(id);
 
             if (document == null)
             {
-                return NotFound();
+                return NotFound("File not found!");
             }
             return File(document.data, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", document.file_Name);
         }
 
-        public IActionResult PreviewFile(string id)
+        public IActionResult PreviewFile(string id) // Preview PDF file
         {
             var file = _context.FileRequirement.FirstOrDefault(f => f.fr_Id == id);
             if(file != null)
@@ -365,9 +389,13 @@ namespace RemcSys.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddEvent(string eventTitle, DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> AddEvent(string eventTitle, DateTime startDate, DateTime endDate) // Adding Event
         {
             var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
             if (ModelState.IsValid)
             {
                 var addEvent = new CalendarEvent
@@ -389,10 +417,13 @@ namespace RemcSys.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserEvents()
+        public async Task<IActionResult> GetUserEvents() // Getting Event
         {
             var user = await _userManager.GetUserAsync(User);
-
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
             var events = _context.CalendarEvents
                 .Where(e => e.Visibility == "Broadcasted" || (e.Visibility == "JustYou" && e.UserId == user.Id))
                 .Select(e => new
@@ -409,7 +440,7 @@ namespace RemcSys.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteEvent(string id)
+        public async Task<IActionResult> DeleteEvent(string id) // Delete an event
         {
             var events = await _context.CalendarEvents.FindAsync(id);
             if (events != null && events.Visibility == "JustYou")
