@@ -57,6 +57,7 @@ namespace RemcSys.Controllers
             }
 
             await RemindEvaluations();
+            await RemindSubmitProgressReport();
 
             var fundedResearch = await _context.FundedResearches.ToListAsync();
 
@@ -417,7 +418,6 @@ namespace RemcSys.Controllers
                 e.evaluator_Name != researchApp.applicant_Name && !researchApp.team_Members.Contains(e.evaluator_Name)).ToList();
             return eligibleEvaluators;
         }
-
 
         private async Task SendEmailAsync(string email, string subject, string htmlBody) // Email Configuration
         {
@@ -916,6 +916,245 @@ namespace RemcSys.Controllers
                             Please submit the Grading and Comments forms at your earliest convenience to ensure the research's timely progress. 
                             If you need assistance, feel free to contact the REMC Chief.
 
+                        </div>
+                    
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
+                    </body>
+                </html>";
+            await SendEmailAsync(email, subject, htmlBody);
+        }
+
+        public async Task RemindSubmitProgressReport()
+        {
+            var today = DateTime.Today;
+            var fundedResearches = await _context.FundedResearches.ToListAsync();
+            foreach(var fundedResearch in fundedResearches)
+            {
+                int numReports = 4;
+                int interval = fundedResearch.project_Duration / numReports;
+                var deadlines = Enumerable.Range(1, numReports)
+                    .Select(i => fundedResearch.start_Date.AddMonths(i * interval)).ToList();
+
+                List<DateTime> extensionDeadlines = new List<DateTime>();
+                if(fundedResearch.isExtension1 || fundedResearch.isExtension2)
+                {
+                    int extraReports = fundedResearch.isExtension1 ? 1 : 2;
+                    int extensionInterval = fundedResearch.project_Duration / numReports;
+                    extensionDeadlines = Enumerable.Range(1, extraReports)
+                        .Select(i => fundedResearch.end_Date.AddMonths(i * extensionInterval)).ToList();
+                }
+
+                var allDeadlines = deadlines.Concat(extensionDeadlines).ToList();
+                var statuses = new[]
+                {
+                    "Ongoing",
+                    "Checked Progress Report No.1",
+                    "Checked Progress Report No.2",
+                    "Checked Progress Report No.3",
+                    "Checked Progress Report No.4",
+                    "Checked Progress Report No.5"
+                };
+
+                for (int i = 0; i < allDeadlines.Count; i++)
+                {
+                    int daysLeft = (allDeadlines[i] - today).Days;
+                    bool remind3DaysBefore = daysLeft == 3 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_ThreeDaysBefore;
+                    bool remindDueTomorrow = daysLeft == 1 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_OneDayBefore;
+                    bool remindToday = daysLeft == 0 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_Today;
+                    if(remind3DaysBefore)
+                    {
+                        var content = $"This is a gentle reminder that your progress report for the research titled {fundedResearch.research_Title} is due in 3 days. Please ensure that the report is submitted on or before {allDeadlines[i]:MMMM d, yyyy} to avoid any delays in the research process.";
+                        var subContent = $"If you have any questions or require assistance, feel free to contact the REMC Chief";
+
+                        await SendRemindPREmail(
+                            fundedResearch.teamLead_Email,
+                            fundedResearch.research_Title,
+                            fundedResearch.team_Leader,
+                            content, subContent);
+
+                        await _actionLogger.LogActionAsync(
+                            fundedResearch.team_Leader,
+                            fundedResearch.fr_Type,
+                            content,
+                            true, false, false,
+                            fundedResearch.fra_Id);
+
+                        fundedResearch.reminded_ThreeDaysBefore = true;
+                        await _context.SaveChangesAsync();
+                        break;
+                    }
+                    else if (remindDueTomorrow)
+                    {
+                        var content = $"This is a gentle reminder that your progress report for the research titled {fundedResearch.research_Title} is due tomorrow. Please ensure that the report is submitted on or before {allDeadlines[i]:MMMM d, yyyy} to avoid any delays in the research process.";
+                        var subContent = $"If you have any questions or require assistance, feel free to contact the REMC Chief";
+
+                        await SendRemindPREmail(
+                            fundedResearch.teamLead_Email,
+                            fundedResearch.research_Title,
+                            fundedResearch.team_Leader,
+                            content, subContent);
+
+                        await _actionLogger.LogActionAsync(
+                            fundedResearch.team_Leader,
+                            fundedResearch.fr_Type,
+                            content,
+                            true, false, false,
+                            fundedResearch.fra_Id);
+
+                        fundedResearch.reminded_OneDayBefore = true;
+                        await _context.SaveChangesAsync();
+                        break;
+                    }
+                    else if (remindToday)
+                    {
+                        var content = $"This is an urgent reminder that your progress report for your research titled {fundedResearch.research_Title} is due today. Please make sure to submit it by the end of the day to avoid any delays.";
+                        var subContent = $"We appreciate your immediate attention to this matter. Should you require any assitance, don't hesitate to contact us.";
+
+                        await SendRemindPREmail(
+                            fundedResearch.teamLead_Email,
+                            fundedResearch.research_Title,
+                            fundedResearch.team_Leader,
+                            content, subContent);
+
+                        await _actionLogger.LogActionAsync(
+                            fundedResearch.team_Leader,
+                            fundedResearch.fr_Type,
+                            content,
+                            true, false, false,
+                            fundedResearch.fra_Id);
+
+                        fundedResearch.reminded_Today = true;
+                        await _context.SaveChangesAsync();
+                        break;
+                    }
+
+                    int daysPastDeadline = (today - allDeadlines[i]).Days;
+                    bool remind1DayAfter = daysPastDeadline == 1 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_OneDayOverdue;
+                    bool remind3DaysAfter = daysPastDeadline == 3 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_ThreeDaysOverdue;
+                    bool remind7DaysAfter = daysPastDeadline == 7 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_SevenDaysOverdue;
+                    if (remind1DayAfter)
+                    {
+                        var content = $"We noticed that your progress report for the research titled {fundedResearch.research_Title} has not been submitted, and the deadline has been passed. Please submit the report as soon as possible to avoid any further delays in the research process.";
+                        var subContent = $"Kindly note that continued delay may result in sanctions from the Research Evaluation and Monitoring Center (REMC), and the University.";
+
+                        await SendOverDuePREmail(
+                            fundedResearch.teamLead_Email,
+                            fundedResearch.research_Title,
+                            fundedResearch.team_Leader,
+                            content, subContent);
+
+                        await _actionLogger.LogActionAsync(
+                            fundedResearch.team_Leader,
+                            fundedResearch.fr_Type,
+                            content,
+                            true, false, false,
+                            fundedResearch.fra_Id);
+
+                        fundedResearch.reminded_OneDayOverdue = true;
+                        await _context.SaveChangesAsync();
+                        break;
+                    }
+                    else if (remind3DaysAfter)
+                    {
+                        var content = $"This is a follow-up regarding the overdue progress report for your research titled {fundedResearch.research_Title}, which is now 3 days late. Please be advised that failure to submit the report promptly may lead to institutional sanctions, which could affect the status of your research project.";
+                        var subContent = $"We kindly urge you to submit the report as soon as possible to avoid these penalties.";
+
+                        await SendOverDuePREmail(
+                            fundedResearch.teamLead_Email,
+                            fundedResearch.research_Title,
+                            fundedResearch.team_Leader,
+                            content, subContent);
+
+                        await _actionLogger.LogActionAsync(
+                            fundedResearch.team_Leader,
+                            fundedResearch.fr_Type,
+                            content,
+                            true, false, false,
+                            fundedResearch.fra_Id);
+
+                        fundedResearch.reminded_ThreeDaysOverdue = true;
+                        await _context.SaveChangesAsync();
+                        break;
+                    }
+                    else if (remind7DaysAfter)
+                    {
+                        var content = $"This is the final notice regarding the overdue progress report for your research titled {fundedResearch.research_Title}, which is now 7 days late. In line with University policies, your failure to submit the report on time will lead to sanctions imposed by Research Evaluation and Monitoring Center (REMC).";
+                        var subContent = $"Please be advised that further delay may lead to disqualification of your research project and other penalties as the university may deem appropriate, including suspension of project activities, funding withdrawal, or exclusion from future research opportunities. We strongly urge you to submit the report immediately to avoid these actions.";
+
+                        await SendOverDuePREmail(
+                            fundedResearch.teamLead_Email,
+                            fundedResearch.research_Title,
+                            fundedResearch.team_Leader,
+                            content, subContent);
+
+                        await _actionLogger.LogActionAsync(
+                            fundedResearch.team_Leader,
+                            fundedResearch.fr_Type,
+                            content,
+                            true, false, false,
+                            fundedResearch.fra_Id);
+
+                        fundedResearch.reminded_SevenDaysOverdue = true;
+                        await _context.SaveChangesAsync();
+                        break;
+                    }
+                }
+            }
+        }
+
+        public async Task SendRemindPREmail(string email, string researchTitle, string name, string content, string subContent)
+        {
+            var subject = "Reminder: Progress Report Deadline - " + researchTitle;
+            var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                    <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+            
+                            Greetings! <br><br>
+                            <strong>{content}</strong>
+
+                        </div
+
+                        <div style='margin-bottom: 22px;'>
+                            <strong>{subContent}</strong>
+                        </div>
+            
+                        <hr>
+
+                        <footer style='margin-top: 30px; font-size: 1em;'>
+                            <strong><em>This is an automated email from the Research Evaluation Management Center (REMC). Please do not reply to this email.
+                            For inquiries, contact the chief at <strong>chief@example.com</strong>.</em></strong><br><br>
+                            <img src='cid:{{footerImageContentId}}' alt='Footer Image' style='width: 100%; max-width: 800px; height: auto;' />
+                        </footer>
+                    </body>
+                </html>";
+            await SendEmailAsync(email, subject, htmlBody);
+        }
+
+        public async Task SendOverDuePREmail(string email, string researchTitle, string name, string content, string subContent)
+        {
+            var subject = "Progress Report Submission Overdue - " + researchTitle;
+            var htmlBody = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif;'  font-size: 20px>
+                        <br>
+                        <div style='margin-bottom: 22px;'>
+                            Dear Professor {name},<br><br>
+                    
+                            Greetings! <br><br>
+                            <strong>{content}</strong>
+                        </div
+
+                        <div style='margin-bottom: 22px;'>
+                            <strong>{subContent}</strong>
                         </div>
                     
                         <hr>

@@ -160,6 +160,12 @@ namespace RemcSys.Controllers
                 };
                 _context.ProgressReports.Add(progReport);
                 fr.status = $"Submitted {docuType}";
+                fr.reminded_ThreeDaysBefore = false;
+                fr.reminded_OneDayBefore = false;
+                fr.reminded_Today = false;
+                fr.reminded_OneDayOverdue = false;
+                fr.reminded_ThreeDaysOverdue = false;
+                fr.reminded_SevenDaysOverdue = false;
             }
             await _actionLogger.LogActionAsync(fr.team_Leader, fr.fr_Type, 
                 fr.research_Title + $" already uploaded the {docuType}.", true, true, false, fr.fra_Id);
