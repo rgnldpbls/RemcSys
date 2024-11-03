@@ -43,7 +43,7 @@ namespace RemcSys.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
             _webHostEnvironment = webHostEnvironment;
-            _mlContext = new MLContext();
+            _mlContext = new MLContext(seed: 0);
             _smtpUser = Environment.GetEnvironmentVariable("SMTP_USER") ?? "remc.rmo2@gmail.com";
             _smtpPass = Environment.GetEnvironmentVariable("SMTP_PASS") ?? "rhmh oyge mwky ozzx";
         }
@@ -2270,29 +2270,86 @@ namespace RemcSys.Controllers
             {
                 var data = new List<UFRProjectCost>
                 {
-                    new UFRProjectCost {ProjectCosts = 575000, Year = 2020},
-                    new UFRProjectCost {ProjectCosts = 615000, Year = 2020},
-                    new UFRProjectCost {ProjectCosts = 595000, Year = 2020},
-                    new UFRProjectCost {ProjectCosts = 713500, Year = 2021},
-                    new UFRProjectCost {ProjectCosts = 546000, Year = 2021},
-                    new UFRProjectCost {ProjectCosts = 145000, Year = 2021},
-                    new UFRProjectCost {ProjectCosts = 560000, Year = 2021},
-                    new UFRProjectCost {ProjectCosts = 737000, Year = 2021},
-                    new UFRProjectCost {ProjectCosts = 831000, Year = 2022},
-                    new UFRProjectCost {ProjectCosts = 378000, Year = 2022},
-                    new UFRProjectCost {ProjectCosts = 512000, Year = 2022},
-                    new UFRProjectCost {ProjectCosts = 498000, Year = 2022},
-                    new UFRProjectCost {ProjectCosts = 585000, Year = 2023},
-                    new UFRProjectCost {ProjectCosts = 488000, Year = 2023},
-                    new UFRProjectCost {ProjectCosts = 698000, Year = 2023},
-                    new UFRProjectCost {ProjectCosts = 541000, Year = 2023},
-                    new UFRProjectCost {ProjectCosts = 713000, Year = 2023},
-                    new UFRProjectCost {ProjectCosts = 564000, Year = 2024},
-                    new UFRProjectCost {ProjectCosts = 491000, Year = 2024},
-                    new UFRProjectCost {ProjectCosts = 575000, Year = 2024},
-                    new UFRProjectCost {ProjectCosts = 582000, Year = 2024},
-                    new UFRProjectCost {ProjectCosts = 543000, Year = 2024},
-                    new UFRProjectCost {ProjectCosts = 612000, Year = 2024}
+                    new UFRProjectCost { ProjectCosts = 450000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 460000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 470000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 480000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 490000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 455000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 475000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 465000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 495000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 500000, Year = 2016 },
+                    new UFRProjectCost { ProjectCosts = 520000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 530000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 540000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 550000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 560000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 525000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 535000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 545000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 555000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 565000, Year = 2017 },
+                    new UFRProjectCost { ProjectCosts = 600000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 610000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 620000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 630000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 640000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 605000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 615000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 625000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 635000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 645000, Year = 2018 },
+                    new UFRProjectCost { ProjectCosts = 670000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 680000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 690000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 700000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 710000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 675000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 685000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 695000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 705000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 715000, Year = 2019 },
+                    new UFRProjectCost { ProjectCosts = 575000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 615000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 595000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 620000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 630000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 580000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 610000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 605000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 640000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 625000, Year = 2020 },
+                    new UFRProjectCost { ProjectCosts = 713500, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 546000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 145000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 560000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 737000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 720000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 690000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 660000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 705000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 680000, Year = 2021 },
+                    new UFRProjectCost { ProjectCosts = 831000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 378000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 512000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 498000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 450000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 480000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 510000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 490000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 530000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 520000, Year = 2022 },
+                    new UFRProjectCost { ProjectCosts = 585000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 488000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 698000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 541000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 713000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 590000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 605000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 630000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 680000, Year = 2023 },
+                    new UFRProjectCost { ProjectCosts = 600000, Year = 2023 },
                 };
                 
                 var yearlyCosts = data.GroupBy(d => d.Year)
@@ -2300,56 +2357,88 @@ namespace RemcSys.Controllers
                     .OrderBy(x => x.Year)
                     .ToList();
 
-                var dataView = _mlContext.Data.LoadFromEnumerable(yearlyCosts);
-
-                var forecastingPipeline = _mlContext.Forecasting.ForecastBySsa(
-                    outputColumnName: nameof(ForecastOutput.ForecastedCosts),
-                    inputColumnName: nameof(UFRProjectCost.ProjectCosts),
-                    windowSize: 2,
-                    seriesLength: yearlyCosts.Count,
-                    trainSize: yearlyCosts.Count,
-                    horizon: 2,
-                    confidenceLevel: 0.95f,
-                    confidenceLowerBoundColumn: nameof(ForecastOutput.LowerBoundCosts),
-                    confidenceUpperBoundColumn: nameof(ForecastOutput.UpperBoundCosts));
-
-                var model = forecastingPipeline.Fit(dataView);
-                var forecastEngine = model.CreateTimeSeriesEngine<UFRProjectCost, ForecastOutput>(_mlContext);
-                var forecast = forecastEngine.Predict();
-
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using var package = new ExcelPackage();
                 var worksheet = package.Workbook.Worksheets.Add("Forecast");
 
                 worksheet.Cells[1, 1].Value = "Year";
-                worksheet.Cells[1, 2].Value = "Total Cost";
-                worksheet.Cells[1, 3].Value = "Forecasted Cost";
+                worksheet.Cells[1, 2].Value = "Total University Funded Research Cost";
+                worksheet.Cells[1, 3].Value = "Forecasted Year 1";
+                worksheet.Cells[1, 4].Value = "Forecasted Fund of Year 1";
+                worksheet.Cells[1, 5].Value = "Forecasted Year 2";
+                worksheet.Cells[1, 6].Value = "Forecasted Fund of Year 2";
 
                 int row = 2;
                 foreach(var item in yearlyCosts)
                 {
                     worksheet.Cells[row, 1].Value = item.Year;
                     worksheet.Cells[row, 2].Value = item.ProjectCosts;
+
+                    if (yearlyCosts.Where(y => y.Year <= item.Year).Count() >= 5)
+                    {
+                        var currentData = yearlyCosts.Where(y => y.Year <= item.Year).ToList();
+                        var dataView = _mlContext.Data.LoadFromEnumerable(currentData);
+
+                        var forecastingPipeline = _mlContext.Forecasting.ForecastBySsa(
+                            outputColumnName: nameof(ForecastOutput.ForecastedCosts),
+                            inputColumnName: nameof(UFRProjectCost.ProjectCosts),
+                            windowSize: 2,
+                            seriesLength: currentData.Count,
+                            trainSize: currentData.Count,
+                            horizon: 2,
+                            confidenceLevel: 0.95f,
+                            confidenceLowerBoundColumn: nameof(ForecastOutput.LowerBoundCosts),
+                            confidenceUpperBoundColumn: nameof(ForecastOutput.UpperBoundCosts)
+                        );
+
+                        var model = forecastingPipeline.Fit(dataView);
+                        var forecastEngine = model.CreateTimeSeriesEngine<UFRProjectCost, ForecastOutput>(_mlContext);
+                        var forecast = forecastEngine.Predict();
+
+                        int forecastYear1 = item.Year + 1;
+                        float forecastedFundYear1 = forecast.ForecastedCosts[0];
+                        worksheet.Cells[row, 3].Value = forecastYear1;
+                        worksheet.Cells[row, 4].Value = Math.Round(forecast.ForecastedCosts[0], 2);
+
+                        currentData.Add(new UFRProjectCost { Year = forecastYear1, ProjectCosts = forecastedFundYear1 });
+
+                        var updatedDataView = _mlContext.Data.LoadFromEnumerable(currentData);
+                        var updatedForecastingPipeline = _mlContext.Forecasting.ForecastBySsa(
+                            outputColumnName: nameof(ForecastOutput.ForecastedCosts),
+                            inputColumnName: nameof(UFRProjectCost.ProjectCosts),
+                            windowSize: 2,
+                            seriesLength: currentData.Count,
+                            trainSize: currentData.Count,
+                            horizon: 2,
+                            confidenceLevel: 0.95f,
+                            confidenceLowerBoundColumn: nameof(ForecastOutput.LowerBoundCosts),
+                            confidenceUpperBoundColumn: nameof(ForecastOutput.UpperBoundCosts)
+                        );
+
+                        var updatedModel = updatedForecastingPipeline.Fit(updatedDataView);
+                        var updatedForecastingEngine = updatedModel.CreateTimeSeriesEngine<UFRProjectCost, ForecastOutput>(_mlContext);
+                        var updatedForecast = updatedForecastingEngine.Predict();
+
+                        int forecastYear2 = item.Year + 2;
+                        worksheet.Cells[row, 5].Value = forecastYear2;
+                        worksheet.Cells[row, 6].Value = Math.Round(updatedForecast.ForecastedCosts[1], 2);
+                    }
+
                     row++;
                 }
 
-                int forecastYear = data.Max(d => d.Year) + 1;
-                for(int i = 0; i < forecast.ForecastedCosts.Length; i++)
-                {
-                    worksheet.Cells[row, 1].Value = forecastYear + i;
-                    worksheet.Cells[row, 3].Value = forecast.ForecastedCosts[i];
-                    row++;
-                }
-
-                worksheet.Cells["A1:C1"].Style.Font.Bold = true;
-                worksheet.Cells.AutoFitColumns();
+                worksheet.Cells[1, 1, 1, 6].Style.Font.Bold = true;
+                worksheet.Cells[2, 2, row - 1, 2].Style.Numberformat.Format = "#,##0.00";
+                worksheet.Cells[2, 4, row - 1, 4].Style.Numberformat.Format = "#,##0.00";
+                worksheet.Cells[2, 6, row - 1, 6].Style.Numberformat.Format = "#,##0.00";
+                worksheet.Cells[1, 1, row - 1, 6].AutoFitColumns();
 
                 var excelData = package.GetAsByteArray();
-
+                var date = DateTime.Now.ToString("MMddyyyy:HHmmss");
                 var genRep = new GenerateReport
                 {
                     gr_Id = Guid.NewGuid().ToString(),
-                    gr_fileName = $"UFRFundsReport.xlsx",
+                    gr_fileName = $"UFRFundsReport{date}.xlsx",
                     gr_fileType = ".xlsx",
                     gr_Data = excelData,
                     gr_startDate = startDate,

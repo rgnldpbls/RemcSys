@@ -18,12 +18,12 @@
         <select id="specialization" class="category-select">
             <option value="" disabled selected>Select Report Type...</option>
             <option value="Application">Funded Research Application</option>
-            <option value="Evaluator">University Funded Research - Evaluators</option>
             <option value="OngoingUFR">Ongoing University Funded Research</option>
             <option value="OngoingEFR">Ongoing Externally Funded Research</option>
             <option value="OngoingUFRL">Ongoing University Funded Research Load</option>
             <option value="ResearchProduction">Research Production</option>
             <option value="ForecastedUFRFunds">Forcasted UFR Funds</option>
+            <option value="Evaluator">University Funded Research - Evaluators</option>
         </select>
     </div>
 
@@ -76,7 +76,7 @@
 
     reportType.addEventListener('change', function () {
         const selectedValue = this.value;
-        if (selectedValue == "Evaluator") {
+        if (selectedValue == "Evaluator" || selectedValue == "ForecastedUFRFunds") {
             dateContainer.style.display = 'none';
         }
         else {
@@ -89,11 +89,11 @@
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
 
-        if (selectedType != "Evaluator" && startDate && endDate) {
+        if ((selectedType != "Evaluator" && selectedType != "ForecastedUFRFunds") && startDate && endDate) {
             const url = `/Chief/GenerateReports?reportType=${selectedType}&startDate=${startDate}&endDate=${endDate}`;
             window.location.href = url;
         }
-        else if (selectedType == "Evaluator") {
+        else if (selectedType == "Evaluator" || selectedType == "ForecastedUFRFunds") {
             const url = `/Chief/GenerateReports?reportType=${selectedType}&startDate=null&endDate=null`;
             window.location.href = url;
         }
