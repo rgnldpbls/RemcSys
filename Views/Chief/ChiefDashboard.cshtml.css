@@ -34,20 +34,48 @@
 
 .content-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end; /* Aligns items to the right */
     align-items: flex-start;
+    gap: 20px;
     margin-top: 20px;
 }
 
-.left-section {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    flex-basis: 40%;
+.right-section {
+    width: 300px; /* Adjust width as needed */
+}
+
+.card {
+    margin-bottom: 20px;
 }
 
 .chart-section {
-    flex-basis: 60%;
+    background-color: #fff;
+    width: 48%;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+}
+
+h3 {
+    text-align: center;
+    flex-grow: 1;
+    margin: 0;
+}
+
+.prev-btn,
+.next-btn {
+    color: #850000;
+    font-size: 35px;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
 .chart, .quick-access, .top-research {
@@ -89,9 +117,9 @@
 }
 
 #calendar {
-    width: 80%; 
+    width: 80%;
     max-width: 800px;
-    background-color: #f8f9fa; 
+    background-color: #f8f9fa;
     border-radius: 8px;
     border: 2px solid #850000;
     padding: 10px;
@@ -359,4 +387,3 @@ hr {
     border-top: 3px solid #ddd;
     margin: 12px 0;
 }
-

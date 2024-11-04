@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Ethics Clearance";
+    Layout = "_NavFaculty";
+}
+
+<div class="type-section">
+    <div class="card">
+        <span class="title">Have you already obtained an Ethics Clearance?</span>
+        <div class="d-grid gap-3 col-14 mx-auto">
+            <a href="@Url.Action("#", "FundedResearchApplication")" class="btn btn-success btn-lg"><b>Upload</b>, if YES</a>
+            <a href="@Url.Action("UnderMaintenance", "Home")" class="btn btn-danger btn-lg"><b> Apply</b>, if NO</a>
+        </div>
+    </div>
+</div>

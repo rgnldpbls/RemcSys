@@ -44,6 +44,11 @@
         background-color: #a54239;
     }
 
+.bi-bell-fill:hover {
+    background-color: #a54239;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
 .footer {
     position: absolute;
     bottom: 15px;

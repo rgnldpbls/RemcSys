@@ -20,16 +20,14 @@
         <!-- Progress Steps -->
         <div class="step-container">
             <div class="step">
-                <div class="step-icon complete">
-                    <i class="bi bi-file-earmark-text-fill" style="font-size: 35px"></i>
-                    <span class="progress_line"></span>
+                <div class="step-icon unlocked">
+                    <i class="bi bi-file-earmark-text-fill"></i>
                 </div>
                 <strong>Application Submitted</strong>
             </div>
             <div class="step">
-                <div class="step-icon complete">
-                    <span class="still-progress_line"></span>
-                    <i class="bi bi-list-check" style="font-size: 35px"></i>
+                <div class="step-icon unlocked">
+                    <i class="bi bi-list-check"></i>
                 </div>
                 <strong>Document Under Review</strong>
                 <div class="view-btn">
@@ -39,74 +37,84 @@
             </div>
             <form asp-action="GoToEthics" asp-route-id="@item.fra_Id" method="post">
                 <div class="step">
-                    <div class="step-icon">
-                        <span class="still-progress_line"></span>
-                        <i class="bi bi-file-earmark-lock-fill" style="font-size: 35px"></i>
+                    <div class="step-icon unlocked">
+                        <i class="bi bi-file-earmark-lock-fill"></i>
                     </div>
                     <strong>Ethics Clearance Secured</strong>
-                    <button class="clearance-btn" type="submit" style="font-size:12px; margin-left: 5px;">Apply</button>
+                    <button class="clearance-btn" type="submit" style="font-size:12px; margin-left: 5px;">View</button>
                 </div>
             </form>
             <div class="step">
-                <div class="step-icon">
-                    <span class="still-progress_line"></span>
-                    <i class="bi bi-ui-checks" style="font-size: 35px"></i>
+                <div class="step-icon @(new[] { "Approved", "Rejected", "Proceed" }.Contains(item.application_Status) ? "unlocked" : "locked")">
+                    <i class="bi bi-ui-checks"></i>
                 </div>
                 <strong>Reviewed by Evaluator</strong>
                 @if (new[] { "Approved", "Rejected", "Proceed" }.Contains(item.application_Status))
+
                 {
                     <div class="view-btn">
                         <a asp-action="EvaluationResult" asp-controller="FundedResearchApplication"
                            asp-route-id="@item.fra_Id" style="font-size:12px; text-decoration: none; color: #850000;">View</a>
                     </div>
                 }
+
                 else
+
                 {
                     <i class="bi bi-lock" style="color: #850000"></i>
                 }
             </div>
             @if (new[] { "Submitted", "UnderEvaluation", "Approved", "Proceed" }.Contains(item.application_Status))
+
             {
                 <div class="step">
-                    <div class="step-icon">
-                        <span class="still-progress_line"></span>
-                        <i class="bi bi-check2-circle" style="font-size: 35px"></i>
+                    <div class="step-icon @(item.application_Status == "Proceed" ? "unlocked" : "locked")">
+                        <span class="progress_line"></span>
+                        <i class="bi bi-check2-circle"></i>
                     </div>
                     <strong>Notice To Proceed</strong>
                     @if (item.application_Status == "Proceed")
+
                     {
                         <div class="clearance-btn">
                             <a asp-action="PdfDownload" asp-controller="FundedResearchApplication"
                                asp-route-id="@item.fra_Id" style="font-size:12px; text-decoration: none; color: #850000;">Download</a>
                         </div>
                     }
+
                     else
+
                     {
                         <i class="bi bi-lock" style="color: #850000"></i>
                     }
                 </div>
                 <div class="step">
-                    <div class="step-icon">
-                        <i class="bi bi-flag" style="font-size: 35px"></i>
+                    <div class="step-icon @(item.application_Status == "Proceed" ? "unlocked" : "locked")">
+                        <i class="bi bi-flag"></i>
                     </div>
                     <strong style="font-size: 14px;">Progress Report <br /> Tracker</strong>
                     @if (item.application_Status == "Proceed")
+
                     {
                         <form id="progressForm" method="post" asp-action="Progress">
                             <input type="hidden" name="fraId" value="@item.fra_Id" />
                             <button class="view-btn" type="submit" id="gotoBtn" style="font-size:12px; margin-left: 5px;">Go to</button>
                         </form>
                     }
+
                     else
+
                     {
                         <i class="bi bi-lock" style="color: #850000"></i>
                     }
                 </div>
             }
+
             else if (item.application_Status == "Rejected")
+
             {
                 <div class="step">
-                    <div class="step-icon">
+                    <div class="step-icon unlocked">
                         <i class="bi bi-arrow-repeat" style="font-size: 35px"></i>
                     </div>
                     <strong>Re-Apply</strong>

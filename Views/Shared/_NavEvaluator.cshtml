@@ -33,8 +33,8 @@
                         var user = await UserManager.GetUserAsync(User);
                         <span>Welcome, @user.Name!</span>
                     }
-                    <a asp-controller="Evaluator" asp-action="EvaluatorNotif" class="btn-outline-light">
-                        <i class="bi bi-bell-fill" style="font-size: 30px;"></i>
+                    <a asp-controller="Chief" asp-action="ChiefNotif">
+                        <i class="bi bi-bell-fill" style="font-size: 30px; color: #fff;"></i>
                     </a>
                     <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi-person-circle" style="font-size: 25px;"></i>

@@ -38,7 +38,7 @@
                     {
                         <li>
                             <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank"
-                                style="color: #850000; text-decoration: none;">@file.file_Name</a>
+                               style="color: #850000; text-decoration: none;">@file.file_Name</a>
                         </li>
                     }
                 }
@@ -46,7 +46,7 @@
             <hr />
             <form id="evalForm">
                 <input type="hidden" id="fraId" value="@ViewBag.Id" />
-                @foreach(var criteria in Model.Item2)
+                @foreach (var criteria in Model.Item2)
                 {
                     <h6>@criteria.Name (@criteria.Weight%)</h6>
                     <div class="criteria" data-weight="@criteria.Weight">

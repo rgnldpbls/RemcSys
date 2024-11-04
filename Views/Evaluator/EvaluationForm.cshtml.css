@@ -21,12 +21,15 @@
     display: flex;
     justify-content: space-between;
     background-color: #D3D3D3;
-    padding: 10px;
+    padding: 5px;
     border-radius: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 /* Individual tab */
 .tab {
+    border: 2px solid #929292;
     flex-grow: 1;
     margin-right: 5px;
     text-align: center;

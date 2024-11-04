@@ -14,51 +14,56 @@
     margin-bottom: 20px;
 }
 
-    .step-container p {
-        font-size: 11px;
-    }
-
     .step-container::before {
         content: '';
-        position: relative;
-        left: 0;
-        right: 0;
-        background-color: #D3D3D3;
-        z-index: 0;
+        position: absolute;
+        top: 40%;
+        width: 80%;
+        left: 10%;
+        right: 25%;
+        height: 2px;
+        background-color: #e0e0e0;
+        z-index: 1;
     }
 
 .step {
-    text-align: center;
     position: relative;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
+    z-index: 1;
 }
 
-    .step::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: -50%;
-        width: 100%;
-        height: 2px;
-        background-color: #D3D3D3;
-        z-index: -1;
-    }
 
-    .step:first-child::before {
-        display: none;
-    }
-
-.step-container p {
-    font-size: 11px;
-    margin-bottom: 0;
-    display: inline;
+.step-icon {
+    font-size: 35px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #757171;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    z-index: 2;
 }
+
+    .step-icon.locked {
+        background-color: #fff;
+        color: #000000;
+    }
+
+    .step-icon.unlocked {
+        border: 2px solid #0D6B4A;
+        background-color: #0D6B4A;
+        color: #fff;
+    }
 
 .view-btn {
     justify-content: center;
+    text-align: center;
     border: 2px solid #850000;
     background-color: #fff;
     width: 50px;
@@ -73,53 +78,12 @@
     }
 
 
-.step-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 2px solid #757171;
-    background-color: #FFF;
-    color: #850000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 5px;
-    z-index: 2;
-}
-
-    .step-icon span.progress_line {
-        background: #0D6B4A;
-        width: 100%;
-        height: 2px;
-        position: absolute;
-        top: 25%;
-        left: 59%;
-        transform: translateX(5%);
-        z-index: -1;
-    }
-
-    .step-icon.complete {
-        border: 2px solid #0D6B4A;
-    }
-
-    .step-icon span.still-progress_line {
-        background: #757171;
-        width: 75%;
-        height: 2px;
-        position: absolute;
-        top: 25%;
-        left: 62%;
-        transform: translateX(3%);
-        z-index: -1;
-    }
-
-
 .clearance-btn {
     justify-content: center;
     border: 2px solid #850000;
     text-decoration: none;
     background-color: #fff;
-    width: 70px;
+    width: 50px;
     padding: 5px;
     color: #850000;
     cursor: pointer;

@@ -4,326 +4,449 @@
     Layout = "_NavChief1";
 }
 
-<h1 style="color: #850000; margin-top: 10px;">SETTINGS</h1>
-<hr />
+<h1 style="color: #850000; margin: 20px;">SETTINGS <i class="bi bi-gear" style=" color: #850000; font-size: 40px; margin-left: 10px;"></i></h1>
+<div class="horizontal-line"></div>
 @Html.AntiForgeryToken()
 
-<div class="form-group d-flex align-items-center">
-    <label class="mx-3"><b>UNDER MAINTENANCE</b></label>
-    <label for="maintenanceSwitch" class="switch">
-        <input type="checkbox" id="maintenanceSwitch" onchange="updateSwitchStatus(this, 'maintenance')">
-        <span class="slider" id="maintenance-slider">
-            <span class="slider-text" id="maintenance-status"></span>
-        </span>
-    </label>
-    <label class="mx-3"><b>UFR APPLICATION</b></label>
-    <label for="ufrAppSwitch" class="switch">
-        <input type="checkbox" id="ufrAppSwitch" onchange="updateSwitchStatus(this, 'ufrApp')">
-        <span class="slider" id="ufrApp-slider">
-            <span class="slider-text" id="ufrApp-status"></span>
-        </span>
-    </label>
-    <label class="mx-3"><b>EFR APPLICATION</b></label>
-    <label for="efrAppSwitch" class="switch">
-        <input type="checkbox" id="efrAppSwitch" onchange="updateSwitchStatus(this, 'efrApp')">
-        <span class="slider" id="efrApp-slider">
-            <span class="slider-text" id="efrApp-status"></span>
-        </span>
-    </label>
-    <label class="mx-3"><b>UFRL APPLICATION</b></label>
-    <label for="ufrlAppSwitch" class="switch">
-        <input type="checkbox" id="ufrlAppSwitch" onchange="updateSwitchStatus(this, 'ufrlApp')">
-        <span class="slider" id="ufrlApp-slider">
-            <span class="slider-text" id="ufrlApp-status"></span>
-        </span>
-    </label>
-</div>
-<hr />
-<div class="form-group d-flex align-items-center mt-4">
-    <label class="mx-3"><b>NUMBER OF EVALUATORS</b></label>
-    <div class="input-group" style="width: 200px;">
-        <input type="number"
-                id="evaluatorCount"
-                class="form-control"
-                min="1"
-                max="10"
-                value="@Model.Item1.evaluatorNum"
-                style="border-radius: 4px;"/>
-        <button class="btn btn-primary ms-2"
-                onclick="updateEvaluatorCount()"
-                style="border-radius: 4px;">
-            Save
-        </button>
-    </div>
-    <label class="mx-3"><b>NUMBER OF EVALUATION DAYS</b></label>
-    <div class="input-group" style="width: 200px;">
-        <input type="number"
-               id="evaluationDays"
-               class="form-control"
-               min="1"
-               max="30"
-               value="@Model.Item1.daysEvaluation"
-               style="border-radius: 4px;" />
-        <button class="btn btn-primary ms-2"
-                onclick="updateDaysEvaluation()"
-                style="border-radius: 4px;">
-            Save
-        </button>
-    </div>
-</div>
-<hr />
-<div class="d-flex justify-content-between align-items-start mt-4" style="gap: 10px;">
-    <div class="flex-fill">
-        <label class="mx-3"><b>MANAGED MEMORANDUMS</b></label>
-        <div id="uploadFiles" class="mt-2">
-            @if (Model.Item2 != null && Model.Item2.Any())
-            {
-                <ul>
-                    @foreach (var file in Model.Item2)
-                    {
-                        if (file.document_Type == "Memorandum")
-                        {
-                            <li>
-                                @file.file_Name
-                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
-                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
-                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
-                            </li>
-                        }
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No file have been uploaded yet.</p>
-            }
+<!--Application Period Switch-->
+<div class="application-period d-flex flex-column align-items-center">
+    <h2 class="application-title">Application Period</h2>
+    <hr />
+    <div class="d-flex justify-content-around w-100">
+        <div class="app-switch" id="maintenance-section">
+            <h5>Under Maintenance</h5>
+            <p id="maintenance-description">The application system is currently under maintenance and unavailable.</p>
+            <label class="switch">
+                <input type="checkbox" id="maintenanceSwitch" onchange="updateSwitchStatus(this, 'maintenance')">
+                <span class="slider" id="maintenance-slider">
+                    <span class="slider-text" id="maintenance-status"></span>
+                </span>
+            </label>
         </div>
-        <div class="input-group mt-3" style="width: 400px;">
-            <input type="file" id="memorandumFile" class="form-control" accept=".pdf" />
-            <button class="btn btn-info ms-2"
-                    onclick="previewFile('memorandumFile')"
-                    style="border-radius: 4px;">
-                Preview
-            </button>
-            <button class="btn btn-primary ms-2"
-                    onclick="submitFile('memorandumFile', 'Memorandum')"
-                    style="border-radius: 4px;">
-                Submit
-            </button>
+
+        <div class="app-switch" id="ufrApp-section">
+            <h5>UFR Application</h5>
+            <p id="ufrApp-description">The application is currently closed and not accepting submissions.</p>
+            <label class="switch">
+                <input type="checkbox" id="ufrAppSwitch" onchange="updateSwitchStatus(this, 'ufrApp')">
+                <span class="slider" id="ufrApp-slider">
+                    <span class="slider-text" id="ufrApp-status"></span>
+                </span>
+            </label>
         </div>
-    </div>
-    <div class="flex-fill">
-        <label class="mx-3"><b>GENERATED DOCUMENTARY FORMS</b></label>
-        <div class="mt-2">
-            @if (Model.Item2 != null && Model.Item2.Any())
-            {
-                <ul>
-                    @foreach (var file in Model.Item2)
-                    {
-                        if (file.document_Type == "DocumentaryForm")
-                        {
-                            <li>
-                                @file.file_Name
-                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" style="color: #850000; text-decoration: none;">[Preview]</a>
-                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
-                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
-                            </li>
-                        }
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No file have been uploaded yet.</p>
-            }
+
+        <div class="app-switch" id="efrApp-section">
+            <h5>EFR Application</h5>
+            <p id="efrApp-description">The application is currently closed and not accepting submissions.</p>
+            <label class="switch">
+                <input type="checkbox" id="efrAppSwitch" onchange="updateSwitchStatus(this, 'efrApp')">
+                <span class="slider" id="efrApp-slider">
+                    <span class="slider-text" id="efrApp-status"></span>
+                </span>
+            </label>
         </div>
-        <div class="input-group mt-3" style="width: 400px;">
-            <input type="file" id="docuFile" class="form-control" accept=".docx, .pdf" />
-            <button class="btn btn-info ms-2"
-                    onclick="previewFile('docuFile')"
-                    style="border-radius: 4px;">
-                Preview
-            </button>
-            <button class="btn btn-primary ms-2"
-                    onclick="submitFile('docuFile', 'DocumentaryForm')"
-                    style="border-radius: 4px;">
-                Submit
-            </button>
-        </div>
-    </div>
-    <div class="flex-fill">
-        <label class="mx-3"><b>MANAGED UFR EVALUATION FORMS</b></label>
-        <div id="uploadFilesUFR" class="mt-2">
-            @if (Model.Item2 != null && Model.Item2.Any())
-            {
-                <ul>
-                    @foreach(var file in Model.Item2)
-                    {
-                        if(file.document_Type == "UFREvalsForm")
-                        {
-                            <li>
-                                @file.file_Name
-                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
-                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
-                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
-                            </li>
-                        }
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No file have been uploaded yet.</p>
-            }
-        </div>
-        <div class="input-group mt-3" style="width: 400px;">
-            <input type="file" id="ufrEvaluationFile" class="form-control" accept=".docx, .pdf"/>
-            <button class="btn btn-info ms-2"
-                    onclick="previewFile('ufrEvaluationFile')"
-                    style="border-radius: 4px;">Preview</button>
-            <button class="btn btn-primary ms-2"
-                    onclick="submitFile('ufrEvaluationFile', 'UFREvalsForm')"
-                    style="border-radius: 4px;">Submit</button>
+
+        <div class="app-switch" id="ufrlApp-section">
+            <h5>UFRL Application</h5>
+            <p id="ufrlApp-description">The application is currently closed and not accepting submissions.</p>
+            <label class="switch">
+                <input type="checkbox" id="ufrlAppSwitch" onchange="updateSwitchStatus(this, 'ufrlApp')">
+                <span class="slider" id="ufrlApp-slider">
+                    <span class="slider-text" id="ufrlApp-status"></span>
+                </span>
+            </label>
         </div>
     </div>
 </div>
-<hr />
-<div class="d-flex justify-content-between align-items-start mt-4" style="gap: 10px;">
-    <div class="flex-fill">
-        <label class="mx-3"><b>GENERATED PROGRESS REPORT</b></label>
-        <div class="mt-2">
-            @if (Model.Item2 != null && Model.Item2.Any())
-            {
-                <ul>
-                    @foreach (var file in Model.Item2)
+
+<!--Application and Evaluation-->
+<div class="application-period d-flex flex-column align-items-center">
+    <h2 class="application-title">Application and Evaluation </h2>
+    <ol>
+        <p><b>NOTE: </b>Please upload the required files for each category:</p>
+        <li>
+            <b>Memorandums and Executive Orders</b> - Upload the <i>existing or latest version</i> of the memorandum.
+        </li>
+        <li>
+            <b>Documentary Requirements</b> - Upload the <i>necessary requirements needed</i> to apply for funded research work.
+        </li>
+        <li>
+            <b>Evaluation Forms Template (UFR)</b>  - Upload the <i>evaluation forms</i> that will be used by evaluators for assessing proposals.
+        </li>
+    </ol>
+    <hr />
+    <div class="d-flex justify-content-around w-100">
+        <!-- Managed Memorandums -->
+        <div class="flex-fill container-wrapper">
+            <label class="mx-3"><b>MEMORANDUMS AND EXECUTIVE ORDERS</b></label>
+            <div id="uploadFiles" class="mt-2">
+                <div id="drop-area">
+                    @if (Model.Item2 != null && Model.Item2.Any())
                     {
-                        if (file.document_Type == "ProgressReport")
-                        {
-                            <li>
-                                @file.file_Name
-                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
-                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
-                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
-                            </li>
-                        }
+                        <ul>
+                            @foreach (var file in Model.Item2)
+                            {
+                                if (file.document_Type == "Memorandum")
+                                {
+                                    <li>
+                                        <span>@file.file_Name</span>
+                                        <div>
+                                            <a href="@Url.Action("PreviewFile", new { id = file.Id })" target="_blank" style="color: blue; margin-right: 10px; font-size: 20px;">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("RemoveFile", new { id = file.Id })" style="color: #850000; font-size: 20px;"
+                                               onclick="return confirm('Are you sure you want to remove this file?');">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
                     }
-                </ul>
-            }
-            else
-            {
-                <p>No file have been uploaded yet.</p>
-            }
-        </div>
-        <div class="input-group mt-3" style="width: 400px;">
-            <input type="file" id="progressReport" class="form-control" accept=".docx, .pdf" />
-            <button class="btn btn-info ms-2"
-                    onclick="previewFile('progressReport')"
-                    style="border-radius: 4px;">Preview</button>
-            <button class="btn btn-primary ms-2"
-                    onclick="submitFile('progressReport', 'ProgressReport')"
-                    style="border-radius: 4px;">Submit</button>
-        </div>
-    </div>
-    <div class="flex-fill">
-        <label class="mx-3"><b>GENERATED TERMINAL REPORT</b></label>
-        <div class="mt-2">
-            @if (Model.Item2 != null && Model.Item2.Any())
-            {
-                <ul>
-                    @foreach (var file in Model.Item2)
+                    else
                     {
-                        if (file.document_Type == "TerminalReport")
-                        {
-                            <li>
-                                @file.file_Name
-                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
-                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
-                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
-                            </li>
-                        }
+                        <p>No file have been uploaded yet.</p>
                     }
-                </ul>
-            }
-            else
-            {
-                <p>No file have been uploaded yet.</p>
-            }
-        </div>
-        <div class="input-group mt-3" style="width: 400px;">
-            <input type="file" id="terminalReport" class="form-control" accept=".docx, .pdf" />
-            <button class="btn btn-info ms-2"
-                    onclick="previewFile('terminalReport')"
-                    style="border-radius: 4px;">Preview</button>
-            <button class="btn btn-primary ms-2"
-                    onclick="submitFile('terminalReport', 'TerminalReport')"
-                    style="border-radius: 4px;">Submit</button>
-        </div>
-    </div>
-    <div class="flex-fill">
-        <label class="mx-3"><b>GENERATED CERTIFICATE OF COMPLETION (1 file)</b></label>
-        <div class="mt-2">
-            @if (Model.Item2 != null && Model.Item2.Any())
-            {
-                <ul>
-                    @foreach (var file in Model.Item2)
-                    {
-                        if (file.document_Type == "CertificateCompletion")
-                        {
-                            <li>
-                                @file.file_Name
-                                <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: #850000; text-decoration: none;">[Preview]</a>
-                                <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; text-decoration: none;"
-                                   onclick="return confirm('Are you sure you want to remove this file?');">[Remove]</a>
-                            </li>
-                        }
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No file have been uploaded yet.</p>
-            }
-        </div>
-        <div class="input-group mt-3" style="width: 400px;">
-            <input type="file" id="certificateCompletion" class="form-control" accept=".docx, .pdf" />
-            <button class="btn btn-info ms-2"
-                    onclick="previewFile('certificateCompletion')"
-                    style="border-radius: 4px;">Preview</button>
-            <button class="btn btn-primary ms-2"
-                    onclick="submitFile('certificateCompletion', 'CertificateCompletion')"
-                    style="border-radius: 4px;">Submit</button>
-        </div>
-    </div>
-</div>
-<hr />
-<div class="d-flex justify-content-between align-items-start mt-4">
-    <div class="flex-fill">
-        <h4><b>MANAGE EVALUATION CRITERIA</b></h4>
-        <label class="mx-3"><b>ADD NEW CRITERIA</b></label>
-        <form method="post" action="@Url.Action("AddCriteria", "Chief")">
-            <div class="form-group" style="width: 500px;">
-                <label for="criteriaName">Criteria Name</label>
-                <input type="text" class="form-control" id="criteriaName" name="criteriaName" required style="border-radius: 4px;" />
+                </div>
             </div>
-            <div class="form-group" style="width: 500px;">
-                <label for="criteriaWeight">Weight (%)</label>
-                <input type="number" class="form-control" id="criteriaWeight" name="criteriaWeight" min="0" max="100" required style="border-radius: 4px;" />
+            <div class="d-flex justify-content-center">
+                <div class="input-group mt-3" style="width: 400px;">
+                    <input type="file" id="memorandumFile" class="form-control" accept=".pdf" />
+                    <button class="preview-btn ms-2" onclick="previewFile('memorandumFile')">
+                        Preview
+                    </button>
+                    <button class="btn btn-primary ms-2" onclick="submitFile('memorandumFile', 'Memorandum')" style="border-radius: 4px;">
+                        Submit
+                    </button>
+                </div>
             </div>
-            <br />
-            <button type="submit" class="btn ms-2" style="border-radius: 4px; background-color: #850000; color: #fff;">Add Criteria</button>
-        </form>
+        </div>
+        <!-- Generated Documentary Forms -->
+        <div class="flex-fill container-wrapper">
+            <label class="mx-3"><b>DOCUMENTARY REQUIREMENTS</b></label>
+            <div class="mt-2">
+                <div id="drop-area">
+                    @if (Model.Item2 != null && Model.Item2.Any())
+                    {
+                        <ul>
+                            @foreach (var file in Model.Item2)
+                            {
+                                if (file.document_Type == "DocumentaryForm")
+                                {
+                                    <li>
+                                        <span>@file.file_Name</span>
+                                        <div>
+                                            <a href="@Url.Action("PreviewFile", new {id = file.Id})" style="color: blue; margin-right: 10px; font-size: 20px;">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; font-size: 20px;"
+                                               onclick="return confirm('Are you sure you want to remove this file?');">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>No file have been uploaded yet.</p>
+                    }
+                </div>
+            </div>
+            <div class="d-flex justify-content-center">
+                <div class="input-group mt-3" style="width: 400px;">
+                    <input type="file" id="docuFile" class="form-control" accept=".docx, .pdf" />
+                    <button class="preview-btn ms-2" onclick="previewFile('docuFile')">
+                        Preview
+                    </button>
+                    <button class="btn btn-primary ms-2" onclick="submitFile('docuFile', 'DocumentaryForm')" style="border-radius: 4px;">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Number of Evaluators -->
+    <div class="d-flex justify-content-around w-100 mt-4">
+        <div class="flex-fill">
+            <div class="container-wrapper mb-3">
+                <label class="mx-3"><b>NUMBER OF EVALUATORS</b></label>
+                <div class="d-flex justify-content-center">
+                    <div class="input-group" style="width: 200px; margin-top: 20px;">
+                        <input type="number"
+                               id="evaluatorCount"
+                               class="form-control"
+                               min="1"
+                               max="10"
+                               value="@Model.Item1.evaluatorNum"
+                               style="border-radius: 4px;" />
+                        <button class="btn btn-primary ms-2"
+                                onclick="updateEvaluatorCount()"
+                                style="border-radius: 4px;">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Number of Evaluation Days -->
+            <div class="container-wrapper">
+                <label class="mx-3"><b>NUMBER OF EVALUATION DAYS</b></label>
+                <div class="d-flex justify-content-center">
+                    <div class="input-group" style="width: 200px; margin-top: 20px;">
+                        <input type="number"
+                               id="evaluationDays"
+                               class="form-control"
+                               min="1"
+                               max="30"
+                               value="@Model.Item1.daysEvaluation"
+                               style="border-radius: 4px;" />
+                        <button class="btn btn-primary ms-2"
+                                onclick="updateDaysEvaluation()"
+                                style="border-radius: 4px;">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Managed UFR Evaluation Forms -->
+        <div class="flex-fill container-wrapper">
+            <label class="mx-3"><b>EVALUATION FORMS TEMPLATE (UFR)</b></label>
+            <div id="uploadFilesUFR" class="mt-2">
+                <div id="drop-area">
+                    @if (Model.Item2 != null && Model.Item2.Any())
+                    {
+                        <ul>
+                            @foreach (var file in Model.Item2)
+                            {
+                                if (file.document_Type == "UFREvalsForm")
+                                {
+                                    <li>
+                                        <span>@file.file_Name</span>
+                                        <div>
+                                            <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: blue; margin-right: 10px; font-size: 20px;">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; font-size: 20px;"
+                                               onclick="return confirm('Are you sure you want to remove this file?');">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>No file have been uploaded yet.</p>
+                    }
+                </div>
+            </div>
+            <div class="d-flex justify-content-center">
+                <div class="input-group mt-3" style="width: 400px;">
+                    <input type="file" id="ufrEvaluationFile" class="form-control" accept=".docx, .pdf" />
+                    <button class="preview-btn ms-2" onclick="previewFile('ufrEvaluationFile')">Preview</button>
+                    <button class="btn btn-primary ms-2" onclick="submitFile('ufrEvaluationFile', 'UFREvalsForm')" style="border-radius: 4px;">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Progress Report Monitoring-->
+<div class="application-period d-flex flex-column align-items-center">
+    <h2 class="application-title">Progress Report Monitoring</h2>
+    <p class="note"><b>NOTE: </b>Please upload the required file templates for the <i>Progress Report, Terminal Report, and Certificate of Completion Template</i>.</p>
+    <hr />
+    <div class="d-flex justify-content-around w-100">
+        <div class="flex-fill container-wrapper">
+            <label class="mx-3"><b>PROGRESS REPORT TEMPLATE</b></label>
+            <div class="mt-2">
+                <div id="drop-area">
+                    @if (Model.Item2 != null && Model.Item2.Any())
+                    {
+                        <ul>
+                            @foreach (var file in Model.Item2)
+                            {
+                                if (file.document_Type == "ProgressReport")
+                                {
+                                    <li>
+                                        <span>@file.file_Name</span>
+                                        <div>
+                                            <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: blue; margin-right: 10px; font-size: 20px;">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; font-size: 20px;"
+                                               onclick="return confirm('Are you sure you want to remove this file?');">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>No file have been uploaded yet.</p>
+                    }
+                </div>
+            </div>
+            <div class="d-flex justify-content-center">
+                <div class="input-group mt-3" style="width: 400px;">
+                    <input type="file" id="progressReport" class="form-control" accept=".docx, .pdf" />
+                    <button class="preview-btn ms-2"
+                            onclick="previewFile('progressReport')">
+                        Preview
+                    </button>
+                    <button class="btn btn-primary ms-2"
+                            onclick="submitFile('progressReport', 'ProgressReport')"
+                            style="border-radius: 4px;">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-fill container-wrapper">
+            <label class="mx-3"><b>TERMINAL REPORT TEMPLATE</b></label>
+            <div class="mt-2">
+                <div id="drop-area">
+                    @if (Model.Item2 != null && Model.Item2.Any())
+                    {
+                        <ul>
+                            @foreach (var file in Model.Item2)
+                            {
+                                if (file.document_Type == "TerminalReport")
+                                {
+                                    <li>
+                                        <span>@file.file_Name</span>
+                                        <div>
+                                            <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: blue; margin-right: 10px; font-size: 20px;">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; font-size: 20px;"
+                                               onclick="return confirm('Are you sure you want to remove this file?');">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>No file have been uploaded yet.</p>
+                    }
+                </div>
+            </div>
+            <div class="d-flex justify-content-center">
+                <div class="input-group mt-3" style="width: 400px;">
+                    <input type="file" id="terminalReport" class="form-control" accept=".docx, .pdf" />
+                    <button class="preview-btn ms-2"
+                            onclick="previewFile('terminalReport')">
+                        Preview
+                    </button>
+                    <button class="btn btn-primary ms-2"
+                            onclick="submitFile('terminalReport', 'TerminalReport')"
+                            style="border-radius: 4px;">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-wrapper mt-4">
+        <label class="mx-3"><b>CERTIFICATE OF COMPLETION TEMPLATE</b></label>
+        <div class="mt-2">
+            <div id="drop-area">
+                @if (Model.Item2 != null && Model.Item2.Any())
+                {
+                    <ul>
+                        @foreach (var file in Model.Item2)
+                        {
+                            if (file.document_Type == "CertificateCompletion")
+                            {
+                                <li>
+                                    <span>@file.file_Name</span>
+                                    <div>
+                                        <a href="@Url.Action("PreviewFile", new {id = file.Id})" target="_blank" style="color: blue; margin-right: 10px; font-size: 20px;">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("RemoveFile", new {id = file.Id})" style="color: #850000; font-size: 20px;"
+                                           onclick="return confirm('Are you sure you want to remove this file?');">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </li>
+                            }
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No file have been uploaded yet.</p>
+                }
+            </div>
+        </div>
+        <div class="d-flex justify-content-center">
+            <div class="input-group mt-3" style="width: 400px;">
+                <input type="file" id="certificateCompletion" class="form-control" accept=".docx, .pdf" />
+                <button class="preview-btn ms-2"
+                        onclick="previewFile('certificateCompletion')">
+                    Preview
+                </button>
+                <button class="btn btn-primary ms-2"
+                        onclick="submitFile('certificateCompletion', 'CertificateCompletion')"
+                        style="border-radius: 4px;">
+                    Submit
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 <hr />
-<div class="d-flex justify-content-between align-items-start mt-4">
-    <div class="flex-fill">
-        <h5 class="mx-3"><b>MANAGE EXISTING CRITERIA</b></h5>
-        @foreach (var criteria in Model.Item3)
-        {
-            <div class="criteria">
-                <label class="mx-3"><b>[@criteria.Id] @criteria.Name (Weight: @criteria.Weight%)</b></label>
-                <a href="@Url.Action("RemoveCriteria", "Chief", new {id = criteria.Id})" class="btn btn-sm btn-danger"
-                   onclick="return confirm('Are you sure you want to remove this criteria?');">Remove</a>
+
+<!--MANAGE EVALUATION CRITERIA-->
+<div class="application-period d-flex flex-column align-items-center">
+    <h2 class="application-title">MANAGE EVALUATION CRITERIA</h2>
+    <hr />
+    <div class="d-flex justify-content-between align-items-start mt-4" style="gap: 10px;">
+        <div class="flex-fill container-wrapper">
+            <label class="mx-3"><b>ADD NEW CRITERIA</b></label>
+            <form method="post" action="@Url.Action("AddCriteria", "Chief")">
+                <div class="form-group" style="width: 500px;">
+                    <label for="criteriaName">Criteria Name</label>
+                    <input type="text" class="form-control" id="criteriaName" name="criteriaName" required style="border-radius: 4px;" />
+                </div>
+                <div class="form-group" style="width: 500px;">
+                    <label for="criteriaWeight">Weight (%)</label>
+                    <input type="number" class="form-control" id="criteriaWeight" name="criteriaWeight" min="0" max="100" required style="border-radius: 4px;" />
+                </div>
+                <br />
+                <button type="submit" class="btn ms-2" style="border-radius: 4px; background-color: #850000; color: #fff;">Add Criteria</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="horizontal-line"></div>
+    <div class="d-flex justify-content-between align-items-start mt-4">
+        <div class="flex-fill">
+            <h5 class="mx-3"><b>MANAGE EXISTING CRITERIA</b></h5>
+            @foreach (var criteria in Model.Item3)
+            {
+                <div class="criteria d-flex justify-content-between align-items-center">
+                    <label class="mx-3"><b>@criteria.Name (Weight: @criteria.Weight%)</b></label>
+                    <a href="@Url.Action("RemoveCriteria", "Chief", new {id = criteria.Id})" style="color: #850000; font-size: 20px;"
+                       onclick="return confirm('Are you sure you want to remove this sub-category?');"><i class="bi bi-trash"></i></a>
+                </div>
 
                 <h6>Sub-Categories: </h6>
                 <ul>
@@ -331,32 +454,63 @@
                     {
                         <li>
                             [@subcategory.Id] @subcategory.Name (Max Score: @subcategory.MaxScore)
-                            <a href="@Url.Action("RemoveSubCategory", "Chief", new {id = subcategory.Id})" class="btn btn-sm btn-danger"
-                               onclick="return confirm('Are you sure you want to remove this sub-category?');">Remove</a>
+                            <a href="@Url.Action("RemoveSubCategory", "Chief", new {id = subcategory.Id})" style="color: #850000; font-size: 20px;"
+                               onclick="return confirm('Are you sure you want to remove this sub-category?');"><i class="bi bi-trash"></i></a>
                         </li>
                     }
                 </ul>
-                <label class="mx-3"><b>ADD SUBCATEGORY</b></label>
-                <form method="post" action="@Url.Action("AddSubCategory", "Chief")">
-                    <input type="hidden" name="criteriaId" value="@criteria.Id" />
-                    <div class="form-group" style="width: 500px;">
-                        <label for="subcategoryName">Subcategory Name</label>
-                        <input type="text" class="form-control" id="subcategoryName" name="subcategoryName" required style="border-radius: 4px;" />
-                    </div>
-                    <div class="form-group" style="width: 500px;">
-                        <label for="subcategoryMaxScore">Max Score</label>
-                        <input type="number" class="form-control" id="subcategoryMaxScore" name="subcategoryMaxScore" min="1" max="10" required style="border-radius: 4px;" />
-                    </div>
-                    <br />
-                    <button type="submit" class="btn ms-2" style="border-radius: 4px; background-color: #850000; color: #fff;">Add Subcategory</button>
-                </form>
-            </div>
-            <hr />
-        }
+                <div class="d-flex justify-content-center mt-10">
+                    <label class="mx-3"><b>ADD SUBCATEGORY</b></label>
+                    <form method="post" action="@Url.Action("AddSubCategory", "Chief")">
+                        <input type="hidden" name="criteriaId" value="@criteria.Id" />
+                        <div class="form-group" style="width: 500px;">
+                            <label for="subcategoryName">Subcategory Name</label>
+                            <input type="text" class="form-control" id="subcategoryName" name="subcategoryName" required style="border-radius: 4px;" />
+                        </div>
+                        <div class="form-group" style="width: 500px;">
+                            <label for="subcategoryMaxScore">Max Score</label>
+                            <input type="number" class="form-control" id="subcategoryMaxScore" name="subcategoryMaxScore" min="1" max="10" required style="border-radius: 4px;" />
+                        </div>
+                        <br />
+                        <button type="submit" class="btn ms-2" style="border-radius: 4px; background-color: #850000; color: #fff; float: right;">Add Subcategory</button>
+                    </form>
+                </div>
+
+                <hr />
+            }
+        </div>
     </div>
 </div>
 
 <script>
+    function updateSwitchStatus(element, switchType) {
+        var statusText = document.getElementById(`${switchType}-status`);
+        var description = document.getElementById(`${switchType}-description`);
+        var slider = document.getElementById(`${switchType}-slider`);
+        if (element.checked) {
+            statusText.textContent = "ON";
+            statusText.style.color = "#fff";
+            if (switchType === 'maintenance') {
+                description.textContent = "The application system is currently under maintenance and unavailable.";
+                slider.style.backgroundColor = "#0D6B4A"; // Dark Red
+            } else {
+                description.textContent = "The application period is currently open for submissions.";
+                slider.style.backgroundColor = "#0D6B4A"; // Green
+            }
+        } else {
+            statusText.textContent = "OFF";
+            statusText.style.color = "#fff";
+
+            if (switchType === 'maintenance') {
+                description.textContent = "The system is operating normally and is not under maintenance.";
+                slider.style.backgroundColor = "#850000"; // Green
+            } else {
+                description.textContent = "The application is currently closed and not accepting submissions.";
+                slider.style.backgroundColor = "#850000"; // Dark Red
+            }
+        }
+    }
+    /*
     function updateSwitchStatus(element, switchType) {
         var statusText = document.getElementById(`${switchType}-status`);
         var slider = document.getElementById(`${switchType}-slider`);
@@ -370,8 +524,9 @@
             element.parentElement.querySelector(".slider").style.backgroundColor = "#f44336"; // Red
         }
     }
+    */
 
-    function updateEvaluatorCount(){
+    function updateEvaluatorCount() {
         const count = document.getElementById('evaluatorCount').value;
 
         if (count < 1 || count > 10) {
@@ -401,7 +556,7 @@
         }
     }
 
-    function updateDaysEvaluation(){
+    function updateDaysEvaluation() {
         const days = document.getElementById('evaluationDays').value;
 
         if (days < 1 || days > 30) {
@@ -431,7 +586,7 @@
         }
     }
 
-    function previewFile(fileInputId){
+    function previewFile(fileInputId) {
         const fileInput = document.getElementById(fileInputId);
         if (fileInput.files.length === 0) {
             alert('Please select a file to preview.');
@@ -654,25 +809,26 @@
         maintenanceSwitch.checked = initialState;
         maintenanceStatus.textContent = initialState ? 'ON' : 'OFF';
         maintenanceStatus.style.color = initialState ? '#fff' : '#fff';
-        maintenanceSlider.style.backgroundColor = initialState ? '#4CAF50' : '#f44336';
+        maintenanceSlider.style.backgroundColor = initialState ? '#0D6B4A' : '#850000';
 
         const ufrInitialState = @Json.Serialize(Model.Item1.isUFRApplication);
         ufrAppSwitch.checked = ufrInitialState;
         ufrAppStatus.textContent = ufrInitialState ? 'ON' : 'OFF';
         ufrAppStatus.style.color = ufrInitialState ? '#fff' : '#fff';
-        ufrAppSlider.style.backgroundColor = ufrInitialState ? '#4CAF50' : '#f44336';
+        ufrAppSlider.style.backgroundColor = ufrInitialState ? '#0D6B4A' : '#850000';
 
         const efrInitialState = @Json.Serialize(Model.Item1.isEFRApplication);
         efrAppSwitch.checked = efrInitialState;
         efrAppStatus.textContent = efrInitialState ? 'ON' : 'OFF';
         efrAppStatus.style.color = efrInitialState ? '#fff' : '#fff';
-        efrAppSlider.style.backgroundColor = efrInitialState ? '#4CAF50' : '#f44336';
+        efrAppSlider.style.backgroundColor = efrInitialState ? '#0D6B4A' : '#850000';
 
         const ufrlInitialState = @Json.Serialize(Model.Item1.isUFRLApplication);
         ufrlAppSwitch.checked = ufrlInitialState;
         ufrlAppStatus.textContent = ufrlInitialState ? 'ON' : 'OFF';
         ufrlAppStatus.style.color = ufrlInitialState ? '#fff' : '#fff';
-        ufrlAppSlider.style.backgroundColor = ufrlInitialState ? '#4CAF50' : '#f44336';
+        ufrlAppSlider.style.backgroundColor = ufrlInitialState ? '#0D6B4A' : '#850000';
+
 
         const initialEvaluatorCount = @Json.Serialize(Model.Item1.evaluatorNum);
         document.getElementById('evaluatorCount').value = initialEvaluatorCount;
@@ -681,130 +837,3 @@
         document.getElementById('evaluationDays').value = initialEvaluationDays;
     });
 </script>
-
-
-<style>
-    .form-group {
-        margin-top: 20px;
-    }
-
-    .app-switch {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 0 20px;
-    }
-
-        .app-switch h5 {
-            margin-bottom: 10px;
-            color: #333;
-            font-weight: 600;
-        }
-
-    .switch {
-        position: relative;
-        display: inline-block;
-        width: 120px;
-        height: 34px;
-        margin-right: 20px;
-    }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: .4s;
-        border-radius: 34px;
-    }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-    .slider-text {
-        position: absolute;
-        font-size: 14px;
-        font-weight: bold;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        transition: .4s;
-    }
-
-    input:checked + .slider:before {
-        transform: translateX(86px);
-    }
-
-    .input-group input[type="number"] {
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        border: 1px solid #ced4da;
-    }
-
-        .input-group input[type="number"]:focus {
-            border-color: #80bdff;
-            outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-        }
-
-    .input-group .btn-primary {
-        background-color: #850000;
-        border-color: #850000;
-    }
-
-        .input-group .btn-primary:hover {
-            background-color: #6a0000;
-            border-color: #6a0000;
-        }
-
-    .input-group input[type="file"] {
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        border: 1px solid #ced4da;
-    }
-
-    .input-group .btn-info {
-        background-color: #17a2b8;
-        border-color: #17a2b8;
-    }
-
-    ul {
-        list-style-type: none;
-        padding-left: 0;
-    }
-
-    li {
-        margin-bottom: 10px;
-    }
-
-        li a {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-    .text-info {
-        color: #17a2b8;
-    }
-
-    .text-danger {
-        color: #dc3545;
-    }
-</style>

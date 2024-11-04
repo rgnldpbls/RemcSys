@@ -7,189 +7,181 @@
     <div class="welcome-section">
         <h1>REMC CHIEF DASHBOARD</h1>
     </div>
-    <div class="content-row">
-        <!-- Left Section with Cards -->
-        @{
-            var groupedColleges = @Model.Item1.GroupBy(f => f.college)
-            .Select(group => new
-            {
-                College = group.Key,
-                Count = group.Count()
-            }).ToList();
+    @{
+        var groupedColleges = @Model.Item1.GroupBy(f => f.college)
+        .Select(group => new
+        {
+            College = group.Key,
+            Count = group.Count()
+        }).ToList();
 
-            var labels = groupedColleges.Select(g => g.College).ToList();
-            var data = groupedColleges.Select(g => g.Count).ToList();
+        var LabelsCollege = groupedColleges.Select(g => g.College).ToList();
+        var DataCollege = groupedColleges.Select(g => g.Count).ToList();
 
-            var UFR = Model.Item1.Where(f => f.fr_Type == "University Funded Research").Count();
-            var EFR = Model.Item1.Where(f => f.fr_Type == "Externally Funded Research").Count();
-            var UFRL = Model.Item1.Where(f => f.fr_Type == "University Funded Research Load").Count();
-        }
-        <div class="left-section">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h2 class="text">@UFR</h2>
-                            <p class="mb-0 text"><strong>TOTAL</strong></p>
-                        </div>
-                        <div class="card-footer UFR">
-                            University<br />Funded Research
-                        </div>
-                    </div>
+        var UFR = Model.Item1.Where(f => f.fr_Type == "University Funded Research").Count();
+        var EFR = Model.Item1.Where(f => f.fr_Type == "Externally Funded Research").Count();
+        var UFRL = Model.Item1.Where(f => f.fr_Type == "University Funded Research Load").Count();
+    }
+    <div class="row justify-content-end" style="margin-bottom: 20px;">
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-white">
+                <div class="card-body text-center">
+                    <h2 class="text">@UFR</h2>
+                    <p class="mb-0 text"><strong>TOTAL</strong></p>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h2 class="text">@EFR</h2>
-                            <p class="mb-0 text"><strong>TOTAL</strong></p>
-                        </div>
-                        <div class="card-footer EFR">
-                            Externally<br />Funded Research
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h2 class="text">@UFRL</h2>
-                            <p class="mb-0 text"><strong>TOTAL</strong></p>
-                        </div>
-                        <div class="card-footer UFRL">
-                            University Funded<br />Research-Load
-                        </div>
-                    </div>
+                <div class="card-footer UFR">
+                    University<br />Funded Research
                 </div>
             </div>
         </div>
 
-        <!-- Right Section with Pie Chart -->
-        <div class="chart-section">
-            <div class="chart">
-                <h3>FUNDED RESEARCH PER COLLEGE</h3>
-                <div class="pie-chart">
-                    <canvas id="pieChart"></canvas>
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-white">
+                <div class="card-body text-center">
+                    <h2 class="text">@EFR</h2>
+                    <p class="mb-0 text"><strong>TOTAL</strong></p>
+                </div>
+                <div class="card-footer EFR">
+                    Externally<br />Funded Research
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-white">
+                <div class="card-body text-center">
+                    <h2 class="text">@UFRL</h2>
+                    <p class="mb-0 text"><strong>TOTAL</strong></p>
+                </div>
+                <div class="card-footer UFRL">
+                    University Funded<br />Research-Load
                 </div>
             </div>
         </div>
     </div>
-        <div class="container">
-            <!-- Calendar -->
-            <div id="calendar"></div>
+    <div class="container">
+        <!-- Calendar -->
+        <div id="calendar"></div>
 
-            <!-- Add Event Modal -->
-            <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addEventModalLabel">Add New Event</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form asp-action="AddEvent" method="post">
-                                <div class="mb-3">
-                                    <label for="event-title" class="form-label">Event Title</label>
-                                    <input type="text" class="form-control" id="event-title" name="eventTitle" required>
+        <!-- Add Event Modal -->
+        <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addEventModalLabel">Add New Event</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form asp-action="AddEvent" method="post">
+                            <div class="mb-3">
+                                <label for="event-title" class="form-label">Event Title</label>
+                                <input type="text" class="form-control" id="event-title" name="eventTitle" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="event-start" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="event-start" name="startDate" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="event-end" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="event-end" name="endDate" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Event Visibility</label>
+                                <div>
+                                    <input type="radio" id="broadcasted" name="eventVisibility" value="Broadcasted" />
+                                    <label for="broadcasted">Everyone</label>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="event-start" class="form-label">Start Date</label>
-                                    <input type="date" class="form-control" id="event-start" name="startDate" required>
+                                <div>
+                                    <input type="radio" id="justYou" name="eventVisibility" value="JustYou" checked />
+                                    <label for="justYou">Just You</label>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="event-end" class="form-label">End Date</label>
-                                    <input type="date" class="form-control" id="event-end" name="endDate" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Event Visibility</label>
-                                    <div>
-                                        <input type="radio" id="broadcasted" name="eventVisibility" value="Broadcasted"/>
-                                        <label for="broadcasted">Everyone</label>
-                                    </div>
-                                    <div>
-                                        <input type="radio" id="justYou" name="eventVisibility" value="JustYou" checked/>
-                                        <label for="justYou">Just You</label>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Add Event</button>
-                            </form>
-                        </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Event</button>
+                        </form>
                     </div>
                 </div>
             </div>
-            <div class="quick-access">
-                <h3>Quick Access Menu</h3>
-                <ul>
-                    <li>
-                        <a href="/Chief/UFResearchApp">
-                            <div class="icon">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <div class="text-container">
-                                <span>LIST OF APPLICATIONS</span>
-                                <strong>PENDING APPLICATION</strong>
-                            </div>
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                     <li>
-                        <a href="/Chief/UniversityFundedResearch">
-                            <div class="icon">
-                                <i class="bi bi-file-earmark-bar-graph-fill"></i>
-                            </div>
-                            <div class="text-container">
-                                <span>LIST OF RESEARCH</span>
-                                <strong>PROGRESS REPORTS</strong>
-                            </div>
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/Chief/ArchivedResearch">
-                            <div class="icon">
-                                <i class="bi bi-clock-fill"></i>
-                            </div>
-                            <div class="text-container">
+        </div>
+        <div class="quick-access">
+            <h3>Quick Access Menu</h3>
+            <ul>
+                <li>
+                    <a href="/Chief/UFResearchApp">
+                        <div class="icon">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>LIST OF APPLICATIONS</span>
+                            <strong>PENDING APPLICATION</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Chief/UniversityFundedResearch">
+                        <div class="icon">
+                            <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>LIST OF RESEARCH</span>
+                            <strong>PROGRESS REPORTS</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Chief/ArchivedResearch">
+                        <div class="icon">
+                            <i class="bi bi-clock-fill"></i>
+                        </div>
+                        <div class="text-container">
                             <span>LIST OF RESEARCH</span>
                             <strong>ARCHIVED RESEARCH</strong>
-                            </div>
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/Chief/GenerateReport">
-                            <div class="icon">
-                                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-                            </div>
-                            <div class="text-container">
-                                <span>LIST OF RESEARCH TYPE</span>
-                                <strong>REPORT GENERATION</strong>
-                            </div>
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/Chief/GenerateGAWADNominees">
-                            <div class="icon">
-                                <i class="bi bi-award-fill"></i>
-                            </div>
-                            <div class="text-container">
-                                <span>TUKLAS AND LATHALA</span>
-                                <strong>GAWAD</strong>
-                            </div>
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Chief/GenerateReport">
+                        <div class="icon">
+                            <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>LIST OF RESEARCH TYPE</span>
+                            <strong>REPORT GENERATION</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Chief/UniversityFundedResearch">
+                        <div class="icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>UFR Funds</span>
+                            <strong>FORECASTING</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Chief/GenerateGAWADNominees">
+                        <div class="icon">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <div class="text-container">
+                            <span>TUKLAS AND LATHALA</span>
+                            <strong>GAWAD</strong>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 
-    <!-- Third row: Top Research and Top Branches -->
+    <!-- Third row: Top Branches and Pie Chart -->
     <div class="content-row">
         <div class="top-research-section">
             <div class="heading-container">
@@ -198,36 +190,54 @@
             <ol class="top-research-list">
                 @{
                     var groupedBranches = Model.Item2
-                        .GroupBy(b => b.TotalResearch)
-                        .OrderByDescending(g => g.Key);
+                    .GroupBy(b => b.TotalResearch)
+                    .OrderByDescending(g => g.Key);
                     var curRank = 1;
                 }
-            @if(groupedBranches != null && groupedBranches.Any())
-            {
-                @foreach (var group in groupedBranches)
+                @if (groupedBranches != null && groupedBranches.Any())
                 {
-                    <div class="rank-group rank-@curRank">
-                        @foreach (var branch in group)
-                        {
-                        <li class="rank-item">
-                            <div class="rank">@curRank.</div>
-                            <div class="branch-info">
-                                <span class="branch-name"> @branch.BranchName</span>
-                                <span class="research-count">Total Research: @branch.TotalResearch</span>
-                            </div>
-                        </li>
-                        }
-                    </div>
-                    curRank++;
+                    @foreach (var group in groupedBranches)
+                    {
+                        <div class="rank-group rank-@curRank">
+                            @foreach (var branch in group)
+                            {
+                            <li class="rank-item">
+                                <div class="rank">@curRank.</div>
+                                <div class="branch-info">
+                                    <span class="branch-name"> @branch.BranchName</span>
+                                    <span class="research-count">Total Research: @branch.TotalResearch</span>
+                                </div>
+                            </li>
+                            }
+                </div>
+                        curRank++;
+                    }
                 }
-            }
-            else
-            {
-                <li>No top performing branches yet.</li>   
-            }
-            </ol>
+                else
+                {
+            <li>No top performing branches yet.</li>
+                }
+        </ol>
+    </div>
+
+
+    <!-- Right Section with Pie Chart -->
+    <div class="chart-section">
+        <div class="chart">
+            <button id="prevChart" class="prev-btn">
+                <i class="bi bi-caret-left-square-fill"></i>
+            </button>
+            <h3 id="chartTitle">FUNDED RESEARCH PER COLLEGE</h3>
+            <button id="nextChart" class="next-btn">
+                <i class="bi bi-caret-right-square-fill"></i>
+            </button>
+        </div>
+        <hr />
+        <div class="pie-chart">
+            <canvas id="pieChart"></canvas>
         </div>
     </div>
+</div>
 
 
 <!-- Calendar JavaScript -->
@@ -292,7 +302,7 @@
                 center: 'title',
                 right: 'addEventButton dayGridMonth,timeGridWeek,timeGridDay'
             },
-            events: fetchEvents, 
+            events: fetchEvents,
             editable: true,
             droppable: true,
             datesSet: removeUnderlines, // Remove underlines after rendering
@@ -300,8 +310,8 @@
                 // Remove underline and create delete button with the event title
                 const deleteButton = `<button class="delete-event-btn" data-id="${arg.event.id}" style="background-color:#850000; color: #fff; border:none; cursor:pointer;">x</button>`;
                 const eventHtml = `<div style="background-color:#FFDB89; display: flex; justify-content: space-between; align-items: center; color: black; border: 2px solid #ff943d;">
-                                                <span>${arg.event.title}</span> ${deleteButton}
-                                               </div>`;
+                                                    <span>${arg.event.title}</span> ${deleteButton}
+                                                   </div>`;
 
                 return { html: eventHtml };
             },
@@ -345,42 +355,57 @@
         });
     });
 </script>
+
 <!-- Add Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const labels = @Html.Raw(Json.Serialize(labels));
-    const dataValues = @Html.Raw(Json.Serialize(data));
-    // Data for the pie chart
-    const data = {
-        labels: labels,
-        datasets: [{
-            label: 'Most Funded Research',
-            data: dataValues,
-            backgroundColor: [
-                '#003F5C',
-                '#2F4B7C',
-                '#665191',
-                '#A05195',
-                '#D45087',
-                '#F95D6A',
-                '#FF7C43',
-                '#FFA600',
-                '#2C3E50',
-                '#34495E',
-                '#4B0082',
-                '#800000',
-                '#8B0000',
-                '#556B2F',
-                '#8B4513'
-            ],
-            hoverOffset: 4
-        }]
-    };
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 
-    // Config for the pie chart
+<script>
+    // Dummy data sets for each chart category
+    const chartData = [
+        {
+            title: 'FUNDED RESEARCH PER COLLEGE',
+            labels: ['College of Science', 'College of Engineering', 'College of Arts', 'College of Business', 'College of Education'],
+            data: [25, 30, 15, 20, 10]
+        },
+        {
+            title: 'FUNDED RESEARCH PER BRANCH',
+            labels: ['Main Campus', 'Taguig City', 'Parañaque City', 'San Juan City', 'Quezon City'],
+            data: [50, 20, 15, 10, 5]
+        },
+        {
+            title: 'OVERALL TOTAL ONGOING FUNDED RESEARCH WORK',
+            labels: ['University Funded Research (UFR)', 'Externally Funded Research (EFR)', 'University Funded Research-Load (UFRL)'],
+            data: [40, 35, 25]
+        }
+    ];
+
+    let currentChartIndex = 0;
+
+    function updateChart(index) {
+        const chartInfo = chartData[index];
+        pieChart.data.labels = chartInfo.labels;
+        pieChart.data.datasets[0].data = chartInfo.data;
+        document.getElementById('chartTitle').innerText = chartInfo.title;
+        pieChart.update();
+    }
+
     const config = {
         type: 'pie',
-        data: data,
+        data: {
+            labels: chartData[0].labels,
+            datasets: [{
+                label: 'Most Funded Research',
+                data: chartData[0].data,
+                backgroundColor: [
+                    '#78281f', '#943126', '#b03a2e', '#cb4335',
+                    '#e74c3c', '#ec7063', '#f1948a', '#f5b7b1',
+                    '#e6b0aa', '#d98880', '#cd6155', '#c0392b',
+                    '#a93226', '#850000', '#922b21'
+                ],
+                hoverOffset: 4
+            }]
+        },
         options: {
             responsive: true,
             plugins: {
@@ -390,8 +415,8 @@
                 tooltip: {
                     callbacks: {
                         label: function (tooltipItem) {
-                            let label = data.labels[tooltipItem.dataIndex] || '';
-                            let value = data.datasets[0].data[tooltipItem.dataIndex];
+                            let label = chartData[currentChartIndex].labels[tooltipItem.dataIndex] || '';
+                            let value = chartData[currentChartIndex].data[tooltipItem.dataIndex];
                             return `${label}: ${value}`;
                         }
                     }
@@ -400,9 +425,16 @@
         }
     };
 
-    // Render the pie chart
-    const pieChart = new Chart(
-        document.getElementById('pieChart'),
-        config
-    );
+    const pieChart = new Chart(document.getElementById('pieChart'), config);
+
+    document.getElementById('prevChart').addEventListener('click', () => {
+        currentChartIndex = (currentChartIndex - 1 + chartData.length) % chartData.length;
+        updateChart(currentChartIndex);
+    });
+
+    document.getElementById('nextChart').addEventListener('click', () => {
+        currentChartIndex = (currentChartIndex + 1) % chartData.length;
+        updateChart(currentChartIndex);
+    });
 </script>
+

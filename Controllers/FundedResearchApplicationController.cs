@@ -712,7 +712,7 @@ namespace RemcSys.Controllers
                 return NotFound("No submitted application found for this user.");
             }
 
-            var existingEthics = await _context.FundedResearchEthics
+            /*var existingEthics = await _context.FundedResearchEthics
                 .FirstOrDefaultAsync(e => e.fra_Id == id);
 
             if(existingEthics == null)
@@ -728,8 +728,14 @@ namespace RemcSys.Controllers
                 _context.FundedResearchEthics.Add(fre);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("UnderMaintenance", "Home");
-            }
-            return RedirectToAction("UnderMaintenance", "Home");
+            }*/
+            return RedirectToAction("SelectFREthics", "FundedResearchApplication");
+        }
+
+        [Authorize(Roles ="Faculty")]
+        public IActionResult SelectFREthics()
+        {
+            return View();
         }
 
         public async Task<IActionResult> PreviewFile(string id) // Preview of PDF Files
