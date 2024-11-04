@@ -14,9 +14,28 @@
             College = group.Key,
             Count = group.Count()
         }).ToList();
-
         var LabelsCollege = groupedColleges.Select(g => g.College).ToList();
         var DataCollege = groupedColleges.Select(g => g.Count).ToList();
+
+        var groupedBranch = @Model.Item1.GroupBy(f => f.branch)
+        .Select(group => new
+        {
+            Branch = group.Key,
+            Count = group.Count()
+        }).ToList();
+        var LabelsBranch = groupedBranch.Select(g => g.Branch).ToList();
+        var DataBranch = groupedBranch.Select(g => g.Count).ToList();
+
+        var totalOngoing = Model.Item1.Where(f => f.status != "Completed").GroupBy(f => f.fr_Type)
+        .Select(group => new
+        {
+            Type = group.Key,
+            Count = group.Count()
+        }).ToList();
+        var LabelOngoing = totalOngoing.Select(g => g.Type).ToList();
+        var DataOngoing = totalOngoing.Select(g => g.Count).ToList();
+
+
 
         var UFR = Model.Item1.Where(f => f.fr_Type == "University Funded Research").Count();
         var EFR = Model.Item1.Where(f => f.fr_Type == "Externally Funded Research").Count();
@@ -362,21 +381,28 @@
 
 <script>
     // Dummy data sets for each chart category
+    const collegeLabels = @Html.Raw(Json.Serialize(LabelsCollege));
+    const collegeDataValues = @Html.Raw(Json.Serialize(DataCollege));
+    const branchLabels = @Html.Raw(Json.Serialize(LabelsBranch));
+    const branchDataValues = @Html.Raw(Json.Serialize(DataBranch));
+    const ongoingLabels = @Html.Raw(Json.Serialize(LabelOngoing));
+    const ongoingDataValues = @Html.Raw(Json.Serialize(DataOngoing));
+
     const chartData = [
         {
             title: 'FUNDED RESEARCH PER COLLEGE',
-            labels: ['College of Science', 'College of Engineering', 'College of Arts', 'College of Business', 'College of Education'],
-            data: [25, 30, 15, 20, 10]
+            labels: collegeLabels,
+            data: collegeDataValues
         },
         {
             title: 'FUNDED RESEARCH PER BRANCH',
-            labels: ['Main Campus', 'Taguig City', 'Parañaque City', 'San Juan City', 'Quezon City'],
-            data: [50, 20, 15, 10, 5]
+            labels: branchLabels,
+            data: branchDataValues
         },
         {
             title: 'OVERALL TOTAL ONGOING FUNDED RESEARCH WORK',
-            labels: ['University Funded Research (UFR)', 'Externally Funded Research (EFR)', 'University Funded Research-Load (UFRL)'],
-            data: [40, 35, 25]
+            labels: ongoingLabels,
+            data: ongoingDataValues
         }
     ];
 

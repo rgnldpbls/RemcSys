@@ -17,7 +17,7 @@
             }
         }
     </p>
-    @if (ViewBag.Extend1 == false && ViewBag.Extend2 == false)
+    @if (ViewBag.Extend1 == false && ViewBag.Extend2 == false && ViewBag.Status != "Completed")
     {
         <form id="extendForm1" method="post" asp-action="ExtendForm1">
             <input type="hidden" name="frId" value="@ViewBag.FrId" />

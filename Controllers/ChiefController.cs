@@ -1207,11 +1207,8 @@ namespace RemcSys.Controllers
 
             if(ethics == null)
             {
-                return NotFound("Funded Research Application didn't apply for Ethics Clearance");
+                return NotFound("The funded research application has not obtained Ethics Clearance as of yet");
             }
-            ViewBag.hasUrec = ethics.urec_No == null;
-            ViewBag.hasEthicClearance = ethics.ethicClearance_Id == null;
-            ViewBag.hasCertificate = ethics.completionCertificate_Id == null;
 
             var model = new Tuple<List<ViewChiefEvaluationVM>, List<FileRequirement>>
                 (evaluationsList, evalFormList);
@@ -1362,9 +1359,9 @@ namespace RemcSys.Controllers
                         field_of_Study = fra.field_of_Study,
                         fra_Type = fra.fra_Type,
                         fra_Id = fra.fra_Id,
-                        urec_No = fre.urec_No,
+                        /*urec_No = fre.urec_No,
                         ethicClearance_Id = fre.ethicClearance_Id,
-                        completionCertificate_Id = fre.completionCertificate_Id
+                        completionCertificate_Id = fre.completionCertificate_Id*/
                     })
                 .ToListAsync();
 
@@ -1630,6 +1627,7 @@ namespace RemcSys.Controllers
             ViewBag.Type = fr.fr_Type;
             ViewBag.Extend1 = fr.isExtension1;
             ViewBag.Extend2 = fr.isExtension2;
+            ViewBag.Status = fr.status;
 
             var progReport = await _context.ProgressReports
                 .Where(pr => pr.fr_Id == id)

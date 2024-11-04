@@ -5,7 +5,7 @@
 
     bool isGradeNull = Model.Item1.Count(e => e.evaluation_Grade == null) >= 1;
     bool isDtsNull = ViewBag.DTSNo == null;
-    bool disableForm = isGradeNull || isDtsNull || ViewBag.hasUrec || ViewBag.hasEthicClearance || ViewBag.hasCertificate;
+    bool disableForm = isGradeNull || isDtsNull;
 
     bool allApproved = Model.Item1.All(e => e.evaluation_Grade >= 70 && e.remarks == "Approved");
     bool anyRejected = Model.Item1.Any(e => e.evaluation_Grade < 70 && e.remarks == "Rejected");

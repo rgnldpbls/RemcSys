@@ -1,0 +1,92 @@
+﻿@model IEnumerable<GeneratedForm>
+@{
+    Layout = "_NavTeamLeader2";
+}
+<div class="application-requirements">
+    <h1>Upload Ethics Clearance</h1>
+
+    <div class="research-info">
+        <h2><b>Research Title:</b> @ViewBag.Research</h2>
+        <h6><b>Proponents:</b><br />@ViewBag.Lead
+            @if (!ViewBag.Members.Contains("N/A"))
+            {
+                @foreach (var member in ViewBag.Members)
+                {
+                    <br />
+                    @member
+                }
+            }
+        </h6>
+    </div>
+    
+    <div class="upload-container">
+        <!-- Your Attachments -->
+        <div class="upload-section">
+            <p><b>NOTE:</b> Please follow the file naming format (Ex: Ethics Clearance - ResearchTitle)</p>
+
+            <div class="attachments" id="attachments">
+                <p>No Attachments</p>
+            </div>
+        </div>
+
+        <!-- Upload and Submit button -->
+        <div class="file-upload-section">
+            <h3>Your Uploads</h3><hr />
+            <form id="uploadForm" enctype="multipart/form-data" method="post" action="@Url.Action("#", "#")">
+                <label for="fileUpload" class="upload-btn">
+                    <span class="upload-icon">+</span> Upload Files
+                </label>
+                <input type="file" id="fileUpload" name="file" accept=".pdf" style="display:none;" required>
+                <input type="hidden" name="id" value="@ViewBag.Id"/>
+                <button type="submit" class="submit-btn">SUBMIT REPORT</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Pop-up -->
+<div class="warning_section" style="display: none;">
+    <div class="card">
+        <i class="bi bi-exclamation-circle-fill" style="font-size: 100px; color:#850000; text-align: center;"></i>
+        <span class="title">Please review all information before submitting.</span>
+        <div class="d-grid gap-3 col-14 mx-auto">
+            <p>Changes may not be possible after submission.</p>
+        </div>
+        <button class="wsubmit-btn" id="confirmSubmit"> Submit</button>
+        <button class="wback-btn">Back</button>
+    </div>
+</div>
+
+<script>
+    document.querySelector('#fileUpload').addEventListener('change', function (event) {
+        const attachmentsDiv = document.getElementById('attachments');
+        attachmentsDiv.innerHTML = ''; // Clear existing attachments
+        const files = event.target.files;
+
+        if (files.length > 0) {
+            for (const file of files) {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.textContent = file.name;
+                link.target = "_blank"; // Open file in a new tab
+                attachmentsDiv.appendChild(link);
+                attachmentsDiv.appendChild(document.createElement('br'));
+            }
+        } else {
+            attachmentsDiv.innerHTML = '<p>No Attachments</p>';
+        }
+    });
+
+    document.querySelector('.submit-btn').addEventListener('click', function (event) {
+        event.preventDefault();
+        document.querySelector('.warning_section').style.display = 'block';
+    });
+
+    document.querySelector('.wback-btn').addEventListener('click', function () {
+        document.querySelector('.warning_section').style.display = 'none';
+    });
+
+    document.querySelector('#confirmSubmit').addEventListener('click', function () {
+        document.getElementById('uploadForm').submit();
+    });
+</script>

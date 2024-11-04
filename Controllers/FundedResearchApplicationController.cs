@@ -700,7 +700,7 @@ namespace RemcSys.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GoToEthics(FundedResearchEthics fundedResearchEthics, string id) // To be Revised
+        public async Task<IActionResult> GoToEthics(string id) // To be Revised
         {
             if(id == null)
             {
@@ -733,8 +733,35 @@ namespace RemcSys.Controllers
         }
 
         [Authorize(Roles ="Faculty")]
-        public IActionResult SelectFREthics()
+        public IActionResult SelectFREthics(string id)
         {
+            if (id == null)
+            {
+                return NotFound("No Funded Research Application ID found!");
+            }
+            ViewBag.Id = id;
+            return View();
+        }
+
+        [Authorize(Roles ="Faculty")]
+        public async Task<IActionResult> UploadEthicsClearance(string id)
+        {
+            if (id == null)
+            {
+                return NotFound("No Funded Research Application ID found!");
+            }
+
+            var fra = await _context.FundedResearchApplication.FindAsync(id);
+            if (fra == null)
+            {
+                return NotFound("No Funded Research Application found!");
+            }
+
+            ViewBag.Id = fra.fra_Id;
+            ViewBag.Research = fra.research_Title;
+            ViewBag.Lead = fra.applicant_Name;
+            ViewBag.Members = fra.team_Members;
+
             return View();
         }
 

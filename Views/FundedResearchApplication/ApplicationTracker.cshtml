@@ -35,15 +35,16 @@
                        asp-route-id="@item.fra_Id" style="font-size:12px; text-decoration: none; color: #850000;">View</a>
                 </div>
             </div>
-            <form asp-action="GoToEthics" asp-route-id="@item.fra_Id" method="post">
-                <div class="step">
-                    <div class="step-icon unlocked">
-                        <i class="bi bi-file-earmark-lock-fill"></i>
-                    </div>
-                    <strong>Ethics Clearance Secured</strong>
-                    <button class="clearance-btn" type="submit" style="font-size:12px; margin-left: 5px;">View</button>
+            <div class="step">
+                <div class="step-icon unlocked">
+                    <i class="bi bi-file-earmark-lock-fill"></i>
                 </div>
-            </form>
+                <strong>Ethics Clearance Secured</strong>
+                <div class="view-btn">
+                    <a asp-action="SelectFREthics" asp-controller="FundedResearchApplication"
+                       asp-route-id="@item.fra_Id" style="font-size: 12px; text-decoration: none; color: #850000;">View</a>
+                </div>
+            </div>
             <div class="step">
                 <div class="step-icon @(new[] { "Approved", "Rejected", "Proceed" }.Contains(item.application_Status) ? "unlocked" : "locked")">
                     <i class="bi bi-ui-checks"></i>
