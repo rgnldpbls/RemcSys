@@ -380,6 +380,7 @@ button {
 }
 
 .wtitle {
+    padding: 10px;
     background-color: #ffffff;
     color: #000;
     font-size: 24px;

@@ -75,11 +75,8 @@
                         </td>
                         <td>
                             <form asp-action="GotoDocuList" asp-route-id="@app.fra_Id" method="post">
-                                <button type="submit" class="edit-btn"><i class="bi bi-file-pdf"></i></button>
+                                <button type="submit" class="edit-btn"><i class="bi bi-file-pdf" style="color:#850000;"></i></button>
                             </form>
-                            @* <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
-                                <i class="bi bi-file-pdf"></i>
-                            </a> *@
                             @if (app.fra_Type == "University Funded Research")
 
                             {

@@ -363,6 +363,25 @@ h1 {
     margin-right: 20px;
 }
 
+.resubmit-btn {
+    padding: 5px 20px;
+    display: inline-flex;
+    align-items: center;
+    background-color: transparent;
+    color: #008CFF;
+    border-radius: 10px;
+}
+
+    .resubmit-btn:hover {
+        background-color: #008CFF;
+        color: #fff;
+    }
+
+    .resubmit-btn i {
+        font-size: 18px;
+        margin-right: 10px;
+    }
+
 /*warning pop-up*/
 .warning_section {
     display: none;

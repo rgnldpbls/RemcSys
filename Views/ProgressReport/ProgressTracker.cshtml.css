@@ -3,10 +3,11 @@
     color: #850000;
 }
 
-h6{
+h6 {
     margin-top: 20px;
     margin-bottom: 10px;
 }
+
 .extend-btn {
     margin-top: 10px;
     border: none;
@@ -19,7 +20,6 @@ h6{
     border-radius: 5px;
 }
 
-
 .step-container {
     position: relative;
     display: flex;
@@ -31,102 +31,52 @@ h6{
     margin-bottom: 20px;
 }
 
-    .step-container p {
-        font-size: 11px;
-    }
-
     .step-container::before {
         content: '';
-        position: relative;
-        left: 0;
-        right: 0;
-        background-color: #D3D3D3;
-        z-index: 0;
+        position: absolute;
+        top: 40%;
+        width: 80%;
+        left: 10%;
+        right: 25%;
+        height: 2px;
+        background-color: #ededed;
+        z-index: 1;
     }
 
 .step {
-    text-align: center;
     position: relative;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
+    z-index: 1;
 }
 
-    .step::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: -50%;
-        width: 100%;
-        height: 2px;
-        background-color: #D3D3D3;
-        z-index: -1;
-    }
-
-    .step:first-child::before {
-        display: none;
-    }
-
-.step-container p {
-    font-size: 11px;
-    margin-bottom: 0;
-    display: inline;
-}
-
-.step-container .compliance {
-    display: inline-vlock;
-    padding: 3px 5px;
-    font-weight: bold;
-    border-radius: 10px;
-    background-color: #FFDB89;
-    width: 70%;
-    color: #850000;
-    font-size: 12px;
-    border: 1px solid #FFB100;
-    justify-content: left;
-}
 
 .step-icon {
+    font-size: 35px;
     width: 60px;
     height: 60px;
     border-radius: 50%;
     border: 2px solid #757171;
-    background-color: #FFF;
-    color: #850000;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 5px;
+    background-color: #fff;
     z-index: 2;
 }
 
-    .step-icon span.progress_line {
-        background: #0D6B4A;
-        width: 100%;
-        height: 2px;
-        position: absolute;
-        top: 25%;
-        left: 62%;
-        transform: translateX(5%);
-        z-index: -3;
+    .step-icon.locked {
+        background-color: #fff;
+        color: #000000;
     }
 
-    .step-icon.complete {
+    .step-icon.unlocked {
         border: 2px solid #0D6B4A;
+        background-color: #0D6B4A;
+        color: #fff;
     }
-
-    .step-icon span.still-progress_line {
-        background: #757171;
-        width: 73%;
-        height: 1px;
-        position: absolute;
-        top: 25%;
-        left: 65%;
-        transform: translateX(3%);
-        z-index: -1;
-    }
-
 
 .document-history {
     background-color: #F0F0F0;
@@ -181,6 +131,7 @@ h6{
     color: white;
     z-index: 2;
 }
+
 .title {
     padding: 1.25rem 1rem 1rem 1rem;
     color: #fff;
@@ -188,6 +139,7 @@ h6{
     font-weight: bold;
     text-align: center;
 }
+
 .card1 {
     overflow: hidden;
     position: relative;
@@ -246,6 +198,7 @@ h6{
         border: 2px solid #420000;
         color: #fff;
     }
+
 .send-btn {
     text-decoration: none;
     text-align: center;
