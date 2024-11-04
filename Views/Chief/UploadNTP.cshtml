@@ -1,4 +1,4 @@
-﻿@model List<ViewNTP>
+﻿@model IEnumerable<FundedResearchApplication>
 @{
     ViewData["Title"] = "University Funded Research Applications";
     Layout = "_NavChief1";
@@ -74,9 +74,12 @@
                             @app.fra_Type
                         </td>
                         <td>
-                            <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
+                            <form asp-action="GotoDocuList" asp-route-id="@app.fra_Id" method="post">
+                                <button type="submit" class="edit-btn"><i class="bi bi-file-pdf"></i></button>
+                            </form>
+                            @* <a asp-action="DocuList" asp-route-id="@app.fra_Id" class="edit-btn">
                                 <i class="bi bi-file-pdf"></i>
-                            </a>
+                            </a> *@
                             @if (app.fra_Type == "University Funded Research")
 
                             {
@@ -87,7 +90,7 @@
                         </td>
                         <td>
                             <div class="file-upload-container">
-                                @if (app.urec_No == null || app.ethicClearance_Id == null || app.completionCertificate_Id == null || app.dts_No == null)
+                                @if (app.dts_No == null || app.FundedResearchEthics == null)
                                 {
                                     <div class="file-input-wrapper">
                                         <input type="file" id="pdfFileInput_@app.fra_Id" accept=".pdf" required disabled />
@@ -98,9 +101,18 @@
                                         </button>
                                     </div>
                                 }
-
+                                else if (app.FundedResearchEthics != null && app.FundedResearchEthics.file_Status != "Checked")
+                                {
+                                    <div class="file-input-wrapper">
+                                        <input type="file" id="pdfFileInput_@app.fra_Id" accept=".pdf" required disabled />
+                                    </div>
+                                    <div class="submit-button-wrapper">
+                                        <button type="button" class="resubmit-btn" id="uploadFileBtn" disabled>
+                                            <i class="bi bi-upload"></i> Upload NTP
+                                        </button>
+                                    </div>
+                                }
                                 else
-
                                 {
                                     <form id="uploadForm" method="post" enctype="multipart/form-data" action="@Url.Action("UploadNotice", "Chief")">
                                         <div class="file-input-wrapper">

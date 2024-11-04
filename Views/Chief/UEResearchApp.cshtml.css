@@ -147,18 +147,22 @@
     font-weight: 500;
     margin-bottom: 10px;
 }
-
-    .assign.noevaluator {
-        background-color: #727272;
-        width: 50%;
-        color: #FFF;
-    }
-
     .assign.wevaluator {
         background-color: #DBBF1B;
         width: 50%;
         color: #FFF;
     }
+
+.noevaluators {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    background-color: #727272;
+    width: 50%;
+    color: #FFF;
+}
 
 .status-button {
     background-color: transparent;

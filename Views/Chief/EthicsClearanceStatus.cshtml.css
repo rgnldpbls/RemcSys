@@ -1,0 +1,14 @@
+﻿.container {
+    max-width: 800px;
+}
+
+.alert {
+    border-radius: 10px;
+    background-color: #fff3cd; /* Light yellow for a warning look */
+    color: #856404; /* Dark yellow for text */
+    border: 1px solid #ffeeba; /* Matches the warning theme */
+}
+
+    .alert h2 {
+        color: #856404; /* Dark yellow to match the theme */
+    }

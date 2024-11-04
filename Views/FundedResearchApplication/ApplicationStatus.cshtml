@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FileRequirement>
+﻿@model Tuple<IEnumerable<FileRequirement>, IEnumerable<FundedResearchEthics>>
 @{
     ViewData["Title"] = "Application Status";
     ViewBag.IsFunded = false;
@@ -39,7 +39,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var fileRequirement in Model)
+            @foreach (var fileRequirement in Model.Item1)
             {
                 <tr>
                     <td>@fileRequirement.file_Name</td>
@@ -113,6 +113,84 @@
                         }
                     </td>
                 </tr>
+            }
+            @if(Model.Item2 != null & Model.Item2.Any())
+            {
+                @foreach(var researchEthics in Model.Item2)
+                {
+                    <tr>
+                        <td>@researchEthics.file_Name</td>
+                        <td>@researchEthics.file_Uploaded.ToString("MMMM d, yyyy")</td>
+                        <td>
+                            @if (researchEthics.file_Status == "Pending")
+                            {
+                                <span class="status pending">Pending</span>
+                            }
+                            @if (researchEthics.file_Status == "Compliance")
+                            {
+                                <span class="status compliance">For Compliance</span>
+                                <button class="feedback-button" id="feedbackBtn-@researchEthics.fre_Id" onclick="showFeedback('@researchEthics.fre_Id')">
+                                    <i class="bi bi-chat-left-text-fill"></i>
+                                </button>
+
+                                <!--feedback pop-up-->
+                                <div class="feedback" id="feedback-@researchEthics.fre_Id" style="display: none;">
+                                    <div class="card1">
+                                        <button type="button" class="fdismiss" id="xBtn-@researchEthics.fre_Id" onclick="hideFeedback('@researchEthics.fre_Id')">×</button>
+                                        <span class="title">Feedback</span>
+                                        <div class="card2">
+                                            <p>
+                                                @researchEthics.file_Feedback
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (researchEthics.file_Status == "Checked")
+                            {
+                                <span class="status approved">Checked by the Chief</span>
+                            }
+                        </td>
+                        <td class="action-buttons">
+                            @if (researchEthics.file_Status == "Pending" || researchEthics.file_Status == "Checked")
+                            {
+                                @if (researchEthics.file_Type == ".pdf")
+                                {
+                                    <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = researchEthics.fre_Id }) " target="_blank">
+                                        <i class="bi bi-file-pdf"></i>Preview
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                @if (researchEthics.file_Type == ".pdf")
+                                {
+                                    <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = researchEthics.fre_Id }) " target="_blank">
+                                        <i class="bi bi-file-pdf"></i>Preview
+                                    </a>
+                                }
+                                <form asp-action="UpdateFile" method="post" enctype="multipart/form-data">
+                                    <div class="file-upload-container">
+                                        <div class="file-input-wrapper">
+                                            <input type="file" id="newFile_@researchEthics.fre_Id" name="newFile" accept=".pdf" style="display: none;" onchange="updateFileName('@researchEthics.fre_Id')" required />
+                                            <label for="newFile_@researchEthics.fre_Id" class="choose-file-btn"> Choose File </label>
+                                            <a id="previewLink_@researchEthics.fre_Id" href="#" target="_blank" style="display: none;">
+                                                Preview
+                                                <span id="fileNameDisplay_@researchEthics.fre_Id" style="margin-left: 10px;">No file chosen</span>
+
+                                            </a>
+                                        </div>
+                                        <input type="hidden" name="id" value="@researchEthics.fre_Id" />
+                                        <div class="submit-button-wrapper">
+                                            <button type="submit" class="resubmit-btn"> <i class="bi bi-upload"></i>Submit</button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                            }
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>

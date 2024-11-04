@@ -64,6 +64,16 @@
                 linkUrl = "UEResearchApp";
             }
 
+            else if (log.ResearchType == "University Funded Research" && log.Action.Contains("uploaded the Ethics Clearance"))
+            {
+                linkUrl = "UEResearchApp";
+            }
+
+            else if ((log.ResearchType == "Externally Funded Research" || log.ResearchType == "University Funded Research Load") && log.Action.Contains("uploaded the Ethics Clearance"))
+            {
+                linkUrl = "UploadNTP";
+            }
+
             <a href="@linkUrl" class="notification-link">
                 <div class="notification-card">
                     <span class="notification-text">

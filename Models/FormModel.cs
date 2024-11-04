@@ -42,8 +42,9 @@
         public string field_of_Study { get; set; }
         public string fra_Type {  get; set; }
         public string fra_Id { get; set; }
-        public string? urec_No { get; set; }
-        public int? ethicClearance_Id { get; set; }
-        public int? completionCertificate_Id { get; set; }
+        public string? fre_Id { get; set; }
+        public byte[]? clearanceFile {  get; set; }
+        public string? file_Status {  get; set; }
+
     }
 }

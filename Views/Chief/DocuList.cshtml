@@ -1,4 +1,4 @@
-﻿@model IEnumerable<RemcSys.Models.FileRequirement>
+﻿@model Tuple<IEnumerable<FileRequirement>, IEnumerable<FundedResearchEthics>>
 @{
     ViewData["Title"] = "Application Requirements";
 
@@ -44,7 +44,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(var item in Model)
+            @foreach(var item in Model.Item1)
             {
                 <tr>
                     <td>
@@ -73,6 +73,33 @@
                         <button class="comment-btn" id="comment-@item.fr_Id" style="display: none; font-size: 28px;" data-row-id="@item.fr_Id"><i class="bi bi-chat-left-fill"></i></button>
                     </td>
                 </tr>
+            }
+            @if(Model.Item2 != null && Model.Item2.Any())
+            {
+                @foreach(var researchEthics in Model.Item2)
+                {
+                    <td>@researchEthics.file_Name</td>
+                    <td>@researchEthics.file_Uploaded.ToString("MMMM d, yyyy")</td>
+                    <td>
+                        <div class="dropdown-container">
+                            <select class="form-control custom-select status-dropdown" data-row-id="@researchEthics.fre_Id" onchange="handleStatusChange(this)"
+                            @if (researchEthics.file_Status == "Checked")
+                            {
+                                <text>disabled</text>
+                            }>
+                                <option value="@researchEthics.file_Status" disabled selected>@researchEthics.file_Status</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Compliance">For Compliance</option>
+                                <option value="Checked">Checked</option>
+                            </select>
+                            <i class="arrow-down"></i>
+                        </div>
+                    </td>
+                    <td class="action-buttons">
+                        <a href="@Url.Action("PreviewFile", new {id = researchEthics.fre_Id})" target="_blank"><i class="bi bi-eye-fill" style="color:#000; font-size: 30px;"></i></a>
+                        <button class="comment-btn" id="comment-@researchEthics.fre_Id" style="display: none; font-size: 28px;" data-row-id="@researchEthics.fre_Id"><i class="bi bi-chat-left-fill"></i></button>
+                    </td>
+                }
             }
         </tbody>
     </table>

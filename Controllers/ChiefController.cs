@@ -184,24 +184,27 @@ namespace RemcSys.Controllers
             var fileRequirement = await _context.FileRequirement.Where(f => f.fra_Id == id && f.file_Type == ".pdf")
                 .OrderBy(fr => fr.file_Name)
                 .ToListAsync();
-            return View(fileRequirement);
+
+            var researchEthics = await _context.FundedResearchEthics
+                 .Where(e => e.fra_Id == id)
+                 .ToListAsync();
+
+            var model = new Tuple<IEnumerable<FileRequirement>, IEnumerable<FundedResearchEthics>>(fileRequirement, researchEthics);
+
+            return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> SaveFeedback(string fileId, string fileStatus, string fileFeedback) // Saving Feedback of the Chief on each Documentary Requirements
         {
             var fileReq = _context.FileRequirement.Find(fileId);
-            if(fileReq == null)
-            {
-                return NotFound("No File Requirement found!");
-            }
-            var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fileReq.fra_Id).FirstOrDefaultAsync();
-            if(fra == null)
-            {
-                return NotFound("No Funded Research Application found!");
-            }
             if (fileReq != null)
             {
+                var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == fileReq.fra_Id).FirstOrDefaultAsync();
+                if (fra == null)
+                {
+                    return NotFound("No Funded Research Application found!");
+                }
                 fileReq.file_Status = fileStatus;
                 fileReq.file_Feedback = fileFeedback;
 
@@ -210,6 +213,24 @@ namespace RemcSys.Controllers
                     "Kindly check the feedback for the changes.", true, false, false, fra.fra_Id);
                 return Json(new { success = true });
             }
+
+            var researchEthics = _context.FundedResearchEthics.Find(fileId);
+            if (researchEthics != null)
+            {
+                var fra = await _context.FundedResearchApplication.Where(f => f.fra_Id == researchEthics.fra_Id).FirstOrDefaultAsync();
+                if (fra == null)
+                {
+                    return NotFound("No Funded Research Application found!");
+                }
+                researchEthics.file_Status = fileStatus;
+                researchEthics.file_Feedback = fileFeedback;
+
+                _context.SaveChanges();
+                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, "You need to resubmit this " + researchEthics.file_Name + ". " +
+                    "Kindly check the feedback for the changes.", true, false, false, fra.fra_Id);
+                return Json(new { success = true });
+            }
+
             return Json(new { success = false });
         }
 
@@ -217,42 +238,61 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> UpdateStatus(string fr_Id, string newStatus) //Updating the File Status into Checked on each Documentary Requirements
         {
             var file = _context.FileRequirement.FirstOrDefault(f => f.fr_Id == fr_Id);
-            if(file == null)
+            if (file != null)
             {
-                return Json(new { success = false, message = "File requirement not found" });
-            }
-
-            var fra = await _context.FundedResearchApplication
+                var fra = await _context.FundedResearchApplication
                 .Where(f => f.fra_Id == file.fra_Id)
                 .FirstOrDefaultAsync();
-            if (fra == null)
-            {
-                return Json(new { success = false, message = "Funded Research Application not found" });
-            }
-
-            file.file_Status = newStatus;
-            _context.SaveChanges();
-            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, file.file_Name + " already checked by the Chief.", 
-                true, false, false, fra.fra_Id);
-
-            var allFilesChecked = _context.FileRequirement
-                   .Where(fr => fr.fra_Id == fra.fra_Id)
-                   .All(fr => fr.file_Status == "Checked");
-
-            if (allFilesChecked && fra.fra_Type == "University Funded Research")
-            {
-                await AssignEvaluators(fra.fra_Id);
-                return Json(new { assigned = true });
-            }
-            else if(allFilesChecked && fra.fra_Type != "University Funded Research")
-            {
-                fra.application_Status = "Approved";
-                await _context.SaveChangesAsync();
-                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " all file requirements approved by the Chief.", 
+                if (fra == null)
+                {
+                    return Json(new { success = false, message = "Funded Research Application not found" });
+                }
+                file.file_Status = newStatus;
+                _context.SaveChanges();
+                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, file.file_Name + " already checked by the Chief.",
                     true, false, false, fra.fra_Id);
-                return Json(new { approved = true });
+
+                var allFilesChecked = _context.FileRequirement
+                       .Where(fr => fr.fra_Id == fra.fra_Id)
+                       .All(fr => fr.file_Status == "Checked");
+
+                if (allFilesChecked && fra.fra_Type == "University Funded Research")
+                {
+                    await AssignEvaluators(fra.fra_Id);
+                    return Json(new { assigned = true });
+                }
+                else if (allFilesChecked && fra.fra_Type != "University Funded Research")
+                {
+                    fra.application_Status = "Approved";
+                    await _context.SaveChangesAsync();
+                    await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, fra.research_Title + " all file requirements approved by the Chief.",
+                        true, false, false, fra.fra_Id);
+                    await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, $"{fra.research_Title} needs to apply/upload ethics clearance.", true, false, false, fra.fra_Id);
+                    return Json(new { approved = true });
+                }
+                return Json(new { success = true });
             }
-            return Json(new { success = true });
+
+            var ethics = _context.FundedResearchEthics.FirstOrDefault(f => f.fre_Id == fr_Id);
+            if (ethics != null)
+            {
+                var fra = await _context.FundedResearchApplication
+                .Where(f => f.fra_Id == ethics.fra_Id)
+                .FirstOrDefaultAsync();
+                if (fra == null)
+                {
+                    return Json(new { success = false, message = "Funded Research Application not found" });
+                }
+                ethics.file_Status = newStatus;
+                _context.SaveChanges();
+
+                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, ethics.file_Name + " already verified by the Chief.",
+                   true, false, false, fra.fra_Id);
+
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false, message = "Bad Request!" });
         }
 
         [HttpPost]
@@ -281,6 +321,15 @@ namespace RemcSys.Controllers
                 if (fileRequirement.file_Type == ".pdf")
                 {
                     return File(fileRequirement.data, "application/pdf");
+                }
+            }
+
+            var researchEthics = await _context.FundedResearchEthics.FindAsync(id);
+            if(researchEthics != null)
+            {
+                if(researchEthics.file_Type == ".pdf")
+                {
+                    return File(researchEthics.clearanceFile, "application/pdf");
                 }
             }
 
@@ -517,7 +566,6 @@ namespace RemcSys.Controllers
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> UEResearchApp(string searchString)
         {
-            /*await CheckMissedEvaluations();*/
             ViewData["currentFilter"] = searchString;
             var appQuery = _context.FundedResearchApplication
                 .Where(f => f.fra_Type == "University Funded Research");
@@ -1169,6 +1217,12 @@ namespace RemcSys.Controllers
             await SendEmailAsync(email, subject, htmlBody);
         }
 
+        [Authorize(Roles ="Chief")]
+        public IActionResult EthicsClearanceStatus()
+        {
+            return View();
+        }
+
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> ChiefResearchEvaluation(string id)
         {
@@ -1205,9 +1259,22 @@ namespace RemcSys.Controllers
             var ethics = await _context.FundedResearchEthics
                 .FirstOrDefaultAsync(e => e.fra_Id == id);
 
-            if(ethics == null)
+            var logAction = await _context.ActionLogs.Where(l => l.FraId == fra.fra_Id && l.Action.Contains($"{fra.research_Title} needs to apply/upload ethics clearance.") && l.isTeamLeader == true).FirstOrDefaultAsync();
+            if(logAction == null)
             {
-                return NotFound("The funded research application has not obtained Ethics Clearance as of yet");
+                await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, $"{fra.research_Title} needs to apply/upload ethics clearance.", true, false, false, fra.fra_Id);
+            }
+
+            if(ethics == null || ethics.file_Status == "Pending")
+            {
+                if(ethics == null)
+                {
+                    return RedirectToAction("EthicsClearanceStatus");
+                }
+                else if (ethics.file_Status == "Pending")
+                {
+                    return RedirectToAction("DocuList", "Chief", new {id = fra.fra_Id});
+                }
             }
 
             var model = new Tuple<List<ViewChiefEvaluationVM>, List<FileRequirement>>
@@ -1348,21 +1415,8 @@ namespace RemcSys.Controllers
 
             var researchAppList = await appQuery
                 .Where(f => f.application_Status == "Approved")
+                .Include(f => f.FundedResearchEthics)
                 .OrderBy(f => f.submission_Date)
-                .Join(_context.FundedResearchEthics,
-                    fra => fra.fra_Id,
-                    fre => fre.fra_Id,
-                    (fra, fre) => new ViewNTP
-                    {
-                        dts_No = fra.dts_No,
-                        research_Title = fra.research_Title,
-                        field_of_Study = fra.field_of_Study,
-                        fra_Type = fra.fra_Type,
-                        fra_Id = fra.fra_Id,
-                        /*urec_No = fre.urec_No,
-                        ethicClearance_Id = fre.ethicClearance_Id,
-                        completionCertificate_Id = fre.completionCertificate_Id*/
-                    })
                 .ToListAsync();
 
             return View(researchAppList);
@@ -1407,6 +1461,25 @@ namespace RemcSys.Controllers
             await SendProceedEmail(fra.applicant_Email, fra.research_Title, fra.applicant_Name);
 
             return RedirectToAction("UploadNTP", "Chief");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GotoDocuList(string id)
+        {
+            if(id == null)
+            {
+                return NotFound("Funded Research Application ID not found!");
+            }
+
+            var ethics = await _context.FundedResearchEthics
+                .FirstOrDefaultAsync(e => e.fra_Id == id);
+
+            if (ethics == null)
+            {
+                return RedirectToAction("EthicsClearanceStatus");
+            }
+
+            return RedirectToAction("DocuList", "Chief", new { id = id });
         }
 
         public async Task SendProceedEmail(string email, string researchTitle, string name)

@@ -85,7 +85,7 @@
                                 foreach (var eval in assignedEvaluators)
                                 {
 
-                                    if (eval.evaluation_Status == "Pending")
+                                    if (eval.evaluation_Status == "Pending" || eval.evaluation_Status == "Missed")
 
                                     {
                                         <button class="assign wevaluator"
@@ -116,7 +116,7 @@
                             else
 
                             {
-                                <span class="assign noevaluator">No Evaluator yet</span>
+                                <span class="noevaluators">No Evaluator yet</span>
                             }
                         </td>
                         <td>

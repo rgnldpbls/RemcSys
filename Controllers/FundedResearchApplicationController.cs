@@ -679,7 +679,13 @@ namespace RemcSys.Controllers
                 .OrderBy(fr => fr.file_Name)
                 .ToListAsync();
 
-            return View(fileRequirements);
+            var researchEthics = await _context.FundedResearchEthics
+                .Where(e => e.fra_Id == id)
+                .ToListAsync();
+
+            var model = new Tuple<IEnumerable<FileRequirement>, IEnumerable<FundedResearchEthics>>(fileRequirements, researchEthics);
+
+            return View(model);
         }
 
         [HttpPost]
@@ -704,42 +710,27 @@ namespace RemcSys.Controllers
         {
             if(id == null)
             {
-                return NotFound();
-            }
-            var fra = await _context.FundedResearchApplication.FindAsync(id);
-            if(fra == null)
-            {
-                return NotFound("No submitted application found for this user.");
+                return NotFound("No Funded Research App ID found!");
             }
 
-            /*var existingEthics = await _context.FundedResearchEthics
-                .FirstOrDefaultAsync(e => e.fra_Id == id);
-
-            if(existingEthics == null)
+            var fr = await _context.FundedResearchEthics.FirstOrDefaultAsync(f => f.fra_Id == id);
+            if(fr == null)
             {
-                var fre = new FundedResearchEthics
-                {
-                    fre_Id = Guid.NewGuid().ToString(),
-                    fra_Id = fra.fra_Id,
-                    urec_No = null,
-                    ethicClearance_Id = null,
-                    completionCertificate_Id = null
-                };
-                _context.FundedResearchEthics.Add(fre);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("UnderMaintenance", "Home");
-            }*/
-            return RedirectToAction("SelectFREthics", "FundedResearchApplication");
+                return RedirectToAction("SelectFREthics", "FundedResearchApplication", new { fraId = id, hasEthics = false });
+            }
+            
+            return RedirectToAction("SelectFREthics", "FundedResearchApplication", new { fraId = id, hasEthics =  true});
         }
 
         [Authorize(Roles ="Faculty")]
-        public IActionResult SelectFREthics(string id)
+        public IActionResult SelectFREthics(string fraId, bool hasEthics)
         {
-            if (id == null)
+            if (fraId == null)
             {
                 return NotFound("No Funded Research Application ID found!");
             }
-            ViewBag.Id = id;
+            ViewBag.Id = fraId;
+            ViewBag.hasEthics = hasEthics;
             return View();
         }
 
@@ -765,6 +756,47 @@ namespace RemcSys.Controllers
             return View();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SubmitEthicsClearance(IFormFile file, string id)
+        {
+            if(id == null)
+            {
+                return NotFound("Funded Research Application ID not found!");
+            }
+            var fra = await _context.FundedResearchApplication.FindAsync(id);
+            if(fra == null)
+            {
+                return NotFound("Funded Research Application not found!");
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return NotFound("There is no uploaded file. Please upload the file and try to submit again.");
+            }
+
+            byte[] pdfData;
+            using (var ms  = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                pdfData = ms.ToArray();
+                var researchEthics = new FundedResearchEthics
+                {
+                    fre_Id = Guid.NewGuid().ToString(),
+                    file_Name = file.FileName,
+                    file_Type = Path.GetExtension(file.FileName),
+                    clearanceFile = pdfData,
+                    file_Status = "Pending",
+                    file_Feedback = null,
+                    file_Uploaded = DateTime.Now,
+                    fra_Id = fra.fra_Id
+                };
+                _context.FundedResearchEthics.Add(researchEthics);
+            }
+            await _actionLogger.LogActionAsync(fra.applicant_Name, fra.fra_Type, $"{fra.research_Title} already uploaded the Ethics Clearance.", true, true, false, fra.fra_Id);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("ApplicationStatus", new {id = fra.fra_Id});
+        }
+
         public async Task<IActionResult> PreviewFile(string id) // Preview of PDF Files
         {
             var fileRequirement = await _context.FileRequirement.FindAsync(id);
@@ -778,6 +810,17 @@ namespace RemcSys.Controllers
                 return File(fileRequirement.data, "application/pdf");
             }
 
+            var researchEthics = await _context.FundedResearchEthics.FindAsync(id);
+            if(researchEthics == null)
+            {
+                return NotFound("No file found!");
+            }
+
+            if(researchEthics.file_Type == ".pdf")
+            {
+                return File(researchEthics.clearanceFile, "application/pdf");
+            }
+
             return BadRequest("Only PDF files can be previewed.");
         }
 
@@ -785,12 +828,7 @@ namespace RemcSys.Controllers
         public async Task<IActionResult> UpdateFile(string id, IFormFile newFile) // Upload updated file
         {
             var fileRequirement = await _context.FileRequirement.FindAsync(id);
-            if( fileRequirement == null)
-            {
-                return NotFound("No File found!");
-            }
-
-            if(newFile != null && newFile.Length > 0)
+            if (fileRequirement != null && newFile != null && newFile.Length > 0)
             {
                 using (var memoryStream = new  MemoryStream())
                 {
@@ -804,8 +842,27 @@ namespace RemcSys.Controllers
                 }
 
                 await _context.SaveChangesAsync();
+                return RedirectToAction("ApplicationStatus", new { id = fileRequirement.fra_Id });
             }
-            return RedirectToAction("ApplicationStatus", new {id = fileRequirement.fra_Id});
+
+            var researchEthics = await _context.FundedResearchEthics.FindAsync(id);
+            if(researchEthics != null && newFile != null && newFile.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await newFile.CopyToAsync(memoryStream);
+                    researchEthics.clearanceFile = memoryStream.ToArray();
+                    researchEthics.file_Name = newFile.FileName;
+                    researchEthics.file_Type = Path.GetExtension(newFile.FileName);
+                    researchEthics.file_Uploaded = DateTime.Now;
+                    researchEthics.file_Status = "Pending";
+                    researchEthics.file_Feedback = null;
+                }
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction("ApplicationStatus", new { id = researchEthics.fra_Id });
+            }
+            return NotFound("No file was updated");
         }
 
         [Authorize(Roles = "Faculty")]
