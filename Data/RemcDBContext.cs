@@ -31,6 +31,7 @@ namespace RemcSys.Data
         public DbSet<Guidelines> Guidelines { get; set; }
         public DbSet<Criteria> Criterias { get; set; }
         public DbSet<SubCategory> SubCategories { get; set; }
+        public DbSet<UFRForecasting> UFRForecastings { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

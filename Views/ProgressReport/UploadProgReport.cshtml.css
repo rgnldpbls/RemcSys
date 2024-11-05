@@ -20,6 +20,7 @@ h6 {
 }
 
 .research-info {
+    padding: 20px;
     margin-top: 20px;
     background-color: #F8F8F8;
     margin-bottom: 20px;
@@ -33,6 +34,7 @@ h6 {
 }
 
 .upload-section {
+    padding: 20px;
     background-color: #F8F8F8;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     justify-content: space-between;

@@ -7,7 +7,8 @@
 
     <div class="research-info">
         <h2><b>Research Title:</b> @ViewBag.Research</h2>
-        <h6><b>Proponents:</b><br />@ViewBag.Lead
+        <h6>
+            <b>Proponents:</b><br />@ViewBag.Lead
             @if (!ViewBag.Members.Contains("N/A"))
             {
                 @foreach (var member in ViewBag.Members)
@@ -18,13 +19,13 @@
             }
         </h6>
     </div>
-    
+
     <div class="upload-container">
         <!-- Your Attachments -->
         <div class="upload-section">
             <h4>Terminal Report Template</h4>
             <p>Kindly download it for your reference.</p>
-            @foreach(var doc in Model)
+            @foreach (var doc in Model)
             {
                 <a class="btn-outline-secondary" href="@Url.Action("Download", "ProgressReport", new {id = doc.Id})">
                     @doc.FileName
@@ -45,7 +46,7 @@
                     <span class="upload-icon">+</span> Upload Files
                 </label>
                 <input type="file" id="fileUpload" name="file" accept=".pdf" style="display:none;" required>
-                <input type="hidden" name="id" value="@ViewBag.Id"/>
+                <input type="hidden" name="id" value="@ViewBag.Id" />
                 <button type="submit" class="submit-btn">SUBMIT REPORT</button>
             </form>
         </div>
@@ -73,12 +74,53 @@
 
         if (files.length > 0) {
             for (const file of files) {
+                const fileContainer = document.createElement('div');
+                fileContainer.textContent = file.name;
+                fileContainer.style.display = 'flex';
+                fileContainer.style.alignItems = 'center';
+                fileContainer.style.marginBottom = '5px';
+                fileContainer.style.gap = '10px';
+
+                // Preview button (file link)
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(file);
-                link.textContent = file.name;
+                link.textContent = 'Preview';
                 link.target = "_blank"; // Open file in a new tab
-                attachmentsDiv.appendChild(link);
-                attachmentsDiv.appendChild(document.createElement('br'));
+                // Apply preview button styles directly
+                link.style.backgroundColor = 'white';
+                link.style.color = 'blue';
+                link.style.padding = '5px 10px';
+                link.style.cursor = 'pointer';
+                link.style.borderRadius = '5px';
+                link.style.border = '2px solid blue';
+                link.style.textDecoration = 'none';
+                link.addEventListener('mouseover', () => {
+                    link.style.backgroundColor = 'blue';
+                    link.style.color = 'white';
+                });
+                link.addEventListener('mouseout', () => {
+                    link.style.backgroundColor = 'white';
+                    link.style.color = 'blue';
+                });
+                fileContainer.appendChild(link);
+
+                // Remove button
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'X';
+                // Apply remove button styles directly
+                removeButton.style.backgroundColor = '#850000';
+                removeButton.style.color = 'white';
+                removeButton.style.border = 'none';
+                removeButton.style.padding = '5px 10px';
+                removeButton.style.border = '2px solid #fff';
+                removeButton.style.cursor = 'pointer';
+                removeButton.style.borderRadius = '3px';
+                removeButton.addEventListener('click', function () {
+                    fileContainer.remove(); // Remove this file's display
+                });
+                fileContainer.appendChild(removeButton);
+
+                attachmentsDiv.appendChild(fileContainer);
             }
         } else {
             attachmentsDiv.innerHTML = '<p>No Attachments</p>';

@@ -7,7 +7,8 @@
 <div class="document-management-container">
     <h3><b>RESEARCH TITLE:</b> @ViewBag.Research</h3>
     <p><b>Field of Study:</b> @ViewBag.Field</p>
-    <p><b>Proponents:</b><br />  @ViewBag.Lead 
+    <p>
+        <b>Proponents:</b><br />  @ViewBag.Lead
         @if (!ViewBag.Member.Contains("N/A"))
         {
             @foreach (var member in ViewBag.Member)
@@ -41,10 +42,10 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(var item in Model)
+            @foreach (var item in Model)
             {
                 <tr>
-                    <td>
+                    <td style=" text-align: left;">
                         @item.file_Name
                     </td>
                     <td>
@@ -82,7 +83,7 @@
     <div class="card1">
         <button type="button" class="fdismiss" id="closePopupBtn">×</button>
         <span class="title">Feedback</span>
-        <input class="card2" id="feedback" placeholder="Enter your feedback here..."/>
+        <textarea class="card2" id="feedback" placeholder="Enter your feedback here..."></textarea>
         <button type="button" class="send-btn" id="sendFeedbackBtn">Send</button>
     </div>
 </div>
@@ -236,7 +237,7 @@
     });
 </script>
 <script>
-    let selectedRowId = null; 
+    let selectedRowId = null;
     let previousStatus = null;
 
     function handleStatusChange(selectElement) {

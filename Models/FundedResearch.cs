@@ -35,8 +35,10 @@ namespace RemcSys.Models
         public bool reminded_SevenDaysOverdue { get; set; }
     }
 
-    public class UFRProjectCost
+    public class UFRForecasting
     {
+        [Key]
+        public int Id {  get; set; }
         public float ProjectCosts { get; set; }
         public int Year {  get; set; }
     }
@@ -47,4 +49,14 @@ namespace RemcSys.Models
         public float[] LowerBoundCosts {  get; set; }
         public float[] UpperBoundCosts { get; set; }
     }
-}
+
+    public class ForecastViewModel
+    {
+        public int Year { get; set; }
+        public float ProjectCosts { get; set; }
+        public int? ForecastYear1 { get; set; }
+        public float? ForecastedFundYear1 { get; set; }
+        public int? ForecastYear2 { get; set; }
+        public float? ForecastedFundYear2 { get; set; }
+    }
+ }

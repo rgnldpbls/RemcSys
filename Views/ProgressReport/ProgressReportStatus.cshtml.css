@@ -58,6 +58,21 @@ dts_edit-button {
         font-weight: bold;
     }
 
+        .document-table th:nth-child(2),
+        .document-table td:nth-child(2) {
+            min-width: 200px;
+        }
+
+        .document-table th:nth-child(3),
+        .document-table td:nth-child(3) {
+            min-width: 280px;
+        }
+
+        .document-table th:nth-child(4),
+        .document-table td:nth-child(4) {
+            min-height: 75px;
+        }
+
 .status-button {
     background-color: transparent;
     border: none;
@@ -166,10 +181,9 @@ button {
         font-size: 20px;
     }
 
-.resubmit-btn {
+.choose-file-btn {
     background-color: transparent;
     border-radius: 5px;
-    color: #008CFF;
     padding: 5px 20px;
     margin-left: 10px;
     cursor: pointer;
@@ -179,20 +193,38 @@ button {
     transition: background-color 0.3s ease;
 }
 
-    .resubmit-btn:hover {
-        background-color: #008CFF;
-        color: #FFFFFF;
+    .choose-file-btn:hover {
+        background-color: #D3D3D3;
     }
 
-    .resubmit-btn:focus {
-        outline: 2px solid #008CFF;
+.submit-button-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.resubmit-btn {
+    padding: 5px 20px;
+    display: inline-flex;
+    align-items: center;
+    background-color: #fff;
+    color: #008CFF;
+    border-radius: 10px;
+}
+
+    .resubmit-btn:hover {
+        background-color: #008CFF;
+        color: #fff;
     }
 
     .resubmit-btn i {
-        font-size: 20px;
+        font-size: 18px;
+        margin-right: 10px;
     }
 
+
 .back-btn {
+    text-decoration: none;
     background-color: #850000;
     color: #FFF;
     padding: 10px 20px;
@@ -216,7 +248,7 @@ button {
 .feedback {
     display: none;
     position: absolute;
-    top: 50%;
+    top: 60%;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -256,6 +288,7 @@ button {
         color: #fff;
         font-size: 16px;
         margin: 10px 0;
+        margin-left: 10px;
     }
 
 .fdismiss {
@@ -295,7 +328,7 @@ button {
 .status_tag {
     display: none;
     position: absolute;
-    top: 50%;
+    top: 70%;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -408,7 +441,7 @@ button {
     border: 2px solid #000;
     border-radius: 1rem;
     width: 400px;
-    height: 300px;
+    height: 350px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
@@ -421,12 +454,27 @@ button {
     text-align: center;
 }
 
+.wsubmit-btn {
+    position: absolute;
+    background-color: #FFDB89;
+    color: #850000;
+    bottom: 30px;
+    right: 20px;
+    font-size: 20px;
+    width: 150px;
+    height: 50px;
+    font-weight: 500;
+    border: 1px #FFDB89;
+    border-radius: 5px;
+    text-align: center;
+}
+
 .wback-btn {
     position: absolute;
     background-color: #850000;
     color: #FFF;
-    bottom: 10px;
-    left: 10px;
+    bottom: 30px;
+    left: 20px;
     font-size: 20px;
     width: 150px;
     height: 50px;
@@ -441,6 +489,7 @@ button {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+    align-items: center;
 }
 
 .file-input-wrapper {

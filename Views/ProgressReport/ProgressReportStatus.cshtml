@@ -31,17 +31,17 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(var progressReport in Model)
+            @foreach (var progressReport in Model)
             {
                 <tr>
-                    <td>@progressReport.file_Name</td>
+                    <td style=" text-align: left;">@progressReport.file_Name</td>
                     <td>@progressReport.file_Uploaded.ToString("MMMM d, yyyy")</td>
                     <td>
-                        @if(progressReport.file_Status == "Pending")
+                        @if (progressReport.file_Status == "Pending")
                         {
                             <span class="status pending">Pending</span>
                         }
-                        @if(progressReport.file_Status == "Compliance")
+                        @if (progressReport.file_Status == "Compliance")
                         {
                             <span class="status compliance">For Compliance</span>
                             <button class="feedback-button" id="feedbackBtn-@progressReport.pr_Id" onclick="showFeedback('@progressReport.pr_Id')">
@@ -61,13 +61,13 @@
                                 </div>
                             </div>
                         }
-                        @if(progressReport.file_Status == "Checked")
+                        @if (progressReport.file_Status == "Checked")
                         {
                             <span class="status approved">Checked by the Chief</span>
                         }
                     </td>
                     <td class="action-buttons">
-                        @if(progressReport.file_Status == "Pending" || progressReport.file_Status == "Checked")
+                        @if (progressReport.file_Status == "Pending" || progressReport.file_Status == "Checked")
                         {
                             <a class="delete-btn" href="@Url.Action("PreviewFile", new {id = progressReport.pr_Id }) " target="_blank">
                                 <i class="bi bi-file-pdf"></i>Preview
@@ -81,7 +81,7 @@
                             <form asp-action="UpdateFile" method="post" enctype="multipart/form-data">
                                 <div class="file-upload-container">
                                     <div class="file-input-wrapper">
-                                        <input type="file" id="newFile_@progressReport.pr_Id" name="newFile" accept=".pdf,.xls,.xlsx" style="display: none;" onchange="updateFileName('@progressReport.pr_Id')" required/>
+                                        <input type="file" id="newFile_@progressReport.pr_Id" name="newFile" accept=".pdf,.xls,.xlsx" style="display: none;" onchange="updateFileName('@progressReport.pr_Id')" required />
                                         <label for="newFile_@progressReport.pr_Id" class="choose-file-btn">Choose File</label>
                                         <a id="previewLink_@progressReport.pr_Id" href="#" target="_blank" style="display: none;">
                                             <span id="fileNameDisplay_@progressReport.pr_Id">No file chosen</span>
@@ -132,12 +132,12 @@
         <span class="wtitle">Are you sure you want to withdraw your application?</span>
     </div>
     <button class="wsubmit-btn" id="confirmSubmitBtn"
-       style="position: absolute; background-color: #FFDB89;color: #850000; bottom: 10px;right: 10px;font-size: 20px;width: 150px;height: 50px;font-weight: 500;border: 1px #FFDB89;border-radius: 5px; text-align: center; margin-top: 10px;line-height: 50px;"> 
-       Yes
-   </button>
+            style="position: absolute; background-color: #FFDB89;color: #850000; bottom: 10px;right: 10px;font-size: 20px;width: 150px;height: 50px;font-weight: 500;border: 1px #FFDB89;border-radius: 5px; text-align: center; margin-top: 10px;line-height: 50px;">
+        Yes
+    </button>
     <button class="wback-btn" id="backBtn"
             style="background-color: #850000; color: white; width: 150px; height: 50px; font-size: 20px; position: absolute; bottom: 10px; left: 10px;">
-            Cancel
+        Cancel
     </button>
 </div>
 
@@ -172,25 +172,25 @@
     }
 </script>
 <script>
-        function updateFileName(fr_Id) {
-            var input = document.getElementById('newFile_' + fr_Id);
-            var fileNameDisplay = document.getElementById('fileNameDisplay_' + fr_Id);
-            var previewLink = document.getElementById('previewLink_' + fr_Id);
+    function updateFileName(fr_Id) {
+        var input = document.getElementById('newFile_' + fr_Id);
+        var fileNameDisplay = document.getElementById('fileNameDisplay_' + fr_Id);
+        var previewLink = document.getElementById('previewLink_' + fr_Id);
 
-            if (input.files && input.files.length > 0) {
-                // Update the file name display with the selected file name
-                fileNameDisplay.textContent = input.files[0].name;
+        if (input.files && input.files.length > 0) {
+            // Update the file name display with the selected file name
+            fileNameDisplay.textContent = input.files[0].name;
 
-                // Create a URL for the selected file
-                var fileURL = URL.createObjectURL(input.files[0]);
-                // Set the href of the preview link to the file URL
-                previewLink.href = fileURL;
-                // Show the preview link (span will be clickable)
-                previewLink.style.display = 'inline-block';
-            } else {
-                // No file chosen, reset the file name display and hide the preview link
-                fileNameDisplay.textContent = 'No file chosen';
-                previewLink.style.display = 'none';
-            }
+            // Create a URL for the selected file
+            var fileURL = URL.createObjectURL(input.files[0]);
+            // Set the href of the preview link to the file URL
+            previewLink.href = fileURL;
+            // Show the preview link (span will be clickable)
+            previewLink.style.display = 'inline-block';
+        } else {
+            // No file chosen, reset the file name display and hide the preview link
+            fileNameDisplay.textContent = 'No file chosen';
+            previewLink.style.display = 'none';
         }
+    }
 </script>

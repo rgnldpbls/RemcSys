@@ -1,0 +1,199 @@
+﻿@model List<ForecastViewModel>
+@{
+    ViewData["Title"] = "Budget Forecasting";
+    Layout = "_NavChief1";
+}
+
+
+
+<h1 class="forecasting-title">Budget Forecasting</h1>
+
+<div class="forecasting-container">
+    <p class="forecasting-subtitle">Forecasted University Funded Research Funds</p>
+
+    <div class="chart-container">
+        <canvas id="forecastChart" width="800" height="400"></canvas>
+    </div>
+</div>
+    <div class="table-container">
+        <table class="forecast-table">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Total University Funded Research Cost</th>
+                    <th>Forecasted Year 1</th>
+                    <th>Forecasted Fund <br /> (Year 1)</th>
+                    <th>Forecasted Year 2</th>
+                    <th>Forecasted Fund <br /> (Year 2)</th>
+                </tr>
+            </thead>
+            <tbody>
+            @{
+                var yearList = Model.Select(g => g.Year).ToList();
+                var projectCost = Model.Select(g => g.ProjectCosts).ToList();
+                var fundYear1 = Model.Select(g => g.ForecastedFundYear1).ToList();
+                var fundYear2 = Model.Select(g => g.ForecastedFundYear2).ToList();
+            }
+            @foreach(var item in Model.OrderByDescending(y => y.Year))
+            {
+                <tr>
+                    <td>@item.Year</td>
+                    <td>@item.ProjectCosts.ToString("#,##0.00")</td>
+                    <td>
+                        @(item.ForecastYear1 != null ? item.ForecastYear1 : "-")
+                    </td>
+                    <td>
+                        @(item.ForecastedFundYear1 != null ? item.ForecastedFundYear1.Value.ToString("#,##0.00") : 0)  
+                    </td >
+                    <td>
+                        @(item.ForecastYear2 != null ? item.ForecastYear2 : "-")
+                    </td>
+                    <td>
+                        @(item.ForecastedFundYear2 != null ? item.ForecastedFundYear2.Value.ToString("#,##0.00"): 0)
+                    </td>
+                </tr>
+            }
+            @* <tr>
+                    <td>2016</td>
+                    <td>₱2,805,000.00</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>2017</td>
+                    <td>₱4,075,000.00</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>2018</td>
+                    <td>₱5,115,000.00</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>2019</td>
+                    <td>₱6,435,000.00</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>2020</td>
+                    <td>₱2,085,000.00</td>
+                    <td>2021</td>
+                    <td>₱4,142,051.00</td>
+                    <td>2022</td>
+                    <td>₱3,222,145.50</td>
+                </tr>
+                <tr>
+                    <td>2021</td>
+                    <td>₱5,205,000.00</td>
+                    <td>2022</td>
+                    <td>₱3,917,063.75</td>
+                    <td>2023</td>
+                    <td>₱4,626,129.50</td>
+                </tr>
+                <tr>
+                    <td>2022</td>
+                    <td>₱9,166,500.00</td>
+                    <td>2023</td>
+                    <td>₱8,316,868.50</td>
+                    <td>2024</td>
+                    <td>₱9,286,330.00</td>
+                </tr>
+                <tr>
+                    <td>2023</td>
+                    <td>₱12,009,000.00</td>
+                    <td>2024</td>
+                    <td>₱12,018,923.00</td>
+                    <td>2025</td>
+                    <td>₱12,957,154.00</td>
+                </tr> *@
+            </tbody>
+        </table>
+    </div>
+
+    <button id="export" class="export-button">Export as Excel</button>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const yearList = @Html.Raw(Json.Serialize(yearList));
+        const projectCost = @Html.Raw(Json.Serialize(projectCost));
+        const fundYear1 = @Html.Raw(Json.Serialize(fundYear1));
+        const fundYear2 = @Html.Raw(Json.Serialize(fundYear2));
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            const forecastChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: yearList,
+                    datasets: [
+                        {
+                            label: 'Actual Funding',
+                            data: projectCost,
+                            borderColor: 'blue',
+                            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                            pointStyle: 'rectRot',
+                            pointRadius: 5,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Forecasted Funding Year 1',
+                            data: fundYear1,
+                            borderColor: 'orange',
+                            backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                            borderDash: [5, 5],
+                            pointStyle: 'rectRot',
+                            pointRadius: 5,
+                            tension: 0.3,
+                        },
+                                {
+                            label: 'Forecasted Funding Year 2',
+                            data: fundYear2,
+                            borderColor: 'green',
+                            backgroundColor: 'rgba(0, 128, 0, 0.1)',
+                            borderDash: [5, 5],
+                            pointStyle: 'rectRot',
+                            pointRadius: 5,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Total University Funded Research Cost (PHP)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        document.getElementById('export').addEventListener('click', function(){
+            const url = `/Chief/GenerateReports?reportType=ForecastedUFRFunds&startDate=null&endDate=null`;
+            window.location.href = url;
+        })
+    </script>
+}
