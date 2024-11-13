@@ -76,7 +76,7 @@ namespace RemcSys.Controllers
 
             return View(model);
         }
-
+         
         [Authorize(Roles = "Chief")]
         public async Task<IActionResult> ChiefNotif() // Notification of the Chief
         {
@@ -462,9 +462,24 @@ namespace RemcSys.Controllers
                 throw new Exception("Research application not found.");
             }
 
-            var evaluators = await _context.Evaluator.ToListAsync();
-            var eligibleEvaluators = evaluators.Where(e => e.field_of_Interest.Contains(researchApp.field_of_Study) &&
-                e.evaluator_Name != researchApp.applicant_Name && !researchApp.team_Members.Contains(e.evaluator_Name)).ToList();
+            var evaluators = await _context.Evaluator
+                .Where(e => e.field_of_Interest.Contains(researchApp.field_of_Study) &&
+                            e.evaluator_Name != researchApp.applicant_Name && 
+                            !researchApp.team_Members.Contains(e.evaluator_Name))
+                .ToListAsync();
+            var eligibleEvaluators = new List<Evaluator>();
+            foreach(var evaluator in evaluators)
+            {
+                var pendingAndMissedCount = await _context.Evaluations
+                    .Where(ev => ev.evaluator_Id == evaluator.evaluator_Id && 
+                        (ev.evaluation_Status == "Pending" || ev.evaluation_Status == "Missed"))
+                    .CountAsync();
+
+                if(pendingAndMissedCount <= 10)
+                {
+                    eligibleEvaluators.Add(evaluator);
+                }
+            }
             return eligibleEvaluators;
         }
 
@@ -620,7 +635,7 @@ namespace RemcSys.Controllers
                 .ToListAsync();
 
             var pendingCount = await _context.Evaluations
-                .Where(e => e.evaluation_Status == "Pending")
+                .Where(e => e.evaluation_Status == "Pending" || e.evaluation_Status == "Missed")
                 .ToListAsync();
 
             var evaluatorData = evaluators.Select(e => new
@@ -1015,6 +1030,7 @@ namespace RemcSys.Controllers
                     bool remind3DaysBefore = daysLeft == 3 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_ThreeDaysBefore;
                     bool remindDueTomorrow = daysLeft == 1 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_OneDayBefore;
                     bool remindToday = daysLeft == 0 && fundedResearch.status == statuses[i] && !fundedResearch.reminded_Today;
+                    bool delaySubmission = daysLeft < 0 && fundedResearch.status == statuses[i];
                     if(remind3DaysBefore)
                     {
                         var content = $"This is a gentle reminder that your progress report for the research titled {fundedResearch.research_Title} is due in 3 days. Please ensure that the report is submitted on or before {allDeadlines[i]:MMMM d, yyyy} to avoid any delays in the research process.";
@@ -1080,6 +1096,33 @@ namespace RemcSys.Controllers
                         fundedResearch.reminded_Today = true;
                         await _context.SaveChangesAsync();
                         break;
+                    }
+                    else if (delaySubmission)
+                    {
+                        if (statuses[i] == "Ongoing")
+                        {
+                            fundedResearch.status = "Missing Progress Report No.1";
+                        }
+                        else if (statuses[i] == "Checked Progress Report No.1")
+                        {
+                            fundedResearch.status = "Missing Progress Report No.2";
+                        }
+                        else if(statuses[i] == "Checked Progress Report Report No.2")
+                        {
+                            fundedResearch.status = "Missing Progress Report No.3";
+                        }
+                        else if (statuses[i] == "Checked Progress Report No.3")
+                        {
+                            fundedResearch.status = "Missing Progress Report No.4";
+                        }
+                        else if (statuses[i] == "Checked Progress Report No.4")
+                        {
+                            fundedResearch.status = "Missing Progress Report No.5";
+                        }
+                        else if (statuses[i] == "Checked Progress No.5")
+                        {
+                            fundedResearch.status = "Missing Progress Report No.6";
+                        }
                     }
 
                     int daysPastDeadline = (today - allDeadlines[i]).Days;
@@ -2735,39 +2778,6 @@ namespace RemcSys.Controllers
                 }
             }
             return NotFound("Invalid selected GAWAD type");
-        }
-
-        [Authorize(Roles ="Chief")]
-        public async Task<IActionResult> GawadWinner()
-        {
-            var gawadWinner = await _context.GAWADWinners
-                .OrderBy(g => g.file_Uploaded)
-                .ToListAsync();
-            return View(gawadWinner);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UploadGAWADWinners(IFormFile file)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            byte[] pdfData;
-            using (var ms = new MemoryStream())
-            {
-                await file.CopyToAsync(ms);
-                pdfData = ms.ToArray();
-                var gawadWinners = new GAWADWinners
-                {
-                    gw_Id = Guid.NewGuid().ToString(),
-                    gw_fileName = file.FileName,
-                    gw_fileType = Path.GetExtension(file.FileName),
-                    gw_Data = pdfData,
-                    file_Uploaded = DateTime.Now,
-                    UserId = user.Id
-                };
-                _context.GAWADWinners.Add(gawadWinners);
-            }
-            await _context.SaveChangesAsync();
-            return RedirectToAction("GawadWinner");
         }
 
         [HttpPost]

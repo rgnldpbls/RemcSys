@@ -44,6 +44,12 @@ namespace RemcSys.Controllers
             {
                 return NotFound("Evaluator not found!");
             }
+
+            if(evaluator.field_of_Interest == null)
+            {
+                return RedirectToAction("EvaluatorSpecialization", "Evaluator");
+            }
+
             ViewBag.Pending = await _context.Evaluations.Where(e => e.evaluation_Status == "Pending" && e.evaluator_Id == evaluator.evaluator_Id).CountAsync();
             ViewBag.Missed = await _context.Evaluations.Where(e => e.evaluation_Status == "Missed" && e.evaluator_Id == evaluator.evaluator_Id).CountAsync();
             ViewBag.Evaluated = await _context.Evaluations.Where(e => (e.evaluation_Status == "Approved" || e.evaluation_Status == "Rejected")
@@ -451,6 +457,47 @@ namespace RemcSys.Controllers
                 return Json(new { success = true });
             }
             return Json(new { success = false });
+        }
+
+        public async Task<IActionResult> EvaluatorSpecialization()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return NotFound("User not found!");
+            }
+            var evaluator = await _context.Evaluator.FirstOrDefaultAsync(f => f.UserId == user.Id);
+            if (evaluator == null)
+            {
+                return NotFound("Evaluator not found!");
+            }
+            return View(evaluator);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateSpecialization([FromForm] List<string> field_of_Interest)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return NotFound("User not found!");
+                }
+                var evaluator = await _context.Evaluator.FirstOrDefaultAsync(e => e.UserId == user.Id);
+                if (evaluator == null)
+                {
+                    return NotFound("Evaluator not found!");
+                }
+                evaluator.field_of_Interest = field_of_Interest;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            catch
+            {
+                return Json(new {success = false});
+            }
         }
     }
 }

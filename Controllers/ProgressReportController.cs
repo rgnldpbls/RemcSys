@@ -424,6 +424,21 @@ namespace RemcSys.Controllers
             }
 
             fr.isArchive = true;
+            var evaluator = await _context.Evaluator.FirstOrDefaultAsync(e => e.UserId == fr.UserId);
+            if(evaluator != null)
+            {
+                if(evaluator.field_of_Interest == null)
+                {
+                    evaluator.field_of_Interest = new List<string>();
+                }
+
+                if(!string.IsNullOrEmpty(fr.field_of_Study) && !evaluator.field_of_Interest.Contains(fr.field_of_Study))
+                {
+                    evaluator.field_of_Interest.Add(fr.field_of_Study);
+                    _context.Evaluator.Update(evaluator);
+                }
+            }
+
             var genForms = await _context.GeneratedForms.Where(f => f.fra_Id == fr.fra_Id).ToListAsync();
             foreach(var form in genForms)
             {

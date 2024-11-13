@@ -136,16 +136,36 @@ namespace RemcSys.Controllers
                 return NotFound();
             }
             var haveEvaluator = await _context.Evaluator.AnyAsync(e => e.UserId == user.Id);
+            var fundedResearch = await _context.FundedResearches.Where(f => f.UserId == user.Id && f.status == "Completed").ToListAsync();
             if (!haveEvaluator)
             {
+                List<string> fieldOfInterests = null;
+                if(fundedResearch != null && fundedResearch.Any())
+                {
+                    fieldOfInterests = new List<string>();
+                    foreach(var research in fundedResearch)
+                    {
+                        if (!string.IsNullOrEmpty(research.field_of_Study))
+                        {
+                            if (!fieldOfInterests.Contains(research.field_of_Study))
+                            {
+                                fieldOfInterests.Add(research.field_of_Study);
+                            }
+                        }
+                    }
+
+                    if (!fieldOfInterests.Any())
+                    {
+                        fieldOfInterests = null;
+                    }
+                }
+
                 var evaluator = new Evaluator
                 {
                     evaluator_Name = user.Name,
                     evaluator_Email = user.Email,
-                    field_of_Interest = ["Engineering, Architecture, Design, and Built Environment", "Science"],
-                    UserId = user.Id,
-                    UserType = null,
-                    center = ["REMC"]
+                    field_of_Interest = fieldOfInterests,
+                    UserId = user.Id
                 };
                 _context.Evaluator.Add(evaluator);
                 _context.SaveChanges();
